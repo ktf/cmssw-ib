@@ -46,10 +46,10 @@ class CtfSpecialSeedGenerator : public edm::EDProducer
 
   virtual ~CtfSpecialSeedGenerator();//{};
 
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;	
-  virtual void endRun(edm::Run const&, edm::EventSetup const&) override;	
+  virtual void beginRun(edm::Run &, edm::EventSetup const&);	
+  virtual void endRun(edm::Run &, edm::EventSetup const&);	
 
-  virtual void produce(edm::Event& e, const edm::EventSetup& c) override;
+  virtual void produce(edm::Event& e, const edm::EventSetup& c);
 
  private:
   
@@ -64,7 +64,7 @@ class CtfSpecialSeedGenerator : public edm::EDProducer
                   const PropagationDirection& dir,
                   TrajectorySeedCollection& output);
   //checks that the hits used are at positive y and are on different layers
-  bool preliminaryCheck(const SeedingHitSet& shs, const edm::EventSetup& es);
+  bool preliminaryCheck(const SeedingHitSet& shs);
   //We can check if the seed  points in a region covered by scintillators. To be used only in noB case
   //because it uses StraightLinePropagation
   bool postCheck(const TrajectorySeed& seed);

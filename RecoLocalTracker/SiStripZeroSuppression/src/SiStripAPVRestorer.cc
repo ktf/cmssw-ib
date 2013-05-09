@@ -1,5 +1,4 @@
 #include "RecoLocalTracker/SiStripZeroSuppression/interface/SiStripAPVRestorer.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include <cmath>
 #include <iostream>

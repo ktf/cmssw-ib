@@ -3,14 +3,16 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripQuality.h"
 
 
-SiStripBadAPVAlgorithmFromClusterOccupancy::SiStripBadAPVAlgorithmFromClusterOccupancy(const edm::ParameterSet& iConfig, const TrackerTopology* theTopo):
+SiStripBadAPVAlgorithmFromClusterOccupancy::SiStripBadAPVAlgorithmFromClusterOccupancy(const edm::ParameterSet& iConfig):
   lowoccupancy_(0),
   highoccupancy_(100),
   absolutelow_(0),
@@ -18,8 +20,7 @@ SiStripBadAPVAlgorithmFromClusterOccupancy::SiStripBadAPVAlgorithmFromClusterOcc
   Nevents_(0),
   occupancy_(0),
   OutFileName_("Occupancy.root"),
-  UseInputDB_(iConfig.getUntrackedParameter<bool>("UseInputDB",false)),
-  tTopo(theTopo)
+  UseInputDB_(iConfig.getUntrackedParameter<bool>("UseInputDB",false))
   {
     minNevents_=Nevents_*occupancy_;
   }
@@ -115,15 +116,15 @@ void SiStripBadAPVAlgorithmFromClusterOccupancy::extractBadAPVs(SiStripQuality* 
     switch (detectorId.subdetId())
       {
       case StripSubdetector::TIB :
-	layer_ring = tTopo->tibLayer(detrawid);
+	layer_ring = TIBDetId(detrawid).layer();
 	disc       = -1;
 	isback     = -1;
-	if (tTopo->tibIsExternalString(detrawid)) isexternalstring = 1;
+	if (TIBDetId(detrawid).isExternalString()) isexternalstring = 1;
 	else                                       isexternalstring = 0;
-	if (tTopo->tibIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TIBDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
-	rodstringpetal     = tTopo->tibString(detrawid);
-	module_number      = tTopo->tibModule(detrawid);
+	rodstringpetal     = TIBDetId(detrawid).stringNumber();
+	module_number      = TIBDetId(detrawid).moduleNumber();
 	APV.modulePosition = module_number;
 
 	if      (layer_ring == 1) medianValues_TIB_Layer1.push_back(APV);
@@ -133,15 +134,15 @@ void SiStripBadAPVAlgorithmFromClusterOccupancy::extractBadAPVs(SiStripQuality* 
 	break;
 
       case StripSubdetector::TID :
-	layer_ring = tTopo->tidRing(detrawid);
-	disc       = tTopo->tidWheel(detrawid);
-	if (tTopo->tidIsBackRing(detrawid)) isback = 1;
+	layer_ring = TIDDetId(detrawid).ring();
+	disc       = TIDDetId(detrawid).wheel();
+	if (TIDDetId(detrawid).isBackRing()) isback = 1;
 	else                                 isback = 0;
-	if (tTopo->tidIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TIDDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring   = -1;
 	rodstringpetal     = -1;
-	module_number      = tTopo->tidModule(detrawid);
+	module_number      = TIDDetId(detrawid).moduleNumber();
 	APV.modulePosition = layer_ring;
 
 	if (iszminusside==0)
@@ -159,14 +160,14 @@ void SiStripBadAPVAlgorithmFromClusterOccupancy::extractBadAPVs(SiStripQuality* 
 	break;
 
       case StripSubdetector::TOB :
-	layer_ring = tTopo->tobLayer(detrawid);
+	layer_ring = TOBDetId(detrawid).layer();
 	disc       = -1;
 	isback     = -1;
-	if (tTopo->tobIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TOBDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring   = -1;
-	rodstringpetal     = tTopo->tobRod(detrawid);
-	module_number      = tTopo->tobModule(detrawid);
+	rodstringpetal     = TOBDetId(detrawid).rodNumber();
+	module_number      = TOBDetId(detrawid).moduleNumber();
 	APV.modulePosition = module_number;
 
 	if      (layer_ring == 1) medianValues_TOB_Layer1.push_back(APV);
@@ -178,15 +179,15 @@ void SiStripBadAPVAlgorithmFromClusterOccupancy::extractBadAPVs(SiStripQuality* 
 	break;
 
       case StripSubdetector::TEC :
-	layer_ring = tTopo->tecRing(detrawid);
-	disc       = tTopo->tecWheel(detrawid);
-	if (tTopo->tecIsBackPetal(detrawid)) isback = 1;
+	layer_ring = TECDetId(detrawid).ring();
+	disc       = TECDetId(detrawid).wheel();
+	if (TECDetId(detrawid).isBackPetal()) isback = 1;
 	else                                  isback = 0;
-	if (tTopo->tecIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TECDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring   = -1;
-	rodstringpetal     = tTopo->tecPetalNumber(detrawid);
-	module_number      = tTopo->tecModule(detrawid);
+	rodstringpetal     = TECDetId(detrawid).petalNumber();
+	module_number      = TECDetId(detrawid).moduleNumber();
 	APV.modulePosition = layer_ring;
 
 	if (iszminusside==0)

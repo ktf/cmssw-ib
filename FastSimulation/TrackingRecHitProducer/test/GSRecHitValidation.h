@@ -32,7 +32,6 @@
 #include "TString.h"
 
 class TH1F;
-class TrackerTopology;
 
 class GSRecHitValidation : public edm::EDAnalyzer {
 
@@ -45,7 +44,7 @@ class GSRecHitValidation : public edm::EDAnalyzer {
   virtual void endJob();
 
  private:
-  void fillHitsPlots(TString prefix, const SiTrackerGSMatchedRecHit2D * rechit, PSimHit * simHit, const TrackerTopology *tTopo);
+  void fillHitsPlots(TString prefix, const SiTrackerGSMatchedRecHit2D * rechit, PSimHit * simHit);
   edm::ParameterSet conf_;
   const TrackerGeometry * trackerG;
     

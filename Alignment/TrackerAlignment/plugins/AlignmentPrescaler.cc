@@ -2,8 +2,12 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/Common/interface/View.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Alignment/TrackerAlignment/interface/AlignableTracker.h"
 #include "Alignment/CommonAlignment/interface/Alignable.h"
@@ -20,9 +24,7 @@
 #include "DataFormats/Alignment/interface/AlignmentClusterFlag.h"
 #include "DataFormats/Alignment/interface/AliClusterValueMap.h"
 
-// #include "Riostream.h"
-
-using namespace std;
+#include "Riostream.h"
 
 AlignmentPrescaler::AlignmentPrescaler(const edm::ParameterSet &iConfig):
   src_(iConfig.getParameter<edm::InputTag>("src")),
@@ -238,31 +240,31 @@ void AlignmentPrescaler::produce(edm::Event &iEvent, const edm::EventSetup &iSet
 }//end produce
 
 
-int AlignmentPrescaler::layerFromId (const DetId& id, const TrackerTopology* tTopo) const
+int AlignmentPrescaler::layerFromId (const DetId& id) const
 {
  if ( uint32_t(id.subdetId())==PixelSubdetector::PixelBarrel ) {
-    
-    return tTopo->pxbLayer(id);
+    PXBDetId tobId(id);
+    return tobId.layer();
   }
   else if ( uint32_t(id.subdetId())==PixelSubdetector::PixelEndcap ) {
-    
-    return tTopo->pxfDisk(id) + (3*(tTopo->pxfSide(id)-1));
+    PXFDetId tobId(id);
+    return tobId.disk() + (3*(tobId.side()-1));
   }
   else if ( id.subdetId()==StripSubdetector::TIB ) {
-    
-    return tTopo->tibLayer(id);
+    TIBDetId tibId(id);
+    return tibId.layer();
   }
   else if ( id.subdetId()==StripSubdetector::TOB ) {
-    
-    return tTopo->tobLayer(id);
+    TOBDetId tobId(id);
+    return tobId.layer();
   }
   else if ( id.subdetId()==StripSubdetector::TEC ) {
-    
-    return tTopo->tecWheel(id) + (9*(tTopo->pxfSide(id)-1));
+    TECDetId tobId(id);
+    return tobId.wheel() + (9*(tobId.side()-1));
   }
   else if ( id.subdetId()==StripSubdetector::TID ) {
-    
-    return tTopo->tidWheel(id) + (3*(tTopo->tidSide(id)-1));
+    TIDDetId tobId(id);
+    return tobId.wheel() + (3*(tobId.side()-1));
   }
   return -1;
 

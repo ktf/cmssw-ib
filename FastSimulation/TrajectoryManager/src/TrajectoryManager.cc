@@ -36,8 +36,12 @@
 
 //#define FAMOS_DEBUG
 #ifdef FAMOS_DEBUG
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #endif
 
 #include <list>
@@ -141,7 +145,7 @@ TrajectoryManager::~TrajectoryManager() {
 }
 
 void
-TrajectoryManager::reconstruct(const TrackerTopology *tTopo)
+TrajectoryManager::reconstruct()
 {
 
   // Clear the hits of the previous event
@@ -209,7 +213,7 @@ TrajectoryManager::reconstruct(const TrackerTopology *tTopo)
 	    mySimEvent->track(fsimi).notYetToEndVertex(PP.vertex())) { // The particle decayed
 
       // Skip layers with no material (kept just for historical reasons)
-      if ( cyliter->surface().mediumProperties().radLen() < 1E-10 ) { 
+      if ( cyliter->surface().mediumProperties()->radLen() < 1E-10 ) { 
 	++cyliter; ++cyl;
 	continue;
       }
@@ -288,7 +292,7 @@ TrajectoryManager::reconstruct(const TrackerTopology *tTopo)
 	    // Return one or two (for overlap regions) PSimHits in the full 
 	    // tracker geometry
 	    if ( theGeomTracker ) 
-	      createPSimHits(*cyliter, PP, thePSimHits[fsimi], fsimi,mySimEvent->track(fsimi).type(), tTopo);
+	      createPSimHits(*cyliter, PP, thePSimHits[fsimi], fsimi,mySimEvent->track(fsimi).type());
 
 	  }
 	}
@@ -536,7 +540,7 @@ void
 TrajectoryManager::createPSimHits(const TrackerLayer& layer,
                                   const ParticlePropagator& PP,
 				  std::map<double,PSimHit>& theHitMap,
-				  int trackID, int partID, const TrackerTopology *tTopo) {
+				  int trackID, int partID) {
 
   // Propagate the particle coordinates to the closest tracker detector(s) 
   // in this layer and create the PSimHit(s)
@@ -564,7 +568,7 @@ TrajectoryManager::createPSimHits(const TrackerLayer& layer,
   for (std::vector<DetWithState>::const_iterator i=compat.begin(); i!=compat.end(); i++) {
     // Correct Eloss for last 3 rings of TEC (thick sensors, 0.05 cm)
     // Disgusting fudge factor ! 
-    makePSimHits( i->first, i->second, theHitMap, trackID, eloss, thickness, partID,tTopo);
+      makePSimHits( i->first, i->second, theHitMap, trackID, eloss, thickness, partID);
   }
 }
 
@@ -584,8 +588,7 @@ void
 TrajectoryManager::makePSimHits( const GeomDet* det, 
 				 const TrajectoryStateOnSurface& ts,
 				 std::map<double,PSimHit>& theHitMap,
-				 int tkID, float el, float thick, int pID,
-				 const TrackerTopology *tTopo) 
+				 int tkID, float el, float thick, int pID ) 
 {
 
   std::vector< const GeomDet*> comp = det->components();
@@ -594,13 +597,13 @@ TrajectoryManager::makePSimHits( const GeomDet* det,
 	 i != comp.end(); i++) {
       const GeomDetUnit* du = dynamic_cast<const GeomDetUnit*>(*i);
       if (du != 0)
-	theHitMap.insert(theHitMap.end(),makeSinglePSimHit( *du, ts, tkID, el, thick, pID,tTopo));
+	theHitMap.insert(theHitMap.end(),makeSinglePSimHit( *du, ts, tkID, el, thick, pID));
     }
   }
   else {
     const GeomDetUnit* du = dynamic_cast<const GeomDetUnit*>(det);
     if (du != 0)
-      theHitMap.insert(theHitMap.end(),makeSinglePSimHit( *du, ts, tkID, el, thick, pID,tTopo));
+      theHitMap.insert(theHitMap.end(),makeSinglePSimHit( *du, ts, tkID, el, thick, pID));
   }
 
 
@@ -609,8 +612,7 @@ TrajectoryManager::makePSimHits( const GeomDet* det,
 std::pair<double,PSimHit> 
 TrajectoryManager::makeSinglePSimHit( const GeomDetUnit& det,
 				      const TrajectoryStateOnSurface& ts, 
-				      int tkID, float el, float thick, int pID,
-				      const TrackerTopology *tTopo) const
+				      int tkID, float el, float thick, int pID) const
 {
 
   const float onSurfaceTolarance = 0.01; // 10 microns
@@ -683,33 +685,33 @@ TrajectoryManager::makeSinglePSimHit( const GeomDetUnit& det,
   switch (subdet) { 
   case 1: 
     {
-      
-      theLayer = tTopo->pxbLayer(detid);
+      PXBDetId module(detid);
+      theLayer = module.layer();
       std::cout << "\tPixel Barrel Layer " << theLayer << std::endl;
       stereo = 1;
       break;
     }
   case 2: 
     {
-      
-      theLayer = tTopo->pxfDisk(detid);
+      PXFDetId module(detid);
+      theLayer = module.disk();
       std::cout << "\tPixel Forward Disk " << theLayer << std::endl;
       stereo = 1;
       break;
     }
   case 3:
     {
-      
-      theLayer  = tTopo->tibLayer(detid);
+      TIBDetId module(detid);
+      theLayer  = module.layer();
       std::cout << "\tTIB Layer " << theLayer << std::endl;
       stereo = module.stereo();
       break;
     }
   case 4:
     {
-      
-      theLayer = tTopo->tidWheel(detid);
-      theRing  = tTopo->tidRing(detid);
+      TIDDetId module(detid);
+      theLayer = module.wheel();
+      theRing  = module.ring();
       unsigned int theSide = module.side();
       if ( theSide == 1 ) 
        	std::cout << "\tTID Petal Back " << std::endl; 
@@ -722,17 +724,17 @@ TrajectoryManager::makeSinglePSimHit( const GeomDetUnit& det,
     }
   case 5:
     {
-      
-      theLayer  = tTopo->tobLayer(detid);
-      stereo = tTopo->tobStereo(detid);
+      TOBDetId module(detid);
+      theLayer  = module.layer();
+      stereo = module.stereo();
       std::cout << "\tTOB Layer " << theLayer << std::endl;
       break;
     }
   case 6:
     {
-      
-      theLayer = tTopo->tecWheel(detid);
-      theRing  = tTopo->tecRing(detid);
+      TECDetId module(detid);
+      theLayer = module.wheel();
+      theRing  = module.ring();
       unsigned int theSide = module.petal()[0];
       if ( theSide == 1 ) 
 	std::cout << "\tTEC Petal Back " << std::endl; 

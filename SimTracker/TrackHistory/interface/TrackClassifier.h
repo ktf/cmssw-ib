@@ -22,8 +22,6 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 
 
-class TrackTopology;
-
 //! Get track history and classify it in function of their .
 class TrackClassifier : public TrackCategories
 {
@@ -48,7 +46,7 @@ public:
     //! Classify the RecoTrack in categories.
     TrackClassifier const & evaluate (reco::TrackRef const & track)
     {
-      return evaluate( reco::TrackBaseRef(track));
+        return evaluate( reco::TrackBaseRef(track) );
     }
 
     //! Returns a reference to the track history used in the classification.
@@ -111,8 +109,6 @@ private:
     edm::ESHandle<TransientTrackBuilder> transientTrackBuilder_;
 
     edm::Handle<reco::BeamSpot> beamSpot_;
-
-    const TrackerTopology *tTopo_;
 
     //! Classify all the tracks by their association and reconstruction information
     void reconstructionInformation(reco::TrackBaseRef const &);

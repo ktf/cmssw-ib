@@ -2,6 +2,7 @@
 #define SiStripMonitorSummary_SiStripQualityDQM_h
 
 
+#include "FWCore/Framework/interface/ESHandle.h"
 #include "DQM/SiStripMonitorSummary/interface/SiStripBaseCondObjDQM.h"
 
 /* #include "CalibTracker/SiStripCommon/interface/SiStripDetInfoFileReader.h" */
@@ -37,12 +38,12 @@ class SiStripQualityDQM : public SiStripBaseCondObjDQM{
   
   void getActiveDetIds(const edm::EventSetup & eSetup);
 
-  void fillModMEs(const std::vector<uint32_t> & selectedDetIds, const edm::EventSetup& es);
-  void fillMEsForDet(ModMEs selModME_,uint32_t selDetId_, const TrackerTopology* tTopo);
+  void fillModMEs(const std::vector<uint32_t> & selectedDetIds);
+  void fillMEsForDet(ModMEs selModME_,uint32_t selDetId_);
   
-  void fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds, const edm::EventSetup& es);
-  void fillMEsForLayer( /*std::map<uint32_t, ModMEs> selModMEsMap_, */ uint32_t selDetId_, const TrackerTopology* tTopo);
-  void fillGrandSummaryMEs(const edm::EventSetup& eSetup);
+  void fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds);
+  void fillMEsForLayer( /*std::map<uint32_t, ModMEs> selModMEsMap_, */ uint32_t selDetId_);
+  void fillGrandSummaryMEs();
  	       
   
   unsigned long long getCache(const edm::EventSetup & eSetup){ return eSetup.get<SiStripQualityRcd>().cacheIdentifier();}

@@ -2043,7 +2043,7 @@ PrimaryVertexAnalyzer4PU::analyze(const Event& iEvent, const EventSetup& iSetup)
     edm::ESHandle<TrackAssociatorBase> theHitsAssociator;
     iSetup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits",theHitsAssociator);
     associatorByHits_ = (TrackAssociatorBase *) theHitsAssociator.product();
-    r2s_ =   associatorByHits_->associateRecoToSim (trackCollectionH,TPCollectionH, &iEvent, &iSetup ); 
+    r2s_ =   associatorByHits_->associateRecoToSim (trackCollectionH,TPCollectionH, &iEvent ); 
     //simEvt=getSimEvents(iEvent, TPCollectionH, TVCollectionH, trackCollectionH);
     simEvt=getSimEvents(TPCollectionH, TVCollectionH, trackCollectionH);
 

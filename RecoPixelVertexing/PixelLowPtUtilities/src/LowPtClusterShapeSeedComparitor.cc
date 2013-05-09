@@ -18,7 +18,6 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryVector/interface/GlobalVector.h"
 #include "DataFormats/GeometryVector/interface/Basic2DVector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include<cmath>
 
@@ -103,7 +102,6 @@ namespace {
 /*****************************************************************************/
 void LowPtClusterShapeSeedComparitor::init(const edm::EventSetup& es) {
   es.get<CkfComponentsRecord>().get("ClusterShapeHitFilter", theShapeFilter);
-  es.get<IdealGeometryRecord>().get(theTTopo);
 }
 
 bool LowPtClusterShapeSeedComparitor::compatible(const SeedingHitSet &hits, const TrackingRegion &) const
@@ -158,7 +156,7 @@ bool LowPtClusterShapeSeedComparitor::compatible(const SeedingHitSet &hits, cons
     {
       LogTrace("LowPtClusterShapeSeedComparitor")
          << " clusShape is not compatible"
-         << HitInfo::getInfo(*hits[i]->hit(),theTTopo.product());
+         << HitInfo::getInfo(*hits[i]->hit());
 
       ok = false; break;
     }

@@ -15,6 +15,7 @@
 //
 // Author:      Valentin Kuznetsov
 // Created:     Wed Jul  5 11:42:17 EDT 2006
+// $Id: EDLooper.h,v 1.14 2010/08/09 21:04:54 chrjones Exp $
 //
 
 #include "FWCore/Framework/interface/EDLooperBase.h"
@@ -31,10 +32,10 @@ namespace edm {
       EDLooper();
       virtual ~EDLooper();
 
-      EDLooper(EDLooper const&) = delete; // Disallow copying and moving
-      EDLooper& operator=(EDLooper const&) = delete; // Disallow copying and moving
-
     private:
+
+      EDLooper( const EDLooper& ); // stop default
+      const EDLooper& operator=( const EDLooper& ); // stop default
 
     /**Called after all event modules have had a chance to process the edm::Event.
      */

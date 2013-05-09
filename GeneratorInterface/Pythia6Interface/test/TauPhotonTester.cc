@@ -29,10 +29,11 @@ class TauPhotonTester : public edm::EDAnalyzer
       virtual ~TauPhotonTester() {} // no need to delete ROOT stuff
                                    // as it'll be deleted upon closing TFile
       
-      virtual void analyze( const edm::Event&, const edm::EventSetup& ) override;
-      virtual void beginJob() override;
-      virtual void beginRun( const edm::Run &, const edm::EventSetup& ) override;
-      virtual void endJob() override;
+      virtual void analyze( const edm::Event&, const edm::EventSetup& ) ;
+      virtual void beginJob() ;
+      virtual void beginRun( const edm::Run &, const edm::EventSetup& );
+      virtual void endRun( const edm::Run&, const edm::EventSetup& ) ;
+      virtual void endJob() ;
 
    private:
    
@@ -216,6 +217,14 @@ void TauPhotonTester::analyze( const Event& e, const EventSetup& )
    return ;
    
 }
+
+void TauPhotonTester::endRun( const edm::Run& r, const edm::EventSetup& )
+{
+
+   return;
+
+}
+
 
 void TauPhotonTester::endJob()
 {

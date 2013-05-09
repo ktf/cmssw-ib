@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 # Basic HepMC/GenParticle/GenJet validation modules
 from Validation.EventGenerator.BasicHepMCValidation_cfi import *
-from Validation.EventGenerator.BasicHepMCHeavyIonValidation_cfi import *
 from Validation.EventGenerator.BasicGenParticleValidation_cfi import *
 
 # Analyzer for MB/UE studies
@@ -28,7 +27,7 @@ from Validation.EventGenerator.TTbar_Validation_cfi import *
 from Validation.EventGenerator.HiggsValidation_cfi  import *
 
 # define sequences...
-basicGenTest_seq = cms.Sequence(basicHepMCValidation+basicHepMCHeavyIonValidation+basicGenParticleValidation)
+basicGenTest_seq = cms.Sequence(basicHepMCValidation+basicGenParticleValidation)
 duplicationChecker_seq = cms.Sequence(duplicationChecker)
 mbueAndqcdValidation_seq = cms.Sequence(mbueAndqcd_seq)
 drellYanValidation_seq = cms.Sequence(drellYanEleValidation+drellYanMuoValidation)

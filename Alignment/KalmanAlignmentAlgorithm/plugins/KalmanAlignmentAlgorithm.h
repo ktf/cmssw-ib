@@ -50,7 +50,7 @@ public:
 			   AlignableExtras* extras,
 			   AlignmentParameterStore* store );
 
-  virtual void terminate( const edm::EventSetup& setup );
+  virtual void terminate( void );
 
   virtual void run( const edm::EventSetup& setup, const EventInfo &eventInfo );
 

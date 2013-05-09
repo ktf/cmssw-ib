@@ -104,6 +104,14 @@ PFDisplacedVertexProducer::~PFDisplacedVertexProducer() { }
 
 
 void 
+PFDisplacedVertexProducer::beginJob() { }
+
+void 
+PFDisplacedVertexProducer::beginRun(edm::Run & run, 
+			  const edm::EventSetup & es) { }
+
+
+void 
 PFDisplacedVertexProducer::produce(Event& iEvent, 
 			 const EventSetup& iSetup) {
   

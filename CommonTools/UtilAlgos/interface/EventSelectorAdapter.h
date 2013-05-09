@@ -7,9 +7,9 @@
  * 
  * \author Christian Veelken, UC Davis
  *
- * \version $Revision: 1.2 $
+ * \version $Revision: 1.1 $
  *
- * $Id: EventSelectorAdapter.h,v 1.2 2013/02/28 00:34:12 wmtan Exp $
+ * $Id: EventSelectorAdapter.h,v 1.1 2009/03/03 13:07:26 llista Exp $
  *
  */
 
@@ -31,10 +31,9 @@ class EventSelectorAdapter : public edm::EDFilter
   virtual ~EventSelectorAdapter() {}
     
  private:
-  bool filter(edm::Event& evt, const edm::EventSetup& es) override { return eventSelector_(evt, es); } 
+  bool filter(edm::Event& evt, const edm::EventSetup& es) { return eventSelector_(evt, es); } 
   
   T eventSelector_;
 };
 
 #endif
-

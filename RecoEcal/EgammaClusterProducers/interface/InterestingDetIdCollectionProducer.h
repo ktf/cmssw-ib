@@ -47,7 +47,7 @@ class InterestingDetIdCollectionProducer : public edm::EDProducer {
       //! ctor
       explicit InterestingDetIdCollectionProducer(const edm::ParameterSet&);
       ~InterestingDetIdCollectionProducer();
-      virtual void beginRun (edm::Run const&, const edm::EventSetup&) override final;
+      void beginRun (edm::Run &, const edm::EventSetup&);
       //! producer
       virtual void produce(edm::Event &, const edm::EventSetup&);
 

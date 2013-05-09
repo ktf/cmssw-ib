@@ -3,14 +3,14 @@
 #include "DataFormats/GeometrySurface/interface/BoundPlane.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
 bool InsideBoundsMeasurementEstimator::estimate( const TrajectoryStateOnSurface& ts, 
-					     const Plane& plane) const
+					     const BoundPlane& plane) const
 {
   return plane.bounds().inside(ts.localPosition());
 }
 
 MeasurementEstimator::Local2DVector 
 InsideBoundsMeasurementEstimator::maximalLocalDisplacement( const TrajectoryStateOnSurface& ts,
-							const Plane&) const
+							const BoundPlane& plane) const
 {
   return Local2DVector(0,0);
 }

@@ -28,8 +28,10 @@ namespace sistrip {
     ExcludedFEDListProducer( const edm::ParameterSet& pset );
     /// default constructor
     ~ExcludedFEDListProducer();
-    void beginRun( const edm::Run & run, const edm::EventSetup & es) override;
-    void produce( edm::Event& event, const edm::EventSetup& es ) override;
+    void beginJob( const edm::EventSetup & es);
+    void beginRun( edm::Run & run, const edm::EventSetup & es);
+    void produce( edm::Event& event, const edm::EventSetup& es );
+    void endJob();
     
   private:
     unsigned int runNumber_;

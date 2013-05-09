@@ -1,30 +1,28 @@
 #ifndef DataFormat_Math_SSEVec_H
 #define DataFormat_Math_SSEVec_H
 
-#if !defined(__arm__)
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 4)
 #include <x86intrin.h>
 #define CMS_USE_SSE
 #ifdef __AVX__
 #define CMS_USE_AVX
-#endif /* __AVX__ */
-#else /* defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 4) */
+#endif
+#else
 
 #ifdef __SSE2__
 #define CMS_USE_SSE
 
 #include <mmintrin.h>
 #include <emmintrin.h>
-#endif /* __SSE2__ */
+#endif
 #ifdef __SSE3__
 #include <pmmintrin.h>
-#endif /* __SSE3__ */
+#endif
 #ifdef __SSE4_1__
 #include <smmintrin.h>
-#endif /* __SSE4_1__ */
+#endif
 
-#endif /* defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 4) */
-#endif /* !defined(__arm__) */
+#endif
 
 #include<cmath>
 
@@ -46,6 +44,41 @@ namespace mathSSE {
 
 namespace mathSSE {
   template<typename T> inline T sqrt(T t) { return std::sqrt(t);}
+}
+
+namespace mathSSE {
+  //
+  template<typename T> inline bool samesign(T rh, T lh);
+
+  template<>
+  inline bool
+  __attribute__((always_inline)) __attribute__ ((pure)) samesign<int>(int rh, int lh) {
+    int const mask= 0x80000000;
+    return ((rh^lh)&mask) == 0;
+  }
+
+  template<>
+  inline bool
+  __attribute__((always_inline)) __attribute__ ((pure)) samesign<long long>(long long rh, long long lh) {
+    long long const mask= 0x8000000000000000LL;
+    return ((rh^lh)&mask) == 0;
+  }
+
+  template<>
+  inline bool
+  __attribute__((always_inline)) __attribute__ ((pure)) samesign<float>(float rh, float lh) {
+    union { int i; float f; } a, b;
+    a.f=rh; b.f=lh;
+    return samesign<int>(a.i,b.i);
+  }
+
+  template<>
+  inline bool
+  __attribute__((always_inline)) __attribute__ ((pure)) samesign<double>(double rh, double lh) {
+    union { long long i; double f; } a, b;
+    a.f=rh; b.f=lh;
+    return samesign<long long>(a.i,b.i);
+  }
 }
 
 
@@ -860,12 +893,12 @@ inline mathSSE::Vec4D operator/(mathSSE::Vec4D a, mathSSE::Vec4D b) {
 
 inline mathSSE::Vec4D min(mathSSE::Vec4D a, mathSSE::Vec4D b) {
   using namespace mathSSE;
-  return  mathSSE::Vec4D(::min(mathSSE::Vec2D(a.vec[0]),mathSSE::Vec2D(b.vec[0])),::min(mathSSE::Vec2D(a.vec[1]),mathSSE::Vec2D(b.vec[1])) );
+  return  mathSSE::Vec4D(::min(Vec2D(a.vec[0]),Vec2D(b.vec[0])),::min(Vec2D(a.vec[1]),Vec2D(b.vec[1])) );
 }
 
 inline mathSSE::Vec4D max(mathSSE::Vec4D a, mathSSE::Vec4D b) {
   using namespace mathSSE;
-  return  mathSSE::Vec4D(::max(mathSSE::Vec2D(a.vec[0]),mathSSE::Vec2D(b.vec[0])),::max(mathSSE::Vec2D(a.vec[1]),mathSSE::Vec2D(b.vec[1])) );
+  return  mathSSE::Vec4D(::max(Vec2D(a.vec[0]),Vec2D(b.vec[0])),::max(Vec2D(a.vec[1]),Vec2D(b.vec[1])) );
 }
 
 inline mathSSE::Vec4D operator*(double a, mathSSE::Vec4D b) {

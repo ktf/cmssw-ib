@@ -4,18 +4,22 @@
 #include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
 #include "DataFormats/Provenance/interface/ProductProvenance.h"
 
-#include <algorithm>
-
 /*----------------------------------------------------------------------
 
 ----------------------------------------------------------------------*/
 
 namespace edm {
 
-  Provenance::Provenance() : Provenance{boost::shared_ptr<ConstBranchDescription>(), ProductID()} {
+   Provenance::Provenance() :
+    branchDescription_(),
+    productID_(),
+    processHistoryID_(),
+    productProvenanceValid_(false),
+    productProvenancePtr_(new ProductProvenance),
+    store_() {
   }
 
-  Provenance::Provenance(boost::shared_ptr<ConstBranchDescription> const& p, ProductID const& pid) :
+   Provenance::Provenance(boost::shared_ptr<ConstBranchDescription> const& p, ProductID const& pid) :
     branchDescription_(p),
     productID_(pid),
     processHistoryID_(),
@@ -131,9 +135,9 @@ namespace edm {
   Provenance::swap(Provenance& iOther) {
     branchDescription_.swap(iOther.branchDescription_);
     productID_.swap(iOther.productID_);
-    std::swap(processHistoryID_, iOther.processHistoryID_);
-    std::swap(productProvenanceValid_, iOther.productProvenanceValid_);
     productProvenancePtr_.swap(iOther.productProvenancePtr_);
     store_.swap(iOther.store_);
  }
+
 }
+

@@ -21,6 +21,9 @@
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/GeomPropagators/interface/AnalyticalPropagator.h"
 #include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
+
+#include "TrackingTools/KalmanUpdators/interface/KFStripUpdator.h"
+
 #include "TrackingTools/KalmanUpdators/interface/Chi2MeasurementEstimator.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"

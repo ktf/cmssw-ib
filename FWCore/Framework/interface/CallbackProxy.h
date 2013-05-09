@@ -48,7 +48,7 @@ namespace edm {
             //  to return multiple items where only one item is needed by this Proxy
             iCallback->holdOntoPointer(&data_) ; }
          virtual ~CallbackProxy() {
-            DataT* dummy(nullptr);
+            DataT* dummy(0);
             callback_->holdOntoPointer(dummy) ;
          }
          // ---------- const member functions ---------------------

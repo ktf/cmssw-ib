@@ -1,3 +1,4 @@
+#include "DataFormats/HLTReco/interface/HLTResult.h"
 #include "DataFormats/HLTReco/interface/ModuleTiming.h"
 #include "DataFormats/HLTReco/interface/HLTPerformanceInfo.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
@@ -15,6 +16,14 @@
 
 namespace {
   struct dictionary {
+
+    reco::HLTResult< 8> h1;
+    reco::HLTResult<16> h2;
+    reco::HLTResult<24> h3;
+
+    edm::Wrapper<reco::HLTResult< 8> > w1;
+    edm::Wrapper<reco::HLTResult<16> > w2;
+    edm::Wrapper<reco::HLTResult<24> > w3;
 
     edm::EventTime                                et0;
 

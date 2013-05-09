@@ -1,8 +1,8 @@
 /** \file LaserAlignment.cc
  *  LAS reconstruction module
  *
- *  $Date: 2013/01/07 20:26:37 $
- *  $Revision: 1.47 $
+ *  $Date: 2012/07/13 09:22:33 $
+ *  $Revision: 1.46 $
  *  \author Maarten Thomas
  *  \author Jan Olzem
  */
@@ -265,11 +265,6 @@ void LaserAlignment::produce(edm::Event& theEvent, edm::EventSetup const& theSet
 
   if (firstEvent_) {
 
-    //Retrieve tracker topology from geometry
-    edm::ESHandle<TrackerTopology> tTopoHandle;
-    theSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-    const TrackerTopology* const tTopo = tTopoHandle.product();
-
     // access the tracker
     theSetup.get<TrackerDigiGeometryRecord>().get( theTrackerGeometry );
     theSetup.get<IdealGeometryRecord>().get( gD );
@@ -293,11 +288,11 @@ void LaserAlignment::produce(edm::Event& theEvent, edm::EventSetup const& theSet
       TrackerGeomBuilderFromGeometricDet trackerBuilder;
       TrackerGeometry* theRefTracker = trackerBuilder.build(&*theGeometricDet, theParameterSet);
       
-      theAlignableTracker = new AlignableTracker(&(*theRefTracker), tTopo);
+      theAlignableTracker = new AlignableTracker(&(*theRefTracker));
     }
     else {
       // the AlignableTracker object is initialized with the input geometry from DB
-      theAlignableTracker = new AlignableTracker( &(*theTrackerGeometry), tTopo );
+      theAlignableTracker = new AlignableTracker( &(*theTrackerGeometry) );
     }
     
     firstEvent_ = false;

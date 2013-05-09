@@ -8,7 +8,7 @@
 #include "DataFormats/Provenance/interface/ProductRegistry.h"
 #include "DataFormats/Provenance/interface/Provenance.h"
 #include "FWCore/Framework/interface/DelayedReader.h"
-#include "FWCore/Framework/interface/ProductHolder.h"
+#include "FWCore/Framework/interface/Group.h"
 #include "FWCore/Framework/interface/LuminosityBlockPrincipal.h"
 #include "FWCore/Framework/interface/UnscheduledHandler.h"
 #include "FWCore/Framework/interface/ProductDeletedException.h"
@@ -23,7 +23,7 @@ namespace edm {
         boost::shared_ptr<BranchIDListHelper const> branchIDListHelper,
         ProcessConfiguration const& pc,
         HistoryAppender* historyAppender) :
-    Base(reg, reg->productLookup(InEvent), pc, InEvent, historyAppender),
+    Base(reg, pc, InEvent, historyAppender),
           aux_(),
           luminosityBlockPrincipal_(),
           branchMapperPtr_(),
@@ -72,17 +72,17 @@ namespace edm {
     }
 
     // Fill in helper map for Branch to ProductID mapping
-    ProcessIndex pix = 0;
-    for(auto const& blindex : *branchListIndexes_) {
-      branchListIndexToProcessIndex_.insert(std::make_pair(blindex, pix));
-      ++pix;
+    for(BranchListIndexes::const_iterator
+        it = branchListIndexes_->begin(),
+        itEnd = branchListIndexes_->end();
+        it != itEnd; ++it) {
+      ProcessIndex pix = it - branchListIndexes_->begin();
+      branchListIndexToProcessIndex_.insert(std::make_pair(*it, pix));
     }
 
-    // Fill in the product ID's in the product holders.
-    for(auto const& prod : *this) {
-      if (prod->singleProduct()) {
-        prod->setProvenance(branchMapperPtr(), processHistoryID(), branchIDToProductID(prod->branchDescription().originalBranchID()));
-      }
+    // Fill in the product ID's in the groups.
+    for(const_iterator it = this->begin(), itEnd = this->end(); it != itEnd; ++it) {
+      (*it)->setProvenance(branchMapperPtr(), processHistoryID(), branchIDToProductID((*it)->branchDescription().originalBranchID()));
     }
   }
 
@@ -110,11 +110,11 @@ namespace edm {
         << "\n";
     }
     branchMapperPtr()->insertIntoSet(productProvenance);
-    ProductHolderBase* phb = getExistingProduct(bd.branchID());
-    assert(phb);
-    checkUniquenessAndType(edp, phb);
-    // ProductHolder assumes ownership
-    phb->putProduct(edp, productProvenance);
+    Group* g = getExistingGroup(bd.branchID());
+    assert(g);
+    checkUniquenessAndType(edp, g);
+    // Group assumes ownership
+    g->putProduct(edp, productProvenance);
   }
 
   void
@@ -125,36 +125,36 @@ namespace edm {
 
     assert(!bd.produced());
     branchMapperPtr()->insertIntoSet(productProvenance);
-    ProductHolderBase* phb = getExistingProduct(bd.branchID());
-    assert(phb);
-    WrapperOwningHolder const edp(product, phb->productData().getInterface());
-    checkUniquenessAndType(edp, phb);
-    // ProductHolder assumes ownership
-    phb->putProduct(edp, productProvenance);
+    Group* g = getExistingGroup(bd.branchID());
+    assert(g);
+    WrapperOwningHolder const edp(product, g->productData().getInterface());
+    checkUniquenessAndType(edp, g);
+    // Group assumes ownership
+    g->putProduct(edp, productProvenance);
   }
 
   void
-  EventPrincipal::resolveProduct_(ProductHolderBase const& phb, bool fillOnDemand) const {
+  EventPrincipal::resolveProduct_(Group const& g, bool fillOnDemand) const {
     // Try unscheduled production.
-    if(phb.onDemand()) {
+    if(g.onDemand()) {
       if(fillOnDemand) {
-        unscheduledFill(phb.branchDescription().moduleLabel());
+        unscheduledFill(g.branchDescription().moduleLabel());
       }
       return;
     }
 
-    if(phb.branchDescription().produced()) return; // nothing to do.
-    if(phb.product()) return; // nothing to do.
-    if(phb.productUnavailable()) return; // nothing to do.
+    if(g.branchDescription().produced()) return; // nothing to do.
+    if(g.product()) return; // nothing to do.
+    if(g.productUnavailable()) return; // nothing to do.
     if(!reader()) return; // nothing to do.
 
     // must attempt to load from persistent store
-    BranchKey const bk = BranchKey(phb.branchDescription());
-    WrapperOwningHolder edp(reader()->getProduct(bk, phb.productData().getInterface(), this));
+    BranchKey const bk = BranchKey(g.branchDescription());
+    WrapperOwningHolder edp(reader()->getProduct(bk, g.productData().getInterface(), this));
 
-    // Now fix up the ProductHolder
-    checkUniquenessAndType(edp, &phb);
-    phb.putProduct(edp);
+    // Now fix up the Group
+    checkUniquenessAndType(edp, &g);
+    g.putProduct(edp);
   }
 
   BranchID
@@ -190,12 +190,12 @@ namespace edm {
     return ProductID();
   }
 
-  static void throwProductDeletedException(ProductID const& pid, edm::EventPrincipal::ConstProductPtr const phb) {
+  static void throwProductDeletedException(ProductID const&pid, edm::EventPrincipal::ConstGroupPtr const g) {
     ProductDeletedException exception;
     exception<<"get by product ID: The product with given id: "<<pid
-    <<"\ntype: "<<phb->productType()
-    <<"\nproduct instance name: "<<phb->productInstanceName()
-    <<"\nprocess name: "<<phb->processName()
+    <<"\ntype: "<<g->productType()
+    <<"\nproduct instance name: "<<g->productInstanceName()
+    <<"\nprocess name: "<<g->processName()
     <<"\nwas already deleted. This is a configuration error. Please change the configuration of the module which caused this exception to state it reads this data.";
     throw exception;    
   }
@@ -203,8 +203,8 @@ namespace edm {
   BasicHandle
   EventPrincipal::getByProductID(ProductID const& pid) const {
     BranchID bid = pidToBid(pid);
-    ConstProductPtr const phb = getProductHolder(bid, true, true);
-    if(phb == nullptr) {
+    ConstGroupPtr const g = getGroup(bid, true, true);
+    if(g == 0) {
       boost::shared_ptr<cms::Exception> whyFailed(new Exception(errors::ProductNotFound, "InvalidID"));
       *whyFailed
         << "get by product ID: no product with given id: " << pid << "\n";
@@ -212,19 +212,19 @@ namespace edm {
     }
 
     // Was this already deleted?
-    if(phb->productWasDeleted()) {
-      throwProductDeletedException(pid, phb);
+    if(g->productWasDeleted()) {
+      throwProductDeletedException(pid,g);
     }
     // Check for case where we tried on demand production and
     // it failed to produce the object
-    if(phb->onDemand()) {
+    if(g->onDemand()) {
       boost::shared_ptr<cms::Exception> whyFailed(new Exception(errors::ProductNotFound, "InvalidID"));
       *whyFailed
         << "get by product ID: no product with given id: " << pid << "\n"
         << "onDemand production failed to produce it.\n";
       return BasicHandle(whyFailed);
     }
-    return BasicHandle(phb->productData());
+    return BasicHandle(g->productData());
   }
 
   WrapperHolder

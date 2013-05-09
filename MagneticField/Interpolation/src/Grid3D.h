@@ -9,21 +9,10 @@
  */
 
 #include "DataFormats/GeometryVector/interface/Basic3DVector.h"
-// #include "DataFormats/Math/interface/SIMDVec.h"
+#include "DataFormats/Math/interface/SSEVec.h"
 #include "Grid1D.h"
 #include <vector>
 #include "FWCore/Utilities/interface/Visibility.h"
-
-// the storage class
-// needed just because legacy software used () constructor
-struct BStorageArray {
-  BStorageArray(){}
-  BStorageArray(float x,float y, float z) : v{x,y,z}{}
-
-  float const & operator[](int i) const { return v[i];}
-
-  float v[3];
-};
 
 class dso_internal Grid3D {
 public:
@@ -33,14 +22,10 @@ public:
   typedef Basic3DVector<Scalar>   ValueType;
   typedef ValueType ReturnType; 
  
-  using BVector = BStorageArray;
-  //using BVector =  ValueType;
-  using Container = std::vector<BVector>;
-
   Grid3D() {}
 
   Grid3D( const Grid1D& ga, const Grid1D& gb, const Grid1D& gc,
-	  std::vector<BVector>& data) : 
+	  std::vector<ValueType>& data) : 
     grida_(ga), gridb_(gb), gridc_(gc) {
      data_.swap(data);
      stride1_ = gridb_.nodes() * gridc_.nodes();
@@ -56,11 +41,11 @@ public:
   int stride1() const { return stride1_;}
   int stride2() const { return stride2_;}
   int stride3() const { return 1;}
-  ValueType operator()(int i) const {
-    return ValueType(data_[i][0],data_[i][1],data_[i][2]);
+  const ValueType& operator()(int i) const {
+    return data_[i];
   }
 
-  ValueType operator()(int i, int j, int k) const {
+  ValueType const & operator()(int i, int j, int k) const {
     return (*this)(index(i,j,k));
   }
 
@@ -68,7 +53,7 @@ public:
   const Grid1D& gridb() const {return gridb_;}
   const Grid1D& gridc() const {return gridc_;}
 
-  const Container & data() const {return data_;}
+  const std::vector<ValueType>& data() const {return data_;}
 
   void dump() const;
 
@@ -78,7 +63,7 @@ private:
   Grid1D gridb_;
   Grid1D gridc_;
 
-  Container data_;
+  std::vector<ValueType> data_;
 
   int stride1_;
   int stride2_;

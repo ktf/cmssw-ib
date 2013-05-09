@@ -1,5 +1,5 @@
-#ifndef FWCore_Framework_Run_h
-#define FWCore_Framework_Run_h
+#ifndef Framework_Run_h
+#define Framework_Run_h
 
 // -*- C++ -*-
 //
@@ -21,8 +21,6 @@ For its usage, see "FWCore/Framework/interface/PrincipalGetAdapter.h"
 #include "FWCore/Framework/interface/PrincipalGetAdapter.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Common/interface/RunBase.h"
-#include "FWCore/Utilities/interface/EDGetToken.h"
-#include "FWCore/Utilities/interface/ProductKindOfType.h"
 
 #include <memory>
 #include <set>
@@ -36,12 +34,6 @@ namespace edm {
   public:
     Run(RunPrincipal& rp, ModuleDescription const& md);
     ~Run();
-
-    //Used in conjunction with EDGetToken
-    void setConsumer(EDConsumerBase const* iConsumer) {
-      provRecorder_.setConsumer(iConsumer);
-    }
-    
 
     typedef PrincipalGetAdapter Base;
     // AUX functions are defined in RunBase
@@ -66,14 +58,6 @@ namespace edm {
     template <typename PROD>
     bool
     getByLabel(InputTag const& tag, Handle<PROD>& result) const;
-
-    template<typename PROD>
-    bool
-    getByToken(EDGetToken token, Handle<PROD>& result) const;
-    
-    template<typename PROD>
-    bool
-    getByToken(EDGetTokenT<PROD> token, Handle<PROD>& result) const;
 
     template <typename PROD>
     void
@@ -142,8 +126,6 @@ namespace edm {
     RunAuxiliary const& aux_;
     typedef std::set<BranchID> BranchIDSet;
     mutable BranchIDSet gotBranchIDs_;
-
-    static const std::string emptyString_;
   };
 
   template <typename PROD>
@@ -165,7 +147,7 @@ namespace edm {
       provRecorder_.getBranchDescription(TypeID(*product), productInstanceName);
 
     WrapperOwningHolder edp(new Wrapper<PROD>(product), Wrapper<PROD>::getInterface());
-    putProducts().emplace_back(edp, &desc);
+    putProducts().push_back(std::make_pair(edp, &desc));
 
     // product.release(); // The object has been copied into the Wrapper.
     // The old copy must be deleted, so we cannot release ownership.
@@ -174,7 +156,7 @@ namespace edm {
   template <typename PROD>
   bool
   Run::getByLabel(std::string const& label, Handle<PROD>& result) const {
-    return getByLabel(label, emptyString_, result);
+    return provRecorder_.getByLabel(label, result);
   }
 
   template <typename PROD>
@@ -182,70 +164,19 @@ namespace edm {
   Run::getByLabel(std::string const& label,
                   std::string const& productInstanceName,
                   Handle<PROD>& result) const {
-    if(!provRecorder_.checkIfComplete<PROD>()) {
-      principal_get_adapter_detail::throwOnPrematureRead("Run", TypeID(typeid(PROD)), label, productInstanceName);
-    }
-    result.clear();
-    BasicHandle bh = provRecorder_.getByLabel_(TypeID(typeid(PROD)), label, productInstanceName, emptyString_);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
+    return provRecorder_.getByLabel(label, productInstanceName, result);
   }
 
   /// same as above, but using the InputTag class
   template <typename PROD>
   bool
   Run::getByLabel(InputTag const& tag, Handle<PROD>& result) const {
-    if(!provRecorder_.checkIfComplete<PROD>()) {
-      principal_get_adapter_detail::throwOnPrematureRead("Run", TypeID(typeid(PROD)), tag.label(), tag.instance());
-    }
-    result.clear();
-    BasicHandle bh = provRecorder_.getByLabel_(TypeID(typeid(PROD)), tag);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
-  }
-
-  template<typename PROD>
-  bool
-  Run::getByToken(EDGetToken token, Handle<PROD>& result) const {
-    if(!provRecorder_.checkIfComplete<PROD>()) {
-      principal_get_adapter_detail::throwOnPrematureRead("Run", TypeID(typeid(PROD)), token);
-    }
-    result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(PROD)),PRODUCT_TYPE, token);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
-  }
-  
-  template<typename PROD>
-  bool
-  Run::getByToken(EDGetTokenT<PROD> token, Handle<PROD>& result) const {
-    if(!provRecorder_.checkIfComplete<PROD>()) {
-      principal_get_adapter_detail::throwOnPrematureRead("Run", TypeID(typeid(PROD)), token);
-    }
-    result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(PROD)),PRODUCT_TYPE, token);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
+    return provRecorder_.getByLabel(tag, result);
   }
 
   template <typename PROD>
   void
   Run::getManyByType(std::vector<Handle<PROD> >& results) const {
-    if(!provRecorder_.checkIfComplete<PROD>()) {
-      principal_get_adapter_detail::throwOnPrematureRead("Run", TypeID(typeid(PROD)));
-    }
     return provRecorder_.getManyByType(results);
   }
 

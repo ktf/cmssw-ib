@@ -1,16 +1,11 @@
 #ifndef FWCore_Utilities_InputTag_h
 #define FWCore_Utilities_InputTag_h
 
-#ifndef __GCCXML__
-#include <atomic>
-#endif
-
-#include <iosfwd>
 #include <string>
+#include <iosfwd>
 
 #include "FWCore/Utilities/interface/TypeID.h"
 #include "FWCore/Utilities/interface/BranchType.h"
-#include "FWCore/Utilities/interface/ProductHolderIndex.h"
 
 namespace edm {
 
@@ -25,18 +20,6 @@ namespace edm {
     /// label:instance:process
     InputTag(std::string const& s);
     ~InputTag();
-
-    InputTag(InputTag const& other);
-
-#ifndef __GCCXML__
-    InputTag(InputTag&& other);
-#endif
-    InputTag& operator=(InputTag const& other);
-
-#ifndef __GCCXML__
-    InputTag& operator=(InputTag&& other);
-#endif
-
     std::string encode() const;
 
     std::string const& label() const {return label_;} 
@@ -47,23 +30,30 @@ namespace edm {
     
     bool operator==(InputTag const& tag) const;
 
-    ProductHolderIndex indexFor(TypeID const& typeID, BranchType branchType, void const* productRegistry) const;
+    TypeID& typeID() const {return typeID_;}
 
-    void tryToCacheIndex(ProductHolderIndex index, TypeID const& typeID, BranchType branchType, void const* productRegistry) const;
+    BranchType& branchType() const {return branchType_;}
+
+    size_t& cachedOffset() const {return cachedOffset_;}
+
+    int& fillCount() const {return fillCount_;}
+
+    void const*& productRegistry() const {return productRegistry_;}
 
   private:
     std::string label_;
     std::string instance_;
     std::string process_;
-
-#ifndef __GCCXML__
-    mutable std::atomic<unsigned int> index_;
-#endif
     mutable BranchType branchType_;
     mutable TypeID typeID_;
+    mutable size_t cachedOffset_;
+    mutable int fillCount_;
     mutable void const* productRegistry_;
   };
 
   std::ostream& operator<<(std::ostream& ost, InputTag const& tag);
+
 }
+
 #endif
+

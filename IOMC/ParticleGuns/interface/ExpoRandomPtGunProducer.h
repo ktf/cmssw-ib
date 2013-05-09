@@ -21,7 +21,7 @@ namespace edm
 
   private:
    
-    virtual void produce(Event & e, const EventSetup& es) override;
+    virtual void produce(Event & e, const EventSetup& es);
     
   protected :
   

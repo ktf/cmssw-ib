@@ -21,9 +21,6 @@
 #include "DataFormats/Provenance/interface/ProductID.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "SimDataFormats/CrossingFrame/interface/CrossingFramePlaybackInfoExtended.h"
-
 #include "SimGeneral/DataMixingModule/plugins/DataMixingEMWorker.h"
 #include "SimGeneral/DataMixingModule/plugins/DataMixingHcalWorker.h"
 #include "SimGeneral/DataMixingModule/plugins/DataMixingEMDigiWorker.h"
@@ -34,7 +31,6 @@
 #include "SimGeneral/DataMixingModule/plugins/DataMixingSiStripRawWorker.h"
 #include "SimGeneral/DataMixingModule/plugins/DataMixingSiPixelWorker.h"
 #include "SimGeneral/DataMixingModule/plugins/DataMixingGeneralTrackWorker.h"
-#include "SimGeneral/DataMixingModule/plugins/DataMixingPileupCopy.h"
 
 #include <map>
 #include <vector>
@@ -114,8 +110,6 @@ namespace edm
 
       // Submodules to handle the individual detectors
 
-      DataMixingPileupCopy  *PUWorker_;
-
       DataMixingEMWorker *EMWorker_ ;
       DataMixingEMDigiWorker *EMDigiWorker_ ;
       bool MergeEMDigis_;
@@ -128,9 +122,6 @@ namespace edm
 
       bool MergeHcalDigis_;
       bool MergeHcalDigisProd_;
-
-      bool MergePileup_;
-      bool AddedPileup_;
 
       // Muons
 

@@ -47,7 +47,8 @@ public:
 
 private:
 
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
+  virtual void beginRun(edm::Run & run, const edm::EventSetup&) ;
+  virtual void produce(edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 
   std::pair<double, double> momentaAtVertex( const TwoBodyDecay& tbd ) const;
@@ -203,6 +204,9 @@ void TwoBodyDecayMomConstraintProducer::produce( edm::Event& iEvent, const edm::
   iEvent.put(pairs);
   iEvent.put(output);
 }
+
+
+void TwoBodyDecayMomConstraintProducer::beginRun( edm::Run & run, const edm::EventSetup& ) {}
 
 
 void TwoBodyDecayMomConstraintProducer::endJob() {}

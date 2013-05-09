@@ -2,7 +2,7 @@
 #define TR_FastCircle_H_
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/Math/interface/AlgebraicROOTObjects.h"
-#include "FWCore/Utilities/interface/GCC11Compatibility.h"
+#include <vector>
 
 /**
    Calculate circle parameters (x0, y0, rho) for a circle:
@@ -63,11 +63,6 @@ public:
   
   double c() const {return theC;}
   
-  GlobalPoint const & outerPoint() const { return theOuterPoint;} 
-  GlobalPoint const & innerPoint() const { return theInnerPoint;} 
-  GlobalPoint const & vertexPoint() const { return theVertexPoint;} 
-
-
 private:
 
   GlobalPoint theOuterPoint; 
@@ -85,8 +80,9 @@ private:
   
   bool theValid;
   
-  void createCircleParameters() dso_hidden;
-   
+  void createCircleParameters();
+  AlgebraicVector3 transform(const GlobalPoint& aPoint) const;
+  
 };
 
 #endif //TR_Circle_H_

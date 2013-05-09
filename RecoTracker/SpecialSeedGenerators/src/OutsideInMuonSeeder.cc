@@ -1,6 +1,6 @@
 
 //
-// $Id: OutsideInMuonSeeder.cc,v 1.2 2013/02/27 14:58:17 muzaffar Exp $
+// $Id: OutsideInMuonSeeder.cc,v 1.1 2012/09/12 15:58:08 gpetrucc Exp $
 //
 
 /**
@@ -8,7 +8,7 @@
   \brief    Matcher of reconstructed objects to other reconstructed objects using the tracks inside them 
             
   \author   Giovanni Petrucciani
-  \version  $Id: OutsideInMuonSeeder.cc,v 1.2 2013/02/27 14:58:17 muzaffar Exp $
+  \version  $Id: OutsideInMuonSeeder.cc,v 1.1 2012/09/12 15:58:08 gpetrucc Exp $
 */
 
 
@@ -48,7 +48,7 @@ class OutsideInMuonSeeder : public edm::EDProducer {
       explicit OutsideInMuonSeeder(const edm::ParameterSet & iConfig);
       virtual ~OutsideInMuonSeeder() { }
 
-      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup) override;
+      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
 
     private:
       /// Labels for input collections

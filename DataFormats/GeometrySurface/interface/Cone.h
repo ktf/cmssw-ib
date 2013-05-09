@@ -10,22 +10,15 @@
  *  using the static build() method. 
  *  (The normal constructors will become private in the future).
  *
- *  $Date: 2012/12/23 18:07:15 $
- *  $Revision: 1.4 $
+ *  $Date: 2007/07/31 15:20:07 $
+ *  $Revision: 1.2 $
  */
 
 #include "DataFormats/GeometrySurface/interface/Surface.h"
+#include "boost/intrusive_ptr.hpp" 
 
-class Cone  GCC11_FINAL  : public Surface {
+class Cone : public virtual Surface {
 public:
-
-  template<typename... Args>
-  Cone(const PositionType& vert,
-       Geom::Theta<Scalar> angle, 
-       Args&& ... args) :
-    Surface(std::forward<Args>(args)...), 
-    theVertex(vert), theAngle(angle) {}
-
   typedef ReferenceCountingPointer<Cone> ConePointer;
   typedef ReferenceCountingPointer<Cone> ConstConePointer;
 
@@ -37,7 +30,7 @@ public:
 			   const RotationType& rot,
 			   const PositionType& vert,
 			   Geom::Theta<Scalar> angle) {
-    return ConePointer(new Cone(vert, angle, pos, rot));
+    return ConePointer(new Cone(pos, rot, vert, angle));
   }
 
 
@@ -70,6 +63,12 @@ public:
   // Tangent plane to surface from local point
   virtual ReferenceCountingPointer<TangentPlane> tangentPlane (const LocalPoint&) const;
 
+protected:
+  // Private constructor - use build() instead
+  Cone(const PositionType& pos, const RotationType& rot,
+       const PositionType& vert, Geom::Theta<Scalar> angle,
+       MediumProperties* mp) : 
+    Surface(pos, rot, mp), theVertex(vert), theAngle(angle) {}
 
 private:
 

@@ -258,17 +258,18 @@ namespace edm {
   }
 
   // Return a dummy file block.
-  std::unique_ptr<FileBlock>
+  boost::shared_ptr<FileBlock>
   InputSource::readFile() {
     assert(state_ == IsFile);
     assert(!limitReached());
-    return callWithTryCatchAndPrint<std::unique_ptr<FileBlock> >( [this](){ return readFile_(); },
-                                                                  "Calling InputSource::readFile_" );
+    boost::shared_ptr<FileBlock> fb = callWithTryCatchAndPrint<boost::shared_ptr<FileBlock> >( [this](){ return readFile_(); },
+                                                                                               "Calling InputSource::readFile_" );
+    return fb;
   }
 
   void
-  InputSource::closeFile(FileBlock* fb, bool cleaningUpAfterException) {
-    if(fb != nullptr) fb->close();
+  InputSource::closeFile(boost::shared_ptr<FileBlock> fb, bool cleaningUpAfterException) {
+    if(fb) fb->close();
     callWithTryCatchAndPrint<void>( [this](){ closeFile_(); },
                                     "Calling InputSource::closeFile_",
                                     cleaningUpAfterException );
@@ -278,9 +279,9 @@ namespace edm {
   // Return a dummy file block.
   // This function must be overridden for any input source that reads a file
   // containing Products.
-  std::unique_ptr<FileBlock>
+  boost::shared_ptr<FileBlock>
   InputSource::readFile_() {
-    return std::unique_ptr<FileBlock>(new FileBlock);
+    return boost::shared_ptr<FileBlock>(new FileBlock);
   }
 
   boost::shared_ptr<RunPrincipal>
@@ -500,7 +501,6 @@ namespace edm {
   void
   InputSource::doEndRun(RunPrincipal& rp, bool cleaningUpAfterException) {
     rp.setEndTime(time_);
-    rp.setComplete();
     Run run(rp, moduleDescription());
     callWithTryCatchAndPrint<void>( [this,&run](){ endRun(run); }, "Calling InputSource::endRun", cleaningUpAfterException );
     run.commit_();
@@ -516,7 +516,6 @@ namespace edm {
   void
   InputSource::doEndLumi(LuminosityBlockPrincipal& lbp, bool cleaningUpAfterException) {
     lbp.setEndTime(time_);
-    lbp.setComplete();
     LuminosityBlock lb(lbp, moduleDescription());
     callWithTryCatchAndPrint<void>( [this,&lb](){ endLuminosityBlock(lb); }, "Calling InputSource::endLuminosityBlock", cleaningUpAfterException );
     lb.commit_();

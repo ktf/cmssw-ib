@@ -1,6 +1,6 @@
 // Original Author:  Anne-Marie Magnan
 //         Created:  2010/01/21
-// $Id: SiStripFEDEmulatorModule.cc,v 1.2 2013/03/04 07:53:45 davidlt Exp $
+// $Id: SiStripFEDEmulatorModule.cc,v 1.1 2012/10/15 09:02:47 threus Exp $
 //
 
 #include <sstream>
@@ -64,7 +64,8 @@ namespace sistrip
 
   private:
 
-    virtual void produce(edm::Event&, const edm::EventSetup&) override;
+    virtual void beginRun( edm::Run&, const edm::EventSetup& );
+    virtual void produce(edm::Event&, const edm::EventSetup&);
     //virtual void endJob();
 
     //tag of spydata collection
@@ -274,6 +275,17 @@ namespace sistrip {
     }
 
   }//produce method
+
+  // ------------ method called once each job just before starting event loop  ------------
+  void 
+  FEDEmulatorModule::beginRun( edm::Run&, const edm::EventSetup& )
+  {
+
+  }
+
+
+
+
 }//namespace sistrip
 
 //

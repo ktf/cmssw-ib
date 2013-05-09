@@ -48,7 +48,11 @@ namespace reco {
     // picks which rbxs are interesting, storing them to the EDM.
     //
     
-    virtual void produce(edm::Event&, const edm::EventSetup&) override;
+    virtual void beginJob() ;
+    virtual void endJob() ;
+    virtual void produce(edm::Event&, const edm::EventSetup&);
+    virtual void beginRun(edm::Run&, const edm::EventSetup&);
+    virtual void endRun(edm::Run&, const edm::EventSetup&);
     
     //
     // more internal methods
@@ -90,16 +94,6 @@ namespace reco {
 
     double minRecHitE_, minLowHitE_, minHighHitE_; // parameters used to determine noise status
     HcalNoiseAlgo algo_; // algorithms to determine if an RBX is noisy
-
-    bool useCalibDigi_;
-
-    // Variables to store info regarding HBHE calibration digis
-    double calibdigiHBHEthreshold_;  // minimum charge calib digi in order to be counted by noise algorithm
-    std::vector<int> calibdigiHBHEtimeslices_; // time slices to use when computing calibration charge
-    // Variables to store info regarding HF calibration digis
-    double calibdigiHFthreshold_;
-    std::vector<int> calibdigiHFtimeslices_;
-
 
     double TS4TS5EnergyThreshold_;
     std::vector<std::pair<double, double> > TS4TS5UpperCut_;

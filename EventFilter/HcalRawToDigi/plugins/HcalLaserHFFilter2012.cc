@@ -57,8 +57,14 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   
 private:
-  virtual bool filter(edm::Event&, const edm::EventSetup&) override;
-  virtual void endJob() override;
+  virtual void beginJob() ;
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
+  virtual void endJob() ;
+  
+  virtual bool beginRun(edm::Run&, edm::EventSetup const&);
+  virtual bool endRun(edm::Run&, edm::EventSetup const&);
+  virtual bool beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
   
   // ----------member data ---------------------------
   bool verbose_;  // if set to true, then the run:LS:event for any event failing the cut will be printed out
@@ -155,10 +161,44 @@ HcalLaserHFFilter2012::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
    return true;
 }  // HcalLaserHFFilter2012::filter
  
+// ------------ method called once each job just before starting event loop  ------------
+void 
+HcalLaserHFFilter2012::beginJob()
+{
+}
+
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 HcalLaserHFFilter2012::endJob() {
   if (WriteBadToFile_) outfile_.close();
+}
+
+// ------------ method called when starting to processes a run  ------------
+bool 
+HcalLaserHFFilter2012::beginRun(edm::Run&, edm::EventSetup const&)
+{ 
+  return true;
+}
+
+// ------------ method called when ending the processing of a run  ------------
+bool 
+HcalLaserHFFilter2012::endRun(edm::Run&, edm::EventSetup const&)
+{
+  return true;
+}
+
+// ------------ method called when starting to processes a luminosity block  ------------
+bool 
+HcalLaserHFFilter2012::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
+{
+  return true;
+}
+
+// ------------ method called when ending the processing of a luminosity block  ------------
+bool 
+HcalLaserHFFilter2012::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
+{
+  return true;
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------

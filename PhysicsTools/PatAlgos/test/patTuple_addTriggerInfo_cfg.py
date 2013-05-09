@@ -10,32 +10,43 @@ process.options.allowUnscheduled = cms.untracked.bool( True )
 # Load default PAT
 process.load( "PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff" )
 process.load( "PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff" )
-process.p = cms.Path(
-    process.selectedPatCandidates
-    )
 
 
-### Get PAT trigger tools
-from PhysicsTools.PatAlgos.tools.trigTools import *
+### Set up PAT trigger information
+
+process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi" )
+process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerEventProducer_cfi" )
 
 # ------------------------------------------------------------------------------
 # Depending on the purpose, comment/uncomment the following sections
 # ------------------------------------------------------------------------------
 
 # Add full trigger information
-switchOnTrigger( process )
+from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
+process.out.outputCommands += patTriggerEventContent
 
 # # Add full example trigger matching information
-# switchOnTriggerMatching( process )
+# process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerMatcher_cfi" )
+# from PhysicsTools.PatAlgos.triggerLayer1.triggerMatcher_cfi import triggerMatchingDefaultInputTags
+# process.patTriggerEvent.patTriggerMatches = triggerMatchingDefaultInputTags
+# from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
+# process.out.outputCommands += patTriggerEventContent
 
 # # Add stand-alone trigger information
-# switchOnTriggerStandAlone( process )
+# from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
+# process.out.outputCommands += patTriggerStandAloneEventContent
 
 # Add stand-alone example trigger matching information
-# switchOnTriggerMatchingStandAlone( process )
+# process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerMatcher_cfi" )
+# from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
+# process.out.outputCommands += patTriggerStandAloneEventContent
 
 # # Add embedded example trigger matching information
-switchOnTriggerMatchEmbedding( process )
+# process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerMatcher_cfi" )
+# process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerMatchEmbedder_cfi" )
+# from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentTriggerMatch
+# process.out.outputCommands.append( 'drop *' )
+# process.out.outputCommands += patEventContentTriggerMatch
 
 
 # ------------------------------------------------------------------------------

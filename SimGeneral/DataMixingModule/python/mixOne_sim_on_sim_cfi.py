@@ -23,18 +23,12 @@ mixData = cms.EDProducer("DataMixingModule",
     mixProdStep1 = cms.bool(False),
     mixProdStep2 = cms.bool(False),
     IsThisFastSim = cms.string('NO'),  # kludge for fast simulation flag...
-    # Merge Pileup Info?
-    MergePileupInfo = cms.bool(True),                         
     # Use digis?               
     EcalMergeType = cms.string('Digis'),  # set to "Digis" to merge digis
     HcalMergeType = cms.string('Digis'),
-    HcalDigiMerge = cms.string('NotProd'), #use sim hits for signal
+    HcalDigiMerge = cms.string('FullProd'), #use sim hits for signal
     #
     # Input Specifications:
-    #
-
-    PileupInfoInputTag = cms.InputTag("addPileupInfo"),
-    CFPlaybackInputTag = cms.InputTag("mix"),
     #
     SistripLabelSig = cms.InputTag("simSiStripDigis","ZeroSuppressed"),
                    #
@@ -72,7 +66,7 @@ mixData = cms.EDProducer("DataMixingModule",
                          
     EBdigiProducerSig = cms.InputTag("simEcalUnsuppressedDigis"),
     EEdigiProducerSig = cms.InputTag("simEcalUnsuppressedDigis"),
-    ESdigiProducerSig = cms.InputTag("simEcalPreshowerDigis"),
+    ESdigiProducerSig = cms.InputTag("simEcalUnsuppressedDigis"),
     HBHEdigiCollectionSig  = cms.InputTag("simHcalUnsuppressedDigis"),
     HOdigiCollectionSig    = cms.InputTag("simHcalUnsuppressedDigis"),
     HFdigiCollectionSig    = cms.InputTag("simHcalUnsuppressedDigis"),
@@ -81,11 +75,11 @@ mixData = cms.EDProducer("DataMixingModule",
     #
     EBPileInputTag = cms.InputTag("simEcalUnsuppressedDigis",""),
     EEPileInputTag = cms.InputTag("simEcalUnsuppressedDigis",""),
-    ESPileInputTag = cms.InputTag("simEcalPreshowerDigis",""),
-    HBHEPileInputTag = cms.InputTag("simHcalDigis"),
-    HOPileInputTag   = cms.InputTag("simHcalDigis"),
-    HFPileInputTag   = cms.InputTag("simHcalDigis"),
-    ZDCPileInputTag  = cms.InputTag(""),
+    ESPileInputTag = cms.InputTag("simEcalUnsuppressedDigis",""),
+    HBHEPileInputTag = cms.InputTag("simHcalUnsuppressedDigis"),
+    HOPileInputTag   = cms.InputTag("simHcalUnsuppressedDigis"),
+    HFPileInputTag   = cms.InputTag("simHcalUnsuppressedDigis"),
+    ZDCPileInputTag  = cms.InputTag("simHcalUnsuppressedDigis"),
 
     #  Signal
                    #
@@ -98,8 +92,8 @@ mixData = cms.EDProducer("DataMixingModule",
     DTdigiCollectionSig = cms.InputTag("simMuonDTDigis"),
     #  Pileup
                    #                   
-    DTPileInputTag        = cms.InputTag("simMuonDTDigis",""),
-    RPCPileInputTag       = cms.InputTag("simMuonRPCDigis",""),
+    DTPileInputTag        = cms.InputTag("simMuonDTDigis","MuonDTDigis"),
+    RPCPileInputTag       = cms.InputTag("simMuonRPCDigis","MuonRPCDigis"),
     CSCWirePileInputTag   = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi"),
     CSCStripPileInputTag  = cms.InputTag("simMuonCSCDigis","MuonCSCStripDigi"),
     CSCCompPileInputTag   = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),

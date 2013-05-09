@@ -9,8 +9,8 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
 #undef Debug
 
@@ -70,12 +70,6 @@ void PixelTripletLowPtGenerator::hitTriplets(
     const edm::Event & ev,
     const edm::EventSetup& es) 
 {
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHand;
-  es.get<IdealGeometryRecord>().get(tTopoHand);
-  const TrackerTopology *tTopo=tTopoHand.product();
-
   // Generate pairs
   OrderedHitPairs pairs; pairs.reserve(30000);
   thePairGenerator->hitPairs(region,pairs,ev,es);
@@ -178,7 +172,7 @@ void PixelTripletLowPtGenerator::hitTriplets(
         // Check if the cluster shapes are compatible with thrusts
         if(checkClusterShape)
         {
-          if(! theFilter->checkTrack(recHits,globalDirs,tTopo))
+          if(! theFilter->checkTrack(recHits,globalDirs))
           {
 #ifdef Debug
             cerr << "  not compatible: cluster shape" << endl;

@@ -19,6 +19,14 @@
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+
 // added by me
 
 #include "Geometry/CommonDetUnit/interface/TrackingGeometry.h"
@@ -78,7 +86,7 @@ namespace reco { namespace modules {
 	class CosmicTrackSplitter : public edm::EDProducer {
     public:
 		CosmicTrackSplitter(const edm::ParameterSet &iConfig) ; 
-		virtual void produce(edm::Event &iEvent, const edm::EventSetup &iSetup) override;
+		virtual void produce(edm::Event &iEvent, const edm::EventSetup &iSetup) ;
 		
     private:
 		edm::InputTag tracks_;

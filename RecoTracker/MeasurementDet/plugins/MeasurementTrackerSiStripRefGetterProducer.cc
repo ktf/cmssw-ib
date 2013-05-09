@@ -27,10 +27,13 @@ MeasurementTrackerSiStripRefGetterProducer::MeasurementTrackerSiStripRefGetterPr
 MeasurementTrackerSiStripRefGetterProducer::~MeasurementTrackerSiStripRefGetterProducer() {}
 
 // -----------------------------------------------------------------------------
-void MeasurementTrackerSiStripRefGetterProducer::beginRun( edm::Run const&, const edm::EventSetup& setup) {
+void MeasurementTrackerSiStripRefGetterProducer::beginRun( edm::Run &, const edm::EventSetup& setup) {
  //get cabling
   setup.get<SiStripRegionCablingRcd>().get(cabling_);
 }
+
+// -----------------------------------------------------------------------------
+void MeasurementTrackerSiStripRefGetterProducer::endRun(edm::Run &, const edm::EventSetup&) {;}
 
 // -----------------------------------------------------------------------------
 /** */

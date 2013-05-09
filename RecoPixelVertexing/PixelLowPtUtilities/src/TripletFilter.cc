@@ -14,7 +14,6 @@
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 using namespace std;
 
@@ -34,7 +33,7 @@ TripletFilter::~TripletFilter()
 
 /*****************************************************************************/
 bool TripletFilter::checkTrack
-(vector<const TrackingRecHit*> recHits, vector<LocalVector> localDirs, const TrackerTopology *tTopo)
+  (vector<const TrackingRecHit*> recHits, vector<LocalVector> localDirs)
 {
   bool ok = true;
 
@@ -53,7 +52,7 @@ bool TripletFilter::checkTrack
     {
       LogTrace("MinBiasTracking")
        << "  [TripletFilter] clusShape problem"
-       << HitInfo::getInfo(**recHit,tTopo);
+       << HitInfo::getInfo(**recHit);
 
       ok = false; break;
     }
@@ -66,7 +65,7 @@ bool TripletFilter::checkTrack
 
 /*****************************************************************************/
 bool TripletFilter::checkTrack
-(vector<const TrackingRecHit*> recHits, vector<GlobalVector> globalDirs, const TrackerTopology *tTopo)
+  (vector<const TrackingRecHit*> recHits, vector<GlobalVector> globalDirs)
 {
   bool ok = true;
 
@@ -85,7 +84,7 @@ bool TripletFilter::checkTrack
     {
       LogTrace("MinBiasTracking")
        << "  [TripletFilter] clusShape problem"
-       << HitInfo::getInfo(**recHit,tTopo);
+       << HitInfo::getInfo(**recHit);
 
       ok = false; break;
     }

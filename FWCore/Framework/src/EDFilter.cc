@@ -23,7 +23,6 @@ namespace edm {
     detail::CPCSentry sentry(current_context_, cpc);
     bool rc = false;
     Event e(ep, moduleDescription_);
-    e.setConsumer(this);
     rc = this->filter(e, c);
     e.commit_(&previousParentage_, &previousParentageId_);
     return rc;
@@ -38,51 +37,48 @@ namespace edm {
     this->endJob();
   }
 
-  void
+  bool
   EDFilter::doBeginRun(RunPrincipal& rp, EventSetup const& c,
 			CurrentProcessingContext const* cpc) {
     detail::CPCSentry sentry(current_context_, cpc);
+    bool rc = false;
     Run r(rp, moduleDescription_);
-    r.setConsumer(this);
-    Run const& cnstR=r;
-    this->beginRun(cnstR, c);
+    rc = this->beginRun(r, c);
     r.commit_();
-    return;
+    return rc;
   }
 
-  void
+  bool
   EDFilter::doEndRun(RunPrincipal& rp, EventSetup const& c,
 			CurrentProcessingContext const* cpc) {
     detail::CPCSentry sentry(current_context_, cpc);
+    bool rc = false;
     Run r(rp, moduleDescription_);
-    r.setConsumer(this);
-    Run const& cnstR=r;
-    this->endRun(cnstR, c);
+    rc = this->endRun(r, c);
     r.commit_();
-    return;
+    return rc;
   }
 
-  void
+  bool
   EDFilter::doBeginLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
 			CurrentProcessingContext const* cpc) {
     detail::CPCSentry sentry(current_context_, cpc);
+    bool rc = false;
     LuminosityBlock lb(lbp, moduleDescription_);
-    lb.setConsumer(this);
-    LuminosityBlock const& cnstLb = lb;
-    this->beginLuminosityBlock(cnstLb, c);
+    rc = this->beginLuminosityBlock(lb, c);
     lb.commit_();
+    return rc;
   }
 
-  void
+  bool
   EDFilter::doEndLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
 			CurrentProcessingContext const* cpc) {
     detail::CPCSentry sentry(current_context_, cpc);
+    bool rc = false;
     LuminosityBlock lb(lbp, moduleDescription_);
-    lb.setConsumer(this);
-    LuminosityBlock const& cnstLb = lb;
-    this->endLuminosityBlock(cnstLb, c);
+    rc = this->endLuminosityBlock(lb, c);
     lb.commit_();
-    return ;
+    return rc;
   }
 
   void

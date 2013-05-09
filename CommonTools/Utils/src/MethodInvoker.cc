@@ -62,9 +62,9 @@ MethodInvoker::methodName() const {
 std::string
 MethodInvoker::returnTypeName() const {
   if(isFunction_) {
-     return method_.typeOf().qualifiedName();
+     return method_.typeOf().name(edm::TypeNameHandling::Qualified);
   }
-  return member_.typeOf().qualifiedName();
+  return member_.typeOf().name(edm::TypeNameHandling::Qualified);
 }
 
 edm::ObjectWithDict
@@ -73,17 +73,17 @@ MethodInvoker::invoke(const edm::ObjectWithDict & o, edm::ObjectWithDict &retsto
   edm::TypeWithDict retType;
   if(isFunction_) {
      /*std::cout << "Invoking " << methodName() 
-            << " from " << method_.declaringType().qualifiedName() 
-            << " on an instance of " << o.dynamicType().qualifiedName() 
+            << " from " << method_.declaringType().name(edm::TypeNameHandling::Qualified) 
+            << " on an instance of " << o.dynamicType().name(edm::TypeNameHandling::Qualified) 
             << " at " << o.address()
             << " with " << args_.size() << " arguments"
             << std::endl; */
      method_.invoke(o, &ret, args_);
-     retType = method_.finalReturnType(); // this is correct, it takes pointers and refs into account
+     retType = method_.returnType(); // this is correct, it takes pointers and refs into account
   } else {
      /*std::cout << "Invoking " << methodName() 
-            << " from " << member_.declaringType().qualifiedName() 
-            << " on an instance of " << o.dynamicType().qualifiedName() 
+            << " from " << member_.declaringType().name(edm::TypeNameHandling::Qualified) 
+            << " on an instance of " << o.dynamicType().name(edm::TypeNameHandling::Qualified) 
             << " at " << o.address()
             << " with " << args_.size() << " arguments"
             << std::endl; */
@@ -97,22 +97,23 @@ MethodInvoker::invoke(const edm::ObjectWithDict & o, edm::ObjectWithDict &retsto
       << "method \"" << methodName() << "\" called with " << args_.size() 
       << " arguments returned a null pointer ";   
   }
-  //std::cout << "Return type is " << retType.qualifiedName() << std::endl;
+  //std::cout << "Return type is " << retType.name(edm::TypeNameHandling::Qualified) << std::endl;
    
   if(retType.isPointer() || retType.isReference()) { // both need (void **)->(void *) conversion
       if (retType.isPointer()) {
         retType = retType.toType(); // for Pointers, I get the real type this way
       } else {
-        retType = edm::TypeWithDict(retType, 0L); // strip cv & ref flags
+        retType = edm::TypeWithDict(retType, edm::TypeModifiers::NoMod); // strip cv & ref flags
       }
+      while (retType.isTypedef()) retType = retType.toType();
       ret = edm::ObjectWithDict(retType, *static_cast<void **>(addr));
-      //std::cout << "Now type is " << retType.qualifiedName() << std::endl;
+      //std::cout << "Now type is " << retType.name(edm::TypeNameHandling::Qualified) << std::endl;
   }
   if(!ret) {
      throw edm::Exception(edm::errors::Configuration)
       << "method \"" << methodName()
       << "\" returned void invoked on object of type \"" 
-      << o.typeOf().qualifiedName() << "\"\n";
+      << o.typeOf().name(edm::TypeNameHandling::Qualified) << "\"\n";
   }
   return ret;
 }
@@ -130,10 +131,10 @@ LazyInvoker::~LazyInvoker()
 const SingleInvoker &
 LazyInvoker::invoker(const edm::TypeWithDict & type) const 
 {
-    //std::cout << "LazyInvoker for " << name_ << " called on type " << type.qualifiedName() << std::endl;
-    SingleInvokerPtr & invoker = invokers_[edm::TypeID(type.id())];
+    //std::cout << "LazyInvoker for " << name_ << " called on type " << type.name(edm::TypeNameHandling::Qualified) << std::endl;
+    SingleInvokerPtr & invoker = invokers_[type.id()];
     if (!invoker) {
-        //std::cout << "  Making new invoker for " << name_ << " on type " << type.qualifiedName() << std::endl;
+        //std::cout << "  Making new invoker for " << name_ << " on type " << type.name(edm::TypeNameHandling::Qualified) << std::endl;
         invoker.reset(new SingleInvoker(type, name_, argsBeforeFixups_));
     } 
     return * invoker;
@@ -175,8 +176,10 @@ SingleInvoker::SingleInvoker(const edm::TypeWithDict &type,
     MethodSetter setter(invokers_, dummy, typeStack, dummy2, false);
     isRefGet_ = !setter.push(name, args, "LazyInvoker dynamic resolution", false);
     //std::cerr  << "SingleInvoker on type " <<  type.qualifiedName() << ", name " << name << (isRefGet_ ? " is just a ref.get " : " is real") << std::endl;
+    //remove any typedefs if any. If we do not do this it appears that we get a memory leak
+    // because typedefs do not have 'destructors'
     if(invokers_.front().isFunction()) {
-       edm::TypeWithDict retType = invokers_.front().method().finalReturnType();
+       edm::TypeWithDict retType = invokers_.front().method().returnType().finalType();
        storageNeedsDestructor_ = ExpressionVar::makeStorage(storage_, retType);
     } else {
        storage_ = edm::ObjectWithDict();
@@ -217,6 +220,6 @@ SingleInvoker::throwFailedConversion(const edm::ObjectWithDict & o) const {
     throw edm::Exception(edm::errors::Configuration)
         << "member \"" << invokers_.back().methodName()
         << "\" return type is \"" << invokers_.back().returnTypeName()
-        << "\" retured a \"" << o.typeOf().qualifiedName()
+        << "\" retured a \"" << o.typeOf().name(edm::TypeNameHandling::Qualified)
         << "\" which is not convertible to double.";
 }

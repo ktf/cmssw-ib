@@ -25,8 +25,6 @@
 #include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupMixingContent.h"
 
@@ -54,13 +52,13 @@ namespace edm {
 
       virtual void beginJob() {}
 
-      virtual void beginRun(Run const& r1, EventSetup const& c) override;
+      virtual void beginRun(Run& r1, EventSetup const& c);
 
-      virtual void endRun(Run const& r1, EventSetup const& c) override;
+      virtual void endRun(Run& r1, EventSetup const& c);
 
-      virtual void beginLuminosityBlock(LuminosityBlock const& l1, EventSetup const& c) override;
+      virtual void beginLuminosityBlock(LuminosityBlock& l1, EventSetup const& c);
 
-      virtual void endLuminosityBlock(LuminosityBlock const& l1, EventSetup const& c) override;
+      virtual void endLuminosityBlock(LuminosityBlock& l1, EventSetup const& c);
 
       void initializeEvent(Event const& event, EventSetup const& setup);
 

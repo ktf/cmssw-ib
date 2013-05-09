@@ -14,7 +14,8 @@
 
 struct GzInputStream
  {
-  gzFile gzf;
+  typedef voidp gzFile ;
+  gzFile gzf ;
   char buffer[256] ;
   std::istringstream iss ;
   bool eof ;

@@ -83,9 +83,6 @@
 #include <sched.h>
 #endif
 
-//Needed for introspection
-#include "Cintex/Cintex.h"
-
 namespace edm {
 
   namespace event_processor {
@@ -260,13 +257,13 @@ namespace edm {
     //  mRunID, mRunCount, mSetRun
 
   // ---------------------------------------------------------------
-  std::unique_ptr<InputSource>
+  boost::shared_ptr<InputSource>
   makeInput(ParameterSet& params,
             CommonParams const& common,
             ProductRegistry& preg,
             boost::shared_ptr<BranchIDListHelper> branchIDListHelper,
             boost::shared_ptr<ActivityRegistry> areg,
-            boost::shared_ptr<ProcessConfiguration const> processConfiguration) {
+            boost::shared_ptr<ProcessConfiguration> processConfiguration) {
     ParameterSet* main_input = params.getPSetForUpdate("@main_input");
     if(main_input == 0) {
       throw Exception(errors::Configuration)
@@ -314,10 +311,10 @@ namespace edm {
 
     InputSourceDescription isdesc(md, preg, branchIDListHelper, areg, common.maxEventsInput_, common.maxLumisInput_);
     areg->preSourceConstructionSignal_(md);
-    std::unique_ptr<InputSource> input;
+    boost::shared_ptr<InputSource> input;
     try {
       try {
-        input = std::unique_ptr<InputSource>(InputSourceFactory::get()->makeInputSource(*main_input, isdesc).release());
+        input = boost::shared_ptr<InputSource>(InputSourceFactory::get()->makeInputSource(*main_input, isdesc).release());
       }
       catch (cms::Exception& e) { throw; }
       catch (std::bad_alloc& bda) { convertException::badAllocToEDM(); }
@@ -588,8 +585,6 @@ namespace edm {
                         serviceregistry::ServiceLegacy iLegacy) {
 
     //std::cerr << processDesc->dump() << std::endl;
-   
-    ROOT::Cintex::Cintex::Enable();
 
     boost::shared_ptr<ParameterSet> parameterSet = processDesc->getProcessPSet();
     //std::cerr << parameterSet->dump() << std::endl;
@@ -648,9 +643,9 @@ namespace edm {
     schedule_ = items.initSchedule(*parameterSet,subProcessParameterSet.get());
 
     // set the data members
-    act_table_ = std::move(items.act_table_);
+    act_table_ = items.act_table_;
     actReg_ = items.actReg_;
-    preg_.reset(items.preg_.release());
+    preg_ = items.preg_;
     branchIDListHelper_ = items.branchIDListHelper_;
     processConfiguration_ = items.processConfiguration_;
 
@@ -738,7 +733,7 @@ namespace edm {
       ex.addContext("Calling beginJob for the source");
       throw;
     }
-    schedule_->beginJob(*preg_);
+    schedule_->beginJob();
     // toerror.succeeded(); // should we add this?
     if(hasSubProcess()) subProcess_->doBeginJob();
     actReg_->postBeginJobSignal_();
@@ -759,12 +754,11 @@ namespace edm {
     if(hasSubProcess()) {
       c.call(boost::bind(&SubProcess::doEndJob, subProcess_.get()));
     }
-    c.call(boost::bind(&InputSource::doEndJob, input_.get()));
+    c.call(boost::bind(&InputSource::doEndJob, input_));
     if(looper_) {
       c.call(boost::bind(&EDLooperBase::endOfJob, looper_));
     }
-    auto actReg = actReg_.get();
-    c.call([actReg](){actReg->postEndJobSignal_();});
+    c.call(boost::bind(&ActivityRegistry::PostEndJob::operator(), &actReg_->postEndJobSignal_));
     if(c.hasThrown()) {
       c.rethrow();
     }
@@ -1036,7 +1030,7 @@ namespace edm {
         eventsetup::EventSetupRecord const* recordPtr = es.find(*itKey);
         //see if this is on our exclusion list
         ExcludedDataMap::const_iterator itExcludeRec = eventSetupDataToExcludeFromPrefetching_.find(itKey->type().name());
-        ExcludedData const* excludedData(nullptr);
+        ExcludedData const* excludedData(0);
         if(itExcludeRec != eventSetupDataToExcludeFromPrefetching_.end()) {
           excludedData = &(itExcludeRec->second);
           if(excludedData->size() == 0 || excludedData->begin()->first == "*") {
@@ -1305,8 +1299,8 @@ namespace edm {
     // When the FwkImpl signals are given, pass them to the
     // appropriate EventProcessor signals so that the outside world
     // can see the signal.
-    actReg_->preProcessEventSignal_.connect(std::cref(ep->preProcessEventSignal_));
-    actReg_->postProcessEventSignal_.connect(std::cref(ep->postProcessEventSignal_));
+    actReg_->preProcessEventSignal_.connect(ep->preProcessEventSignal_);
+    actReg_->postProcessEventSignal_.connect(ep->postProcessEventSignal_);
   }
 
   std::vector<ModuleDescription const*>
@@ -1376,7 +1370,7 @@ namespace edm {
     if(runNumber == 0) {
       runNumber = 1;
       LogWarning("Invalid Run")
-        << "EventProcessor::setRunNumber was called with an invalid run number (nullptr)\n"
+        << "EventProcessor::setRunNumber was called with an invalid run number (0)\n"
         << "Run number was set to 1 instead\n";
     }
 
@@ -1863,14 +1857,14 @@ namespace edm {
   }
 
   void EventProcessor::closeInputFile(bool cleaningUpAfterException) {
-    if (fb_.get() != nullptr) {
-      input_->closeFile(fb_.get(), cleaningUpAfterException);
+    if (fb_.get() != 0) {
+      input_->closeFile(fb_, cleaningUpAfterException);
     }
     FDEBUG(1) << "\tcloseInputFile\n";
   }
 
   void EventProcessor::openOutputFiles() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->openOutputFiles(*fb_);
       if(hasSubProcess()) subProcess_->openOutputFiles(*fb_);
     }
@@ -1878,7 +1872,7 @@ namespace edm {
   }
 
   void EventProcessor::closeOutputFiles() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->closeOutputFiles();
       if(hasSubProcess()) subProcess_->closeOutputFiles();
     }
@@ -1886,7 +1880,7 @@ namespace edm {
   }
 
   void EventProcessor::respondToOpenInputFile() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->respondToOpenInputFile(*fb_);
       if(hasSubProcess()) subProcess_->respondToOpenInputFile(*fb_);
     }
@@ -1894,7 +1888,7 @@ namespace edm {
   }
 
   void EventProcessor::respondToCloseInputFile() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->respondToCloseInputFile(*fb_);
       if(hasSubProcess()) subProcess_->respondToCloseInputFile(*fb_);
     }
@@ -1902,7 +1896,7 @@ namespace edm {
   }
 
   void EventProcessor::respondToOpenOutputFiles() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->respondToOpenOutputFiles(*fb_);
       if(hasSubProcess()) subProcess_->respondToOpenOutputFiles(*fb_);
     }
@@ -1910,7 +1904,7 @@ namespace edm {
   }
 
   void EventProcessor::respondToCloseOutputFiles() {
-    if (fb_.get() != nullptr) {
+    if (fb_.get() != 0) {
       schedule_->respondToCloseOutputFiles(*fb_);
       if(hasSubProcess()) subProcess_->respondToCloseOutputFiles(*fb_);
     }
@@ -1932,7 +1926,7 @@ namespace edm {
       ModuleChanger changer(schedule_.get());
       looper_->setModuleChanger(&changer);
       EDLooperBase::Status status = looper_->doEndOfLoop(esp_->eventSetup());
-      looper_->setModuleChanger(nullptr);
+      looper_->setModuleChanger(0);
       if(status != EDLooperBase::kContinue || forceLooperToEnd_) return true;
       else return false;
     }

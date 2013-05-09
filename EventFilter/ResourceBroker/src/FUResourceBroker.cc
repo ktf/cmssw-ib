@@ -245,7 +245,7 @@ xoap::MessageReference FUResourceBroker::handleFSMSoapMessage(
 }
 
 //______________________________________________________________________________
-void FUResourceBroker::I2O_FU_TAKE_Callback(toolbox::mem::Reference* bufRef) throw(i2o::exception::Exception) {
+void FUResourceBroker::I2O_FU_TAKE_Callback(toolbox::mem::Reference* bufRef) {
 
 	int currentStateID = -1;
 	fsm_->transitionReadLock();
@@ -286,7 +286,7 @@ void FUResourceBroker::I2O_FU_TAKE_Callback(toolbox::mem::Reference* bufRef) thr
 
 //______________________________________________________________________________
 void FUResourceBroker::I2O_EVM_LUMISECTION_Callback(
-		toolbox::mem::Reference* bufRef) throw(i2o::exception::Exception){
+		toolbox::mem::Reference* bufRef) {
 
 	int currentStateID = -1;
 	fsm_->transitionReadLock();
@@ -341,7 +341,7 @@ void FUResourceBroker::I2O_EVM_LUMISECTION_Callback(
 
 //______________________________________________________________________________
 void FUResourceBroker::I2O_FU_DATA_DISCARD_Callback(
-		toolbox::mem::Reference* bufRef) throw(i2o::exception::Exception){
+		toolbox::mem::Reference* bufRef) {
 
 	// obtain lock on Resource Structure for discard
 	res_->lockRSAccess();
@@ -366,7 +366,7 @@ void FUResourceBroker::I2O_FU_DATA_DISCARD_Callback(
 
 //______________________________________________________________________________
 void FUResourceBroker::I2O_FU_DQM_DISCARD_Callback(
-		toolbox::mem::Reference* bufRef) throw(i2o::exception::Exception){
+		toolbox::mem::Reference* bufRef) {
 
 	// obtain lock on Resource Structure for discard
 	res_->lockRSAccess();

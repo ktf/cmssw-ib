@@ -9,8 +9,13 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/View.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -42,7 +47,7 @@ class TkAlCaOverlapTagger : public edm::EDProducer {
   std::vector<unsigned int> BadModsList_;
 
 
-  int layerFromId (const DetId& id, const TrackerTopology* tTopo) const;
+  int layerFromId (const DetId& id) const;
 };
 
 TkAlCaOverlapTagger::TkAlCaOverlapTagger(const edm::ParameterSet& iConfig):
@@ -59,11 +64,6 @@ TkAlCaOverlapTagger::~TkAlCaOverlapTagger(){}
 
 
 void TkAlCaOverlapTagger::produce(edm::Event &iEvent, const edm::EventSetup &iSetup){
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   edm::Handle<TrajTrackAssociationCollection> assoMap;
   iEvent.getByLabel(src_,  assoMap);
   // cout<<"\n\n############################\n###  Starting a new TkAlCaOverlapTagger - Ev "<<iEvent.id().run()<<", "<<iEvent.id().event()<<endl;
@@ -118,13 +118,13 @@ void TkAlCaOverlapTagger::produce(edm::Event &iEvent, const edm::EventSetup &iSe
 
       //std::cout << "         hit number " << (ith - itt->recHitsBegin()) << std::endl;
       DetId detid = hit->geographicalId();
-      int layer(layerFromId(detid, tTopo));//layer 1-4=TIB, layer 5-10=TOB
+      int layer(layerFromId(detid));//layer 1-4=TIB, layer 5-10=TOB
       int subDet = detid.subdetId();
 
       if ( ( previousTM!=0 )&& (layer!=-1 )) {
 	for (std::vector<TrajectoryMeasurement>::const_iterator itmCompare =itTrajMeas-1;itmCompare >= tmColl.begin() &&  itmCompare > itTrajMeas - 4;--itmCompare){
 	  DetId compareId = itmCompare->recHit()->geographicalId();
-	  if ( subDet != compareId.subdetId() || layer  != layerFromId(compareId, tTopo)) break;
+	  if ( subDet != compareId.subdetId() || layer  != layerFromId(compareId)) break;
 	  if (!itmCompare->recHit()->isValid()) continue;
 	  if ( (subDet<=2) || (subDet > 2 && SiStripDetId(detid).stereo()==SiStripDetId(compareId).stereo())){//if either pixel or strip stereo module
 	    
@@ -239,31 +239,31 @@ void TkAlCaOverlapTagger::produce(edm::Event &iEvent, const edm::EventSetup &iSe
   // iEvent.put(stripmap);
   iEvent.put(hitvalmap);
 }//end  TkAlCaOverlapTagger::produce
-int TkAlCaOverlapTagger::layerFromId (const DetId& id, const TrackerTopology* tTopo) const
+int TkAlCaOverlapTagger::layerFromId (const DetId& id) const
 {
  if ( uint32_t(id.subdetId())==PixelSubdetector::PixelBarrel ) {
-    
-    return tTopo->pxbLayer(id);
+    PXBDetId tobId(id);
+    return tobId.layer();
   }
   else if ( uint32_t(id.subdetId())==PixelSubdetector::PixelEndcap ) {
-    
-    return tTopo->pxfDisk(id) + (3*(tTopo->pxfSide(id)-1));
+    PXFDetId tobId(id);
+    return tobId.disk() + (3*(tobId.side()-1));
   }
   else if ( id.subdetId()==StripSubdetector::TIB ) {
-    
-    return tTopo->tibLayer(id);
+    TIBDetId tibId(id);
+    return tibId.layer();
   }
   else if ( id.subdetId()==StripSubdetector::TOB ) {
-    
-    return tTopo->tobLayer(id);
+    TOBDetId tobId(id);
+    return tobId.layer();
   }
   else if ( id.subdetId()==StripSubdetector::TEC ) {
-    
-    return tTopo->tecWheel(id) + (9*(tTopo->tecSide(id)-1));
+    TECDetId tobId(id);
+    return tobId.wheel() + (9*(tobId.side()-1));
   }
   else if ( id.subdetId()==StripSubdetector::TID ) {
-    
-    return tTopo->tidWheel(id) + (3*(tTopo->tidSide(id)-1));
+    TIDDetId tobId(id);
+    return tobId.wheel() + (3*(tobId.side()-1));
   }
   return -1;
 

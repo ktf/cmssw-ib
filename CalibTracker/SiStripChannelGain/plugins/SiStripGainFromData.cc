@@ -39,8 +39,10 @@
 #include "DataFormats/SiStripDetId/interface/SiStripSubStructure.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 #include "DataFormats/TrackReco/interface/DeDxHit.h"
 #include "DataFormats/TrackReco/interface/TrackDeDxHits.h"
 
@@ -335,11 +337,6 @@ SiStripGainFromData::~SiStripGainFromData()
 void
 SiStripGainFromData::algoBeginJob(const edm::EventSetup& iSetup)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
    iSetup_                  = &iSetup;
 
 //   TH1::AddDirectory(kTRUE);
@@ -531,11 +528,11 @@ SiStripGainFromData::algoBeginJob(const edm::EventSetup& iSetup)
 		APV->Side	   = 0;
 
 		if(SubDet==StripSubdetector::TID){
-                   
-                   APV->Side =  tTopo->tecSide(Detid);
+                   TIDDetId detid = TIDDetId(Detid);
+                   APV->Side =  detid.side();
                 }else if(SubDet==StripSubdetector::TEC){
-                   
-                   APV->Side = tTopo->tecSide(Detid);
+                   TECDetId detid = TECDetId(Detid);
+                   APV->Side = detid.side();
                 }                
 
                 APVsCollOrdered.push_back(APV);
