@@ -14,7 +14,7 @@
 // Original Author:  Michele Pioppi-INFN perugia
 //   Modifications: Freya Blekman - Cornell University
 //         Created:  Mon Sep 26 11:08:32 CEST 2005
-// $Id: SiPixelDigitizer.cc,v 1.8 2012/10/24 18:47:23 eulisse Exp $
+// $Id: SiPixelDigitizer.cc,v 1.9 2013/01/06 19:27:01 dlange Exp $
 //
 //
 
@@ -198,6 +198,10 @@ namespace cms
   void
   SiPixelDigitizer::finalizeEvent(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+    edm::ESHandle<TrackerTopology> tTopoHand;
+    iSetup.get<IdealGeometryRecord>().get(tTopoHand);
+    const TrackerTopology *tTopo=tTopoHand.product();
+
     std::vector<edm::DetSet<PixelDigi> > theDigiVector;
     std::vector<edm::DetSet<PixelDigiSimLink> > theDigiLinkVector;
 
@@ -215,7 +219,8 @@ namespace cms
         
         _pixeldigialgo->digitize(dynamic_cast<PixelGeomDetUnit*>((*iu)),
                                  collector.data,
-                                 linkcollector.data);
+                                 linkcollector.data,
+				 tTopo);
         if(collector.data.size() > 0) {
           theDigiVector.push_back(std::move(collector));
         }

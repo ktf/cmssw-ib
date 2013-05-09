@@ -10,8 +10,8 @@
  *  pointers to the services, therefore EACH event the setServices(const edm::EventSetup&)
  *  method MUST be called in the code in which the TrackTransformer is used.
  *
- *  $Date: 2009/03/03 11:03:08 $
- *  $Revision: 1.4 $
+ *  $Date: 2013/01/09 03:38:34 $
+ *  $Revision: 1.5 $
  *  \author R. Bellan - CERN <riccardo.bellan@cern.ch>
  */
 
@@ -35,6 +35,7 @@ class TrajectorySmoother;
 class Propagator;
 class TransientTrackingRecHitBuilder;
 class Trajectory;
+class TrackerTopology;
 
 class TrackTransformerForGlobalCosmicMuons: public TrackTransformerBase{
 
@@ -111,6 +112,7 @@ public:
   std::string theMuonRecHitBuilderName;
   edm::ESHandle<TransientTrackingRecHitBuilder> theMuonRecHitBuilder;
   
+  const TrackerTopology *tTopo_;
 };
 #endif
 

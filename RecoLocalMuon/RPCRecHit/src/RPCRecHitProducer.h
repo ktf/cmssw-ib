@@ -4,8 +4,8 @@
 /** \class RPCRecHitProducer
  *  Module for RPCRecHit production. 
  *  
- *  $Date: 2010/10/19 19:18:52 $
- *  $Revision: 1.6 $
+ *  $Date: 2013/02/25 18:49:16 $
+ *  $Revision: 1.7 $
  *  \author M. Maggim -- INFN Bari
  */
 
@@ -48,11 +48,10 @@ public:
   virtual ~RPCRecHitProducer();
 
   // Method that access the EventSetup for each run
-  virtual void beginRun( edm::Run&, const edm::EventSetup& );
-  virtual void endRun( edm::Run&, const edm::EventSetup& ) {;}
+  virtual void beginRun(const edm::Run&, const edm::EventSetup& ) override;
 
   /// The method which produces the rechits
-  virtual void produce(edm::Event& event, const edm::EventSetup& setup);
+  virtual void produce(edm::Event& event, const edm::EventSetup& setup) override;
 
 private:
 

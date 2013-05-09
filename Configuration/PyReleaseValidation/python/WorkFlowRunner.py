@@ -3,6 +3,7 @@ from threading import Thread
 
 from Configuration.PyReleaseValidation import WorkFlow
 import os,time
+import shutil
 from subprocess import Popen 
 
 class WorkFlowRunner(Thread):
@@ -48,6 +49,10 @@ class WorkFlowRunner(Thread):
 
         if not os.path.exists(self.wfDir):
             os.makedirs(self.wfDir)
+        else: # clean up to allow re-running in the same overall devel area, then recreate the dir to make sure it exists
+            print "cleaning up ", self.wfDir, ' in ', os.getcwd()
+            shutil.rmtree(self.wfDir) 
+            os.makedirs(self.wfDir)
 
         preamble = 'cd '+self.wfDir+'; '
        
@@ -69,6 +74,7 @@ class WorkFlowRunner(Thread):
             return ' > %s 2>&1; ' % ('step%d_'%(i,)+ID+'.log ',)
 
         inFile=None
+        lumiRangeFile=None
         aborted=False
         for (istepmone,com) in enumerate(self.wf.cmds):
             istep=istepmone+1
@@ -88,6 +94,12 @@ class WorkFlowRunner(Thread):
                     self.stat.append('NOTRUN')
                     aborted=True
                     continue
+                #create lumiRange file first so if dbs fails we get its error code
+                cmd2 = com.lumiRanges()
+                if cmd2:
+                    cmd2 =cmd+cmd2+closeCmd(istep,'lumiRanges')
+                    lumiRangeFile='step%d_lumiRanges.log'%(istep,)
+                    retStep = self.doCmd(cmd2)
                 cmd+=com.dbs()
                 cmd+=closeCmd(istep,'dbsquery')
                 retStep = self.doCmd(cmd)
@@ -102,6 +114,9 @@ class WorkFlowRunner(Thread):
                 if inFile: #in case previous step used DBS query (either filelist of dbs:)
                     cmd += ' --filein '+inFile
                     inFile=None
+                if lumiRangeFile: #DBS query can also restrict lumi range
+                    cmd += ' --lumiToProcess '+lumiRangeFile
+                    lumiRangeFile=None
                 if 'HARVESTING' in cmd and not '134' in str(self.wf.numId) and not '--filein' in cmd:
                     cmd+=' --filein file:step%d_inDQM.root --fileout file:step%d.root '%(istep-1,istep)
                 else:

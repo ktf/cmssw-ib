@@ -30,8 +30,8 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -84,13 +84,13 @@ class QCDTrackAnalyzer : public edm::EDAnalyzer
  public:
    explicit QCDTrackAnalyzer(const edm::ParameterSet& pset);
    ~QCDTrackAnalyzer();
-   virtual void beginRun(edm::Run & run,      const edm::EventSetup& es);
-   virtual void analyze(const edm::Event& ev, const edm::EventSetup& es);
+   virtual void beginRun(const edm::Run & run,      const edm::EventSetup& es) override;
+   virtual void analyze(const edm::Event& ev, const edm::EventSetup& es) override;
    virtual void endJob();
 
  private:
-   int getDetLayerId(const PSimHit& simHit);
-   bool isAccepted(const TrackingParticle& simTrack);
+   int getDetLayerId(const PSimHit& simHit, const TrackerTopology* tTopo);
+   bool isAccepted(const TrackingParticle& simTrack, const TrackerTopology* tTopo);
 
    bool isPrimary(const edm::RefToBase<reco::Track> & recTrack);
    edm::RefToBase<reco::Track> getAssociatedRecTrack
@@ -100,7 +100,7 @@ class QCDTrackAnalyzer : public edm::EDAnalyzer
 
    float refitWithVertex(const reco::Track & recTrack);
 
-   int processSimTracks();
+   int processSimTracks(const edm::EventSetup& es);
 
    float getEnergyLoss(const reco::TrackRef & track);
 
@@ -177,7 +177,7 @@ QCDTrackAnalyzer::~QCDTrackAnalyzer()
 }
 
 /*****************************************************************************/
-void QCDTrackAnalyzer::beginRun(edm::Run & run, const edm::EventSetup& es)
+void QCDTrackAnalyzer::beginRun(const edm::Run & run, const edm::EventSetup& es)
 {
   // Get tracker geometry
   edm::ESHandle<TrackerGeometry> tracker;
@@ -207,7 +207,7 @@ void QCDTrackAnalyzer::endJob()
 }
 
 /*****************************************************************************/
-int QCDTrackAnalyzer::getDetLayerId(const PSimHit& simHit)
+int QCDTrackAnalyzer::getDetLayerId(const PSimHit& simHit, const TrackerTopology* tTopo)
 {
   int layerId;
 
@@ -216,21 +216,20 @@ int QCDTrackAnalyzer::getDetLayerId(const PSimHit& simHit)
   if(theTracker->idToDetUnit(id)->subDetector() ==
        GeomDetEnumerators::PixelBarrel)
   {
-    PXBDetId pid(id);
-    layerId = pid.layer() - 1;
+    
+    layerId = tTopo->pxbLayer(id) - 1;
   }
   else
   {
-    PXFDetId pid(id);
-    layerId = 2 + pid.disk();
+    
+    layerId = 2 + tTopo->pxfDisk(id);
   }
 
   return layerId;
 }
 
 /*****************************************************************************/
-bool QCDTrackAnalyzer::isAccepted
-  (const TrackingParticle& simTrack_)
+bool QCDTrackAnalyzer::isAccepted(const TrackingParticle& simTrack_, const TrackerTopology* tTopo)
 {
   TrackingParticle * simTrack = const_cast<TrackingParticle *>(&simTrack_);
 
@@ -255,7 +254,7 @@ bool QCDTrackAnalyzer::isAccepted
        GeomDetEnumerators::PixelBarrel ||
        theTracker->idToDetUnit(id)->subDetector() ==
        GeomDetEnumerators::PixelEndcap)
-      filled[getDetLayerId(*simHit)] = true;
+      filled[getDetLayerId(*simHit, tTopo)] = true;
   }
   
   // Count the number of filled pixel layers
@@ -465,8 +464,13 @@ float QCDTrackAnalyzer::refitWithVertex
 }
 
 /*****************************************************************************/
-int QCDTrackAnalyzer::processSimTracks()
+int QCDTrackAnalyzer::processSimTracks(const edm::EventSetup& es)
 {
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopoHandle;
+  es.get<IdealGeometryRecord>().get(tTopoHandle);
+  const TrackerTopology* const tTopo = tTopoHandle.product();
+
   int ntrk = 0;
 
   for(TrackingParticleCollection::size_type i=0;
@@ -499,7 +503,7 @@ cerr << " simtrack"
     
     if(simTrack->charge() != 0)
     {
-      acc = isAccepted(*simTrack);
+      acc = isAccepted(*simTrack, tTopo);
       
       // primary charged particles with |eta|<2.4
       if(s.prim && fabs(s.etas) < 2.4)
@@ -515,8 +519,8 @@ cerr << " simtrack"
         const TrackingParticleRefVector& daughters =
           (simTrack->decayVertices()).at(0)->daughterTracks();
 
-        acc = isAccepted(*(daughters.at(0))) &&
-              isAccepted(*(daughters.at(1)));
+        acc = isAccepted(*(daughters.at(0)), tTopo) &&
+              isAccepted(*(daughters.at(1)), tTopo);
       }
     }
     s.acc = acc; // acc
@@ -902,11 +906,11 @@ void QCDTrackAnalyzer::analyze
   {
     LogTrace("MinBiasTracking") << " [TrackAnalyzer] associateSimToReco";
     simToReco =
-    theAssociatorByHits->associateSimToReco(recCollection, simCollection,&ev);
+      theAssociatorByHits->associateSimToReco(recCollection, simCollection,&ev,&es);
 
     LogTrace("MinBiasTracking") << " [TrackAnalyzer] associateRecoToSim";
     recoToSim =
-    theAssociatorByHits->associateRecoToSim(recCollection, simCollection,&ev);
+      theAssociatorByHits->associateRecoToSim(recCollection, simCollection,&ev,&es);
   }
 
   // Analyze
@@ -914,7 +918,7 @@ void QCDTrackAnalyzer::analyze
   if(hasSimInfo)
   {
     LogTrace("MinBiasTracking") << " [TrackAnalyzer] processSimTracks";
-    prim_s_tracks = processSimTracks();
+    prim_s_tracks = processSimTracks(es);
   }
 
   LogTrace("MinBiasTracking") << " [TrackAnalyzer] processRecTracks";

@@ -24,14 +24,14 @@
  * Initial author: P.Vanlaer 25.02.1999
  * Ported from ORCA.
  *
- *  $Date: 2007/05/09 13:50:25 $
- *  $Revision: 1.3 $
+ *  $Date: 2013/01/10 11:55:11 $
+ *  $Revision: 1.4 $
  *  \author vanlaer, cerati
  */
 
 #include "TrackingTools/PatternTools/interface/TrajectoryStateUpdator.h"
 
-class KFUpdator : public TrajectoryStateUpdator {
+class KFUpdator GCC11_FINAL : public TrajectoryStateUpdator {
 
 public:
 

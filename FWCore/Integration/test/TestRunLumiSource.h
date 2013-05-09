@@ -41,6 +41,7 @@ written to the output file anyway.
 ----------------------------------------------------------------------*/
 
 #include "FWCore/Framework/interface/InputSource.h"
+#include "FWCore/Framework/interface/HistoryAppender.h"
 
 #include "boost/shared_ptr.hpp"
 
@@ -89,7 +90,7 @@ namespace edm {
     virtual void endLuminosityBlock(LuminosityBlock&);
     virtual void beginRun(Run&);
     virtual void endRun(Run&);
-    virtual boost::shared_ptr<FileBlock> readFile_();
+    virtual std::unique_ptr<FileBlock> readFile_();
     virtual void closeFile_();
 
     virtual ItemType getNextItemType();
@@ -112,6 +113,8 @@ namespace edm {
 
     // To test exception throws from sources
     int whenToThrow_;
+
+    HistoryAppender historyAppender_;
   };
 }
 #endif

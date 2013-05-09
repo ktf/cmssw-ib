@@ -4,13 +4,9 @@
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#ifdef EDM_LM_DEBUG
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#ifdef EDM_ML_DEBUG
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
@@ -47,7 +43,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
   
   
   
-#ifdef EDM_LM_DEBUG
+#ifdef EDM_ML_DEBUG
   LogDebug("TrackFitters") << "KFTrajectorySmoother::trajectories starting with " << avtm.size() << " HITS\n";
   for (unsigned int j=0;j<avtm.size();j++) { 
     if (avtm[j].recHit()->det()) 
@@ -56,7 +52,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
     else
       LogTrace("TrackFitters") << "hit #:" << j+1 << " Hit with no Det information";
   }
-#endif // EDM_LM_DEBUG
+#endif // EDM_ML_DEBUG
   
   
   TSOS predTsos = avtm.back().forwardPredictedState();
@@ -92,7 +88,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
 
     if(hit->isValid()) {
  
-#ifdef EDM_LM_DEBUG
+#ifdef EDM_ML_DEBUG
       LogDebug("TrackFitters")
 	<< "----------------- HIT #" << hitcounter << " (VALID)-----------------------\n"
 	<< "HIT IS AT R   " << hit->globalPosition().perp() << "\n"
@@ -109,19 +105,19 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
       
       if(hitId.det() == DetId::Tracker) {
 	if (hitId.subdetId() == StripSubdetector::TIB )  
-	  LogTrace("TrackFitters") << " I am TIB " << TIBDetId(hitId).layer();
+	  LogTrace("TrackFitters") << " I am TIB " << tTopo->tibLayer(hitId);
 	else if (hitId.subdetId() == StripSubdetector::TOB ) 
-	  LogTrace("TrackFitters") << " I am TOB " << TOBDetId(hitId).layer();
+	  LogTrace("TrackFitters") << " I am TOB " << tTopo->tobLayer(hitId);
 	else if (hitId.subdetId() == StripSubdetector::TEC ) 
-	  LogTrace("TrackFitters") << " I am TEC " << TECDetId(hitId).wheel();
+	  LogTrace("TrackFitters") << " I am TEC " << tTopo->tecWheel(hitId);
 	else if (hitId.subdetId() == StripSubdetector::TID ) 
-	  LogTrace("TrackFitters") << " I am TID " << TIDDetId(hitId).wheel();
+	  LogTrace("TrackFitters") << " I am TID " << tTopo->tidWheel(hitId);
 	else if (hitId.subdetId() == StripSubdetector::TID ) 
-	  LogTrace("TrackFitters") << " I am TID " << TIDDetId(hitId).wheel();
+	  LogTrace("TrackFitters") << " I am TID " << tTopo->tidWheel(hitId);
 	else if (hitId.subdetId() == (int) PixelSubdetector::PixelBarrel ) 
-	  LogTrace("TrackFitters") << " I am PixBar " << PXBDetId(hitId).layer();
+	  LogTrace("TrackFitters") << " I am PixBar " << tTopo->pxbLayer(hitId);
 	else if (hitId.subdetId() == (int) PixelSubdetector::PixelEndcap )
-	  LogTrace("TrackFitters") << " I am PixFwd " << PXFDetId(hitId).disk();
+	  LogTrace("TrackFitters") << " I am PixFwd " << tTopo->pxfDisk(hitId);
 	else 
 	  LogTrace("TrackFitters") << " UNKNOWN TRACKER HIT TYPE ";
       }
@@ -137,7 +133,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
       }
       else
 	LogTrace("TrackFitters") << " UNKNOWN HIT TYPE ";
-#endif //EDM_LM_DEBUG
+#endif //EDM_ML_DEBUG
       
       
       
