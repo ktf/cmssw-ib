@@ -1,68 +1,54 @@
-#include "Reflex/Type.h"
-
+#include "FWCore/Utilities/interface/MemberWithDict.h"
 #include "FWCore/Utilities/interface/ObjectWithDict.h"
-#include "FWCore/Utilities/interface/TypeWithDict.h"
 
 namespace edm {
 
-  ObjectWithDict::ObjectWithDict(TypeWithDict const& type) : object_(type.type_.Construct()) {}
-
-  ObjectWithDict::ObjectWithDict(TypeWithDict const& type,
-                                 TypeWithDict const& signature,
-                                 std::vector<void*> const& values) : object_(type.type_.Construct(signature.type_, values)) {}
-
-  ObjectWithDict::ObjectWithDict(TypeWithDict const& type, void* address) : object_(type.type_, address) {}
-
-  ObjectWithDict::ObjectWithDict(std::type_info const& typeID, void* address) : object_(Reflex::Type::ByTypeInfo(typeID), address) {}
-
-  std::string
-  ObjectWithDict::typeName() const {
-    return object_.TypeOf().TypeInfo().name();
+  ObjectWithDict::ObjectWithDict() :
+    type_(),
+    address_(nullptr) {
   }
 
-  bool
-  ObjectWithDict::isPointer() const {
-    return object_.TypeOf().IsPointer();
+  ObjectWithDict
+  ObjectWithDict::byType(TypeWithDict const& type) {
+    ObjectWithDict obj(type.construct());
+    return obj;
   }
 
-  bool
-  ObjectWithDict::isReference() const {
-    return object_.TypeOf().IsReference();
+  ObjectWithDict::ObjectWithDict(TypeWithDict const& type, void* address) :
+    type_(type),
+    address_(address) {
   }
 
-  bool
-  ObjectWithDict::isTypedef() const {
-    return object_.TypeOf().IsTypedef();
+  ObjectWithDict::ObjectWithDict(std::type_info const& typeID, void* address) :
+    type_(TypeWithDict(typeID)),
+    address_(address) {
   }
 
-  TypeWithDict
+  TypeWithDict const&
   ObjectWithDict::typeOf() const {
-    return TypeWithDict(object_.TypeOf());
-  }
-
-  TypeWithDict
-  ObjectWithDict::toType() const {
-    return TypeWithDict(object_.TypeOf().ToType());
-  }
-
-  TypeWithDict
-  ObjectWithDict::finalType() const {
-    return TypeWithDict(object_.TypeOf().FinalType());
+    return type_;
   }
 
   TypeWithDict
   ObjectWithDict::dynamicType() const {
-    return TypeWithDict(object_.DynamicType());
+    if(!type_.isVirtual()) {
+      return type_;
+    }
+    struct Dummy_t {virtual ~Dummy_t() {} };
+    return TypeWithDict(typeid(*(Dummy_t*)address_));
+  }
+
+  ObjectWithDict::operator bool() const {
+    return bool(type_) && address_ != nullptr;
+  }
+
+  void*
+  ObjectWithDict::address() const {
+    return address_;
   }
 
   ObjectWithDict
-  ObjectWithDict::castObject(TypeWithDict const& type) const {
-    return ObjectWithDict(object_.CastObject(type.type_));
+  ObjectWithDict::get(std::string const& memberName) const {
+    return type_.dataMemberByName(memberName).get(*this);
   }
-
-  ObjectWithDict
-  ObjectWithDict::construct() const {
-    return ObjectWithDict(object_.TypeOf().Construct());
-  }
-
 }

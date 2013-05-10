@@ -60,9 +60,9 @@ namespace edm {
   StreamerInputSource::~StreamerInputSource() {}
 
   // ---------------------------------------
-  boost::shared_ptr<FileBlock>
+  std::unique_ptr<FileBlock>
   StreamerInputSource::readFile_() {
-    return boost::shared_ptr<FileBlock>(new FileBlock);
+    return std::unique_ptr<FileBlock>(new FileBlock);
   }
 
   void
@@ -206,7 +206,7 @@ namespace edm {
          << eventView.eventLength() << " "
          << eventView.eventData()
          << std::endl;
-    EventSourceSentry(*this);
+    EventSourceSentry sentry(*this);
     // uncompress if we need to
     // 78 was a dummy value (for no uncompressed) - should be 0 for uncompressed
     // need to get rid of this when 090 MTCC streamers are gotten rid of
@@ -301,13 +301,13 @@ namespace edm {
         ProductProvenance productProvenance(spi->branchID(), *spi->parents());
 
         if(spi->prod() != 0) {
-          FDEBUG(10) << "addgroup next " << spi->branchID() << std::endl;
+          FDEBUG(10) << "addproduct next " << spi->branchID() << std::endl;
           eventPrincipal.putOnRead(branchDesc, spi->prod(), productProvenance);
-          FDEBUG(10) << "addgroup done" << std::endl;
+          FDEBUG(10) << "addproduct done" << std::endl;
         } else {
-          FDEBUG(10) << "addgroup empty next " << spi->branchID() << std::endl;
+          FDEBUG(10) << "addproduct empty next " << spi->branchID() << std::endl;
           eventPrincipal.putOnRead(branchDesc, spi->prod(), productProvenance);
-          FDEBUG(10) << "addgroup empty done" << std::endl;
+          FDEBUG(10) << "addproduct empty done" << std::endl;
         }
         spi->clear();
     }

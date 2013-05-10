@@ -47,6 +47,7 @@ namespace edm {
   class EventSetup;
 }
 
+class TrackerTopology;
 
 class SiTrackerGaussianSmearingRecHitConverter : public edm::EDProducer
 {
@@ -56,18 +57,24 @@ class SiTrackerGaussianSmearingRecHitConverter : public edm::EDProducer
   virtual ~SiTrackerGaussianSmearingRecHitConverter();
   
   //--- The top-level event method.
-  virtual void produce(edm::Event& e, const edm::EventSetup& c);
+  virtual void produce(edm::Event& e, const edm::EventSetup& c) override;
   
   // Begin Run
-  virtual void beginRun(edm::Run & run, const edm::EventSetup & es);
+  virtual void beginRun(edm::Run const& run, const edm::EventSetup & es) override;
   
-  void smearHits(MixCollection<PSimHit>& input,
+  //  void smearHits(MixCollection<PSimHit>& input,
+  void smearHits(const edm::PSimHitContainer& input,
+  //  void smearHits(edm::Handle<std::vector<PSimHit> >& input,
                  std::map<unsigned, edm::OwnVector<SiTrackerGSRecHit2D> >& theRecHits,
-                 std::map<unsigned, edm::OwnVector<FastTrackerCluster> >& theClusters);
+                 std::map<unsigned, edm::OwnVector<FastTrackerCluster> >& theClusters,
+		 const TrackerTopology *tTopo);
 
  void  matchHits( std::map<unsigned, edm::OwnVector<SiTrackerGSRecHit2D> >& theRecHits, 
-		  std::map<unsigned, edm::OwnVector<SiTrackerGSMatchedRecHit2D> >& matchedMap,
-		  MixCollection<PSimHit>& simhits);
+		  std::map<unsigned, edm::OwnVector<SiTrackerGSMatchedRecHit2D> >& matchedMap);//,
+		  //		  MixCollection<PSimHit>& simhits);
+   //		  const edm::PSimHitContainer& simhits);
+		  //		  std::vector<PSimHit>& simhits); 
+		  //		  edm::Handle<std::vector<PSimHit> >& simhits);
 
   void loadRecHits(std::map<unsigned,edm::OwnVector<SiTrackerGSRecHit2D> >& theRecHits, 
 		   SiTrackerGSRecHit2DCollection& theRecHitCollection) const;
@@ -84,7 +91,8 @@ class SiTrackerGaussianSmearingRecHitConverter : public edm::EDProducer
 			Local3DPoint& position , 
 			LocalError& error, 
 			unsigned& alphaMult, 
-			unsigned& betaMult);
+			unsigned& betaMult,
+			const TrackerTopology *tTopo);
   //
   void loadPixelData();
   //
@@ -93,7 +101,8 @@ class SiTrackerGaussianSmearingRecHitConverter : public edm::EDProducer
   //
   //
   // parameters
-  std::vector<edm::InputTag> trackerContainers;
+  //  std::vector<edm::InputTag> trackerContainers;
+  edm::InputTag inputSimHits;
   edm::ParameterSet pset_;
   double deltaRaysPCut; // GeV/c
   bool trackingPSimHits; // in case it is true make RecHit = replica of PSimHit without errors (1 um)
@@ -232,7 +241,8 @@ class SiTrackerGaussianSmearingRecHitConverter : public edm::EDProducer
   //  std::map< DetId, edm::OwnVector<SiTrackerGSRecHit2D> > temporaryRecHits;
 
   // Local correspondence between RecHits and SimHits
-  typedef MixCollection<PSimHit>::iterator SimHiterator;
+  //  typedef MixCollection<PSimHit>::iterator SimHiterator;
+  typedef edm::PSimHitContainer::const_iterator SimHiterator;
   std::vector<SimHiterator> correspondingSimHit;
 
   // The random engine

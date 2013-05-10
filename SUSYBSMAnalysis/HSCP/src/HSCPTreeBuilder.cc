@@ -13,7 +13,7 @@
 //
 // Original Author:  Loic QUERTENMONT
 //         Created:  Thu Mar 11 12:19:07 CEST 2010
-// $Id: HSCPTreeBuilder.cc,v 1.7 2010/12/16 17:08:25 querten Exp $
+// $Id: HSCPTreeBuilder.cc,v 1.8 2012/12/26 22:12:10 wmtan Exp $
 //
 
 
@@ -59,10 +59,6 @@
 #include "DataFormats/SiStripDetId/interface/SiStripSubStructure.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"

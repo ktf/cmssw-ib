@@ -1,5 +1,5 @@
 //
-// $Id: PATUserDataHelper.h,v 1.8 2010/02/20 21:00:13 wmtan Exp $
+// $Id: PATUserDataHelper.h,v 1.9 2013/02/27 23:26:56 wmtan Exp $
 //
 
 #ifndef PhysicsTools_PatAlgos_PATUserDataHelper_h
@@ -23,7 +23,7 @@
 	    This also can add "in situ" string-parser-based methods directly. 
 
   \author   Salvatore Rappoccio
-  \version  $Id: PATUserDataHelper.h,v 1.8 2010/02/20 21:00:13 wmtan Exp $
+  \version  $Id: PATUserDataHelper.h,v 1.9 2013/02/27 23:26:56 wmtan Exp $
 */
 
 
@@ -125,7 +125,7 @@ PATUserDataHelper<ObjectType>::PATUserDataHelper(const edm::ParameterSet & iConf
 template<class ObjectType>
 void PATUserDataHelper<ObjectType>::add(ObjectType & patObject,
 					edm::Event const & iEvent, 
-					const edm::EventSetup & iSetup ) 
+					const edm::EventSetup& iSetup) 
 {
 
   // Add "complex" user data to the PAT object

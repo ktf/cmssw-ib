@@ -10,7 +10,7 @@ RootInputFileSequence: This is an InputSource
 #include "InputType.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/GroupSelectorRules.h"
+#include "FWCore/Framework/interface/ProductSelectorRules.h"
 #include "FWCore/Framework/interface/ProcessingController.h"
 #include "FWCore/Sources/interface/EventSkipperByID.h"
 #include "FWCore/Sources/interface/VectorInputSource.h"
@@ -49,7 +49,7 @@ namespace edm {
     boost::shared_ptr<LuminosityBlockPrincipal> readLuminosityBlock_(boost::shared_ptr<LuminosityBlockPrincipal> lumiPrincipal);
     boost::shared_ptr<RunAuxiliary> readRunAuxiliary_();
     boost::shared_ptr<RunPrincipal> readRun_(boost::shared_ptr<RunPrincipal> runPrincipal);
-    boost::shared_ptr<FileBlock> readFile_();
+    std::unique_ptr<FileBlock> readFile_();
     void closeFile_();
     void endJob();
     InputSource::ItemType getNextItemType();
@@ -108,7 +108,7 @@ namespace edm {
     unsigned int treeCacheSize_;
     int const treeMaxVirtualSize_;
     RunNumber_t setRun_;
-    GroupSelectorRules groupSelectorRules_;
+    ProductSelectorRules productSelectorRules_;
     boost::shared_ptr<DuplicateChecker> duplicateChecker_;
     bool dropDescendants_;
     bool labelRawDataLikeMC_;

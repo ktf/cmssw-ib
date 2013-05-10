@@ -86,10 +86,10 @@ namespace edm {
                            processConfiguration.get());
 
       areg->preModuleConstructionSignal_(md);
-      std::auto_ptr<EDProducer> producer(new TriggerResultInserter(*trig_pset, trptr));
+      std::unique_ptr<EDProducer> producer(new TriggerResultInserter(*trig_pset, trptr));
       areg->postModuleConstructionSignal_(md);
 
-      Schedule::WorkerPtr ptr(new WorkerT<EDProducer>(producer, md, work_args));
+      Schedule::WorkerPtr ptr(new WorkerT<EDProducer>(std::move(producer), md, work_args));
       ptr->setActivityRegistry(areg);
       return ptr;
     }
@@ -164,8 +164,8 @@ namespace edm {
             throw Exception(errors::Configuration, "EDAlias does not match data\n")
               << "There are no products of type '" << friendlyClassName << "'\n"
               << "with module label '" << moduleLabel << "' and instance name '" << productInstanceName << "'.\n";
-            }
           }
+        }
       }
 
       std::string const& theInstanceAlias(instanceAlias == star ? productInstanceName : instanceAlias);
@@ -187,8 +187,18 @@ namespace edm {
             << "the other has module label '" << iter->second.moduleLabel_ << "' and product instance name '" << iter->second.productInstanceName_ << "'.\n";
         }
       } else {
-        aliasMap.insert(std::make_pair(key, aliasKey));
-        aliasKeys.insert(std::make_pair(aliasKey, key));
+        auto prodIter = preg.productList().find(key);
+        if(prodIter != preg.productList().end()) {
+          if (!prodIter->second.produced()) {
+            throw Exception(errors::Configuration, "EDAlias\n")
+              << "The module label alias '" << alias << "' and product instance alias '" << theInstanceAlias << "'\n"
+              << "are used for a product of type '" << friendlyClassName << "'\n"
+              << "with module label '" << moduleLabel << "' and product instance name '" << productInstanceName << "',\n"
+              << "An EDAlias can only be used for products produced in the current process. This one is not.\n";
+          }
+          aliasMap.insert(std::make_pair(key, aliasKey));
+          aliasKeys.insert(std::make_pair(aliasKey, key));
+        }
       }
     }
 
@@ -292,7 +302,7 @@ namespace edm {
     wantSummary_(tns.wantSummary()),
     total_events_(),
     total_passed_(),
-    stopwatch_(wantSummary_? new RunStopwatch::StopwatchPointer::element_type : static_cast<RunStopwatch::StopwatchPointer::element_type*> (0)),
+    stopwatch_(wantSummary_? new RunStopwatch::StopwatchPointer::element_type : static_cast<RunStopwatch::StopwatchPointer::element_type*> (nullptr)),
     unscheduled_(new UnscheduledCallProducer),
     endpathsAreActive_(true) {
 
@@ -361,8 +371,8 @@ namespace edm {
           WorkerParams params(proc_pset, modulePSet, preg,
                               processConfiguration, *act_table_);
           Worker* newWorker(worker_reg_.getWorker(params, *itLabel));
-          if (dynamic_cast<WorkerT<EDProducer>*>(newWorker) ||
-              dynamic_cast<WorkerT<EDFilter>*>(newWorker)) {
+          if (newWorker->moduleType() == Worker::kProducer ||
+              newWorker->moduleType() == Worker::kFilter) {
             unscheduledLabels.insert(*itLabel);
             unscheduled_->addWorker(newWorker);
             //add to list so it gets reset each new event
@@ -434,11 +444,13 @@ namespace edm {
     limitOutput(proc_pset, branchIDListHelper.branchIDLists());
 
     loadMissingDictionaries();
+
     preg.setFrozen();
 
     for (AllOutputWorkers::iterator i = all_output_workers_.begin(), e = all_output_workers_.end();
          i != e; ++i) {
       (*i)->setEventSelectionInfo(outputModulePathPositions, preg.anyProductProduced());
+      (*i)->selectProducts(preg);
     }
 
     // Sanity check: make sure nobody has added a worker after we've
@@ -685,7 +697,7 @@ namespace edm {
            iLabel != iEnd; ++iLabel) {
         if (binary_search_string(labelsToBeDropped, *iLabel)) {
           if (binary_search_string(outputModuleLabels, *iLabel)) {
-            outputModulePathPositions[*iLabel].push_back(std::pair<std::string, int>(*iEndPath, iSave - iBegin));
+            outputModulePathPositions[*iLabel].emplace_back(*iEndPath, iSave - iBegin);
           }
         } else {
           if (iSave != iLabel) {
@@ -815,7 +827,7 @@ namespace edm {
 
       WorkerParams params(proc_pset, modpset, preg, processConfiguration, *act_table_);
       Worker* worker = worker_reg_.getWorker(params, moduleLabel);
-      if (ignoreFilters && filterAction != WorkerInPath::Ignore && dynamic_cast<WorkerT<EDFilter>*>(worker)) {
+      if (ignoreFilters && filterAction != WorkerInPath::Ignore && worker->moduleType()==Worker::kFilter) {
         // We have a filter on an end path, and the filter is not explicitly ignored.
         // See if the filter is allowed.
         std::vector<std::string> allowed_filters = proc_pset.getUntrackedParameter<vstring>("@filters_on_endpaths");
@@ -829,8 +841,7 @@ namespace edm {
             << "or explicitly ignore it in the configuration by using cms.ignore().\n";
         }
       }
-      WorkerInPath w(worker, filterAction);
-      tmpworkers.push_back(w);
+      tmpworkers.emplace_back(worker, filterAction);
     }
 
     out.swap(tmpworkers);
@@ -1277,7 +1288,16 @@ namespace edm {
     for_all(all_workers_, boost::bind(&Worker::respondToCloseOutputFiles, _1, boost::cref(fb)));
   }
 
-  void Schedule::beginJob() {
+  void Schedule::beginJob(ProductRegistry const& iRegistry) {
+    auto const runLookup = iRegistry.productLookup(InRun);
+    auto const lumiLookup = iRegistry.productLookup(InLumi);
+    auto const eventLookup = iRegistry.productLookup(InEvent);
+    for(auto & worker: all_workers_) {
+      worker->updateLookup(InRun,*runLookup);
+      worker->updateLookup(InLumi,*lumiLookup);
+      worker->updateLookup(InEvent,*eventLookup);
+    }
+    
     for_all(all_workers_, boost::bind(&Worker::beginJob, _1));
     loadMissingDictionaries();
   }

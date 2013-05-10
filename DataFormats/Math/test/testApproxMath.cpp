@@ -1,6 +1,6 @@
 #include "DataFormats/Math/interface/approx_exp.h"
 #include "DataFormats/Math/interface/approx_log.h"
-
+#include "DataFormats/Math/interface/approx_erf.h"
 #include<cstdio>
 #include<cstdlib>
 #include<iostream>
@@ -95,12 +95,80 @@ void accTest(STD stdf, APPROX approx, int degree) {
   std::cout << "maxdiff / diff >127 / diff >16393 " << maxdiff << " / " << n127<< " / " << n16393<< std::endl;
 }
 
+template<typename STD, typename APPROX>
+void accuTest(STD stdf, APPROX approx, const char * name, float mm=std::numeric_limits<float>::min(), float mx=std::numeric_limits<float>::max()) {
+  using namespace approx_math;
+  std::cout << std::endl << "launching  exhaustive test for " << name << std::endl;
+  binary32 x,pend, r,ref;
+  int maxdiff=0;
+  int n127=0;
+  int n16393=0;
+  float ad=0., rd=0;
+  x.f=mm;
+  x.ui32++;
+  pend.f=mx;
+  pend.ui32--;
+  std::cout << "limits " << x.f << " " << pend.f << " " << pend.ui32-x.ui32 << std::endl;
+  while(x.ui32<pend.ui32) {
+    x.ui32++;
+    r.f=approx(x.f);
+    ref.f=stdf(x.f); // double-prec one  (no hope with -fno-math-errno)
+    ad = std::max(ad,std::abs(r.f-ref.f));
+    rd = std::max(rd,std::abs((r.f/ref.f)-1.f));
+    int d=abs(r.i32-ref.i32);
+    if(d>maxdiff) {
+      // std::cout << "new maxdiff for x=" << x.f << " : " << d << std::endl;
+      maxdiff=d;
+	}
+    if (d>127) ++n127;
+    if (d>16393) ++n16393;
+  }
+  std::cout << "absdiff / reldeff/ maxdiff / diff >127 / diff >16393 :  " << ad << " / " << rd << " / "  
+	    << maxdiff << " / " << n127<< " / " << n16393<< std::endl;
+}
+
+
+
 
 // performance test
+#ifndef __arm__
 #include <x86intrin.h>
-inline volatile unsigned long long rdtsc() {
- return __rdtsc();
+#include <cpuid.h>
+#ifdef __clang__
+bool has_rdtscp() { return true;}
+/** CPU cycles since processor startup */
+inline uint64_t rdtsc() {
+uint32_t lo, hi;
+/* We cannot use "=A", since this would use %rax on x86_64 */
+__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+return (uint64_t)hi << 32 | lo;
 }
+#else
+// CPUID, EAX = 0x80000001, EDX values
+#ifndef bit_RDTSCP
+#define bit_RDTSCP          (1 << 27)
+#endif
+namespace {
+  inline
+  bool has_rdtscp() {
+    unsigned int eax, ebx, ecx, edx;
+    if (__get_cpuid(0x80000001, & eax, & ebx, & ecx, & edx))
+      return (edx & bit_RDTSCP) != 0;
+    else
+      return false;
+  }
+  unsigned int rdtscp_val=0;
+  inline volatile unsigned long long rdtsc() {
+    return __rdtscp(&rdtscp_val);
+  }
+}
+#endif
+#else  // arm
+namespace {
+inline bool has_rdtscp() { return false;}
+inline volatile unsigned long long rdtsc() {return 0;}
+}
+#endif // arm
 
 
 template<int DEGREE, int WHAT>
@@ -152,6 +220,7 @@ void operator()(unsigned long long & t) const{
 
 template<int DEGREE, int WHAT=1>
 void perf() {
+  if (!has_rdtscp()) return; 
   Measure<DEGREE,WHAT> measure;
   using namespace approx_math;
   unsigned long long t=0;
@@ -208,6 +277,10 @@ int main() {
   accTest(::log,approx_logf<2>,2);
   accTest(::log,approx_logf<4>,4);
   accTest(::log,approx_logf<8>,8);
+
+
+  accuTest(::erf,approx_erf, "erf", .01, 8  );
+
 
   return 0;
 }

@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "DataFormats/Provenance/interface/ModuleDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSetfwd.h"
+#include "FWCore/Framework/interface/EDConsumerBase.h"
 
 #include <string>
 
@@ -11,13 +12,13 @@
 
 namespace edm {
 
-  class EDAnalyzer {
+  class EDAnalyzer : public EDConsumerBase {
   public:
     template <typename T> friend class WorkerT;
     typedef EDAnalyzer ModuleType;
     typedef WorkerT<EDAnalyzer> WorkerType;
 
-    EDAnalyzer() : moduleDescription_(), current_context_(0) {}
+    EDAnalyzer() : moduleDescription_(), current_context_(nullptr) {}
     virtual ~EDAnalyzer();
     
     std::string workerType() const {return "WorkerT<EDAnalyzer>";}
