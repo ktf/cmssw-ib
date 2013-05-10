@@ -9,8 +9,12 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/RectangularPixelTopology.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TECDetId.h" 
 //
 
 // PSimHits
@@ -125,7 +129,7 @@ FamosRecHitAnalysis::FamosRecHitAnalysis(edm::ParameterSet const& pset) :
   thePixelForwardResolutionFile = new TFile ( edm::FileInPath( thePixelForwardResolutionFileName ).fullPath().c_str() , "READ" );
 }
 
-void FamosRecHitAnalysis::beginRun(edm::Run const&, const edm::EventSetup& setup) {
+void FamosRecHitAnalysis::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   // Initialize the Tracker Geometry
   edm::ESHandle<TrackerGeometry> theGeometry;
   setup.get<TrackerDigiGeometryRecord> ().get (theGeometry);
@@ -693,12 +697,6 @@ void FamosRecHitAnalysis::analyze(const edm::Event& event, const edm::EventSetup
 #endif
   //
 
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHand;
-  setup.get<IdealGeometryRecord>().get(tTopoHand);
-  const TrackerTopology *tTopo=tTopoHand.product();
-
-
   // Get PSimHit's of the Event
   
   edm::Handle<CrossingFrame<PSimHit> > cf_simhit; 
@@ -885,7 +883,7 @@ void FamosRecHitAnalysis::analyze(const edm::Event& event, const edm::EventSetup
                     hist_dedx_alpha, hist_dedx_beta,
                     mult_alpha , mult_beta ,
                     alpha      , beta      ,
-                    hasBigPixelInX, hasBigPixelInY, tTopo );
+                    hasBigPixelInX, hasBigPixelInY );
 	//
 
 	if(hist_x != 0) {
@@ -1028,8 +1026,7 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
                                       TH1F*& hist_dedx_alpha, TH1F*& hist_dedx_beta,
                                       unsigned int mult_alpha , unsigned int mult_beta ,
                                       double       alpha      , double       beta,      
-                                      const bool hasBigPixelInX, const bool hasBigPixelInY,
-				      const TrackerTopology *tTopo) {
+                                      const bool hasBigPixelInX, const bool hasBigPixelInY ) {
   int subdetid = ((rawid>>25)&0x7);
 
   switch (subdetid) {
@@ -1044,13 +1041,13 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
         iAlpha+=histos_PXB_alpha.size()/2;
       if(hasBigPixelInY)
         iBeta+=histos_PXB_beta.size()/2;
-      
+      PXBDetId module(rawid);
       hist_alpha       = histos_PXB_alpha[iAlpha];
       hist_beta        = histos_PXB_beta[iBeta];
       hist_dedx_alpha  = histos_PXB_dedx_alpha[iAlpha];
       hist_dedx_beta   = histos_PXB_dedx_beta[iBeta];
 #ifdef rrDEBUG
-      unsigned int theLayer = tTopo->pxbLayer(rawid);
+      unsigned int theLayer = module.layer();
       std::cout << "\tTracker subdetector " << subdetid << " PXB Layer " << theLayer << std::endl;
 #endif
   //
@@ -1126,13 +1123,13 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
         iAlpha+=histos_PXF_alpha.size()/2;
       if(hasBigPixelInY)
         iBeta+=histos_PXF_beta.size()/2;
-      
+      PXFDetId module(rawid);
       hist_alpha       = histos_PXF_alpha[iAlpha];
       hist_beta        = histos_PXF_beta[iBeta];
       hist_dedx_alpha  = histos_PXF_dedx_alpha[iAlpha];
       hist_dedx_beta   = histos_PXF_dedx_beta[iBeta];
 #ifdef rrDEBUG
-      unsigned int theDisk = tTopo->pxfDisk(rawid);
+      unsigned int theDisk = module.disk();
       std::cout << "\tTracker subdetector " << subdetid << " PXF Disk " << theDisk << std::endl;
 #endif
       //
@@ -1200,8 +1197,8 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
     //
   case 3:
     {
-      
-      unsigned int theLayer = tTopo->tibLayer(rawid);
+      TIBDetId module(rawid);
+      unsigned int theLayer = module.layer();
       hist_x = histos_TIB_x[theLayer-1];
       hist_y = histos_TIB_y[theLayer-1];
       hist_z = histos_TIB_z[theLayer-1];
@@ -1218,8 +1215,8 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
     // TID
   case 4:
     {
-      
-      unsigned int theRing = tTopo->tidRing(rawid);
+      TIDDetId module(rawid);
+      unsigned int theRing = module.ring();
       hist_x = histos_TID_x[theRing-1];
       hist_y = histos_TID_y[theRing-1];
       hist_z = histos_TID_z[theRing-1];
@@ -1236,8 +1233,8 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
     // TOB
   case 5:
     {
-      
-      unsigned int theLayer = tTopo->tobLayer(rawid);
+      TOBDetId module(rawid);
+      unsigned int theLayer = module.layer();
       hist_x = histos_TOB_x[theLayer-1];
       hist_y = histos_TOB_y[theLayer-1];
       hist_z = histos_TOB_z[theLayer-1];
@@ -1254,8 +1251,8 @@ void FamosRecHitAnalysis::chooseHist( unsigned int rawid ,
     // TEC
   case 6:
     {
-      
-      unsigned int theRing = tTopo->tecRing(rawid);
+      TECDetId module(rawid);
+      unsigned int theRing = module.ring();
       hist_x = histos_TEC_x[theRing-1];
       hist_y = histos_TEC_y[theRing-1];
       hist_z = histos_TEC_z[theRing-1];

@@ -53,4 +53,3 @@ namespace helper {
 }
 
 #endif
-

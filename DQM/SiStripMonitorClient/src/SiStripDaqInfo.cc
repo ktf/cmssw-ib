@@ -9,8 +9,6 @@
 #include "DQM/SiStripMonitorClient/interface/SiStripUtility.h"
 #include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
 
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
-
 //Run Info
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
 #include "CondFormats/RunInfo/interface/RunSummary.h"
@@ -118,7 +116,7 @@ void SiStripDaqInfo::beginRun(edm::Run const& run, edm::EventSetup const& eSetup
 
     eSetup.get<SiStripFedCablingRcd>().get(fedCabling_); 
 
-    readFedIds(fedCabling_, eSetup);
+    readFedIds(fedCabling_);
   }
   if (!bookedStatus_) bookStatus();  
   if (nFedTotal == 0) {
@@ -149,7 +147,7 @@ void SiStripDaqInfo::beginRun(edm::Run const& run, edm::EventSetup const& eSetup
       if (nFEDConnected > 0) {
 	DaqFraction_->Reset();
 	DaqFraction_->Fill(nFEDConnected/nFedTotal);
-	readSubdetFedFractions(FedsInIds,eSetup);
+	readSubdetFedFractions(FedsInIds);
       }
     }
   } 
@@ -175,13 +173,7 @@ void SiStripDaqInfo::endRun(edm::Run const& run, edm::EventSetup const& eSetup){
 //
 // -- Read Sub Detector FEDs
 //
-void SiStripDaqInfo::readFedIds(const edm::ESHandle<SiStripFedCabling>& fedcabling, edm::EventSetup const& iSetup) {
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
+void SiStripDaqInfo::readFedIds(const edm::ESHandle<SiStripFedCabling>& fedcabling) {
   const std::vector<uint16_t>& feds = fedCabling_->feds(); 
 
   nFedTotal = feds.size();
@@ -192,7 +184,7 @@ void SiStripDaqInfo::readFedIds(const edm::ESHandle<SiStripFedCabling>& fedcabli
       uint32_t detId = iconn->detId();
       if (detId == 0 || detId == 0xFFFFFFFF)  continue;
       std::string subdet_tag;
-      SiStripUtility::getSubDetectorTag(detId,subdet_tag,tTopo);
+      SiStripUtility::getSubDetectorTag(detId,subdet_tag);         
       subDetFedMap[subdet_tag].push_back(*ifed); 
       break;
     }
@@ -201,12 +193,7 @@ void SiStripDaqInfo::readFedIds(const edm::ESHandle<SiStripFedCabling>& fedcabli
 //
 // -- Fill Subdet FEDIds 
 //
-void SiStripDaqInfo::readSubdetFedFractions(std::vector<int>& fed_ids, edm::EventSetup const& iSetup) {
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
+void SiStripDaqInfo::readSubdetFedFractions(std::vector<int>& fed_ids) {
 
   const int siStripFedIdMin = FEDNumbering::MINSiStripFEDID;
   const int siStripFedIdMax = FEDNumbering::MAXSiStripFEDID; 
@@ -241,7 +228,7 @@ void SiStripDaqInfo::readSubdetFedFractions(std::vector<int>& fed_ids, edm::Even
 	  break;
 	}
       }
-      if (!fedid_found) findExcludedModule((*iv),tTopo);   
+      if (!fedid_found) findExcludedModule((*iv));   
     }
     int nFedsConnected   = iPos->second.ConnectedFeds;
     int nFedSubDet       = subdetIds.size();
@@ -254,7 +241,7 @@ void SiStripDaqInfo::readSubdetFedFractions(std::vector<int>& fed_ids, edm::Even
 //
 // -- find Excluded Modules
 //
-void SiStripDaqInfo::findExcludedModule(unsigned short fed_id, const TrackerTopology* tTopo) {
+void SiStripDaqInfo::findExcludedModule(unsigned short fed_id) {
   dqmStore_->cd();
   std::string mdir = "MechanicalView";
   if (!SiStripUtility::goToDir(dqmStore_, mdir)) {
@@ -275,7 +262,7 @@ void SiStripDaqInfo::findExcludedModule(unsigned short fed_id, const TrackerTopo
     if (ichannel == 1) {
       std::string subdet_folder ;
       SiStripFolderOrganizer folder_organizer;
-      folder_organizer.getSubDetFolder(detId,tTopo,subdet_folder);
+      folder_organizer.getSubDetFolder(detId,subdet_folder);
       if (!dqmStore_->dirExists(subdet_folder)) {
 	subdet_folder = mechanical_dir + subdet_folder.substr(subdet_folder.find(mdir)+mdir.size());
       }

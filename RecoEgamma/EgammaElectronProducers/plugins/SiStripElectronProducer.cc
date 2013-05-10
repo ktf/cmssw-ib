@@ -8,7 +8,7 @@
 //
 // Original Author:  
 //         Created:  Fri May 26 16:11:30 EDT 2006
-// $Id: SiStripElectronProducer.cc,v 1.4 2013/01/14 21:33:02 dlange Exp $
+// $Id: SiStripElectronProducer.cc,v 1.2 2007/08/28 01:42:29 ratnik Exp $
 //
 
 // system include files
@@ -19,6 +19,7 @@
 #include "DataFormats/EgammaCandidates/interface/SiStripElectronFwd.h"
 #include "SiStripElectronProducer.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
+#include "DataFormats/RoadSearchCloud/interface/RoadSearchCloudCollection.h"
 #include "DataFormats/TrackCandidate/interface/TrackCandidateCollection.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -132,11 +133,6 @@ SiStripElectronProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
    std::auto_ptr<reco::SiStripElectronCollection> electronOut(new reco::SiStripElectronCollection);
    std::auto_ptr<TrackCandidateCollection> trackCandidateOut(new TrackCandidateCollection);
 
-   //Retrieve tracker topology from geometry
-   edm::ESHandle<TrackerTopology> tTopoHand;
-   iSetup.get<IdealGeometryRecord>().get(tTopoHand);
-   const TrackerTopology *tTopo=tTopoHand.product();
-
    // counter for electron candidates
    int siStripElectCands = 0 ;
 
@@ -149,7 +145,7 @@ SiStripElectronProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
       const reco::SuperCluster* sc = &(*reco::SuperClusterRef(superClusterHandle, i));
       double energy = sc->energy();
 
-      if (algo_p->findElectron(*electronOut, *trackCandidateOut, reco::SuperClusterRef(superClusterHandle, i),tTopo)) {
+      if (algo_p->findElectron(*electronOut, *trackCandidateOut, reco::SuperClusterRef(superClusterHandle, i))) {
 	str << "Supercluster energy: " << energy << ", FOUND an electron." << "\n" << std::endl;
 	 ++siStripElectCands ;
       }

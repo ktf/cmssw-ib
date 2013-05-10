@@ -25,8 +25,6 @@ SiStripQualityHotStripIdentifierRoot::SiStripQualityHotStripIdentifierRoot(const
   UseInputDB_(iConfig.getUntrackedParameter<bool>("UseInputDB",false)),
   conf_(iConfig),
   fp_(iConfig.getUntrackedParameter<edm::FileInPath>("file",edm::FileInPath("CalibTracker/SiStripCommon/data/SiStripDetInfo.dat"))),
-  _tracker(nullptr),
-  tTopo(nullptr),
   filename(iConfig.getUntrackedParameter<std::string>("rootFilename","CondDB_TKCC_20X_v3_hlt_50822.root")),
   dirpath(iConfig.getUntrackedParameter<std::string>("rootDirPath","")),
   calibrationthreshold(iConfig.getUntrackedParameter<uint32_t>("CalibrationThreshold",10000))
@@ -67,7 +65,7 @@ SiStripBadStrip* SiStripQualityHotStripIdentifierRoot::getNewObject(){
     
 	  edm::LogInfo("SiStripQualityHotStripIdentifierRoot") <<" [SiStripQualityHotStripIdentifierRoot::getNewObject] call to SiStripHotStripAlgorithmFromClusterOccupancy"<<std::endl;
 
-	  theIdentifier= new SiStripHotStripAlgorithmFromClusterOccupancy(conf_, tTopo);
+	  theIdentifier= new SiStripHotStripAlgorithmFromClusterOccupancy(conf_);
 	  theIdentifier->setProbabilityThreshold(parameters.getUntrackedParameter<double>("ProbabilityThreshold",1.E-7));
 	  theIdentifier->setMinNumEntries(parameters.getUntrackedParameter<uint32_t>("MinNumEntries",100));
 	  theIdentifier->setMinNumEntriesPerStrip(parameters.getUntrackedParameter<uint32_t>("MinNumEntriesPerStrip",5));
@@ -99,7 +97,7 @@ SiStripBadStrip* SiStripQualityHotStripIdentifierRoot::getNewObject(){
 
 	  edm::LogInfo("SiStripQualityHotStripIdentifierRoot") <<" [SiStripQualityHotStripIdentifierRoot::getNewObject] call to SiStripBadAPVAlgorithmFromClusterOccupancy"<<std::endl;
 
-	  theIdentifier2 = new SiStripBadAPVAlgorithmFromClusterOccupancy(conf_, tTopo);
+	  theIdentifier2 = new SiStripBadAPVAlgorithmFromClusterOccupancy(conf_);
 	  theIdentifier2->setLowOccupancyThreshold(parameters.getUntrackedParameter<double>("LowOccupancyThreshold",5));
 	  theIdentifier2->setHighOccupancyThreshold(parameters.getUntrackedParameter<double>("HighOccupancyThreshold",10));
 	  theIdentifier2->setAbsoluteLowThreshold(parameters.getUntrackedParameter<double>("AbsoluteLowThreshold",0));
@@ -135,7 +133,7 @@ SiStripBadStrip* SiStripQualityHotStripIdentifierRoot::getNewObject(){
     
 	  edm::LogInfo("SiStripQualityHotStripIdentifierRoot") <<" [SiStripQualityHotStripIdentifierRoot::getNewObject] call to SiStripBadAPVandHotStripAlgorithmFromClusterOccupancy"<<std::endl;
 
-	  theIdentifier3= new SiStripBadAPVandHotStripAlgorithmFromClusterOccupancy(conf_, tTopo);
+	  theIdentifier3= new SiStripBadAPVandHotStripAlgorithmFromClusterOccupancy(conf_);
 	  theIdentifier3->setProbabilityThreshold(parameters.getUntrackedParameter<double>("ProbabilityThreshold",1.E-7));
 	  theIdentifier3->setMinNumEntries(parameters.getUntrackedParameter<uint32_t>("MinNumEntries",100));
 	  theIdentifier3->setMinNumEntriesPerStrip(parameters.getUntrackedParameter<uint32_t>("MinNumEntriesPerStrip",5));
@@ -187,11 +185,6 @@ SiStripBadStrip* SiStripQualityHotStripIdentifierRoot::getNewObject(){
 }
 
 void SiStripQualityHotStripIdentifierRoot::algoBeginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  tTopo = tTopoHandle.product();
- 
   iSetup.get<TrackerDigiGeometryRecord> ().get (theTrackerGeom);
   _tracker=&(* theTrackerGeom);
 

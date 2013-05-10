@@ -6,8 +6,6 @@
 
 namespace edm {
 
-  std::string const LuminosityBlock::emptyString_;
-
   LuminosityBlock::LuminosityBlock(LuminosityBlockPrincipal& lbp, ModuleDescription const& md) :
         provRecorder_(lbp, md),
         aux_(lbp.aux()),
@@ -23,14 +21,6 @@ namespace edm {
   LuminosityBlockPrincipal&
   LuminosityBlock::luminosityBlockPrincipal() {
     return dynamic_cast<LuminosityBlockPrincipal&>(provRecorder_.principal());
-  }
-
-  void
-  LuminosityBlock::setConsumer(EDConsumerBase const* iConsumer) {
-    provRecorder_.setConsumer(iConsumer);
-    if(run_) {
-      const_cast<Run*>(run_.get())->setConsumer(iConsumer);
-    }
   }
 
   LuminosityBlockPrincipal const&

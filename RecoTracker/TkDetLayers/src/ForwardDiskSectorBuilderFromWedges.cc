@@ -35,14 +35,15 @@ ForwardDiskSectorBuilderFromWedges::operator()( const vector<const TECWedge*>& w
 				   << phidiff ;
   }
   
-  auto bo = computeBounds( wedges );
+  pair<DiskSectorBounds,GlobalVector> bo = 
+    computeBounds( wedges );
 
   Surface::PositionType pos( bo.second.x(), bo.second.y(), bo.second.z() );
   Surface::RotationType rot = computeRotation( wedges, pos);
   return new BoundDiskSector( pos, rot, bo.first);
 }
 
-pair<DiskSectorBounds*, GlobalVector>
+pair<DiskSectorBounds, GlobalVector>
 ForwardDiskSectorBuilderFromWedges::computeBounds( const vector<const TECWedge*>& wedges) const
 {
 
@@ -90,7 +91,7 @@ ForwardDiskSectorBuilderFromWedges::computeBounds( const vector<const TECWedge*>
   }
   
   GlobalVector pos( rmed*cos(phiPos), rmed*sin(phiPos), zPos);
-  return make_pair(new DiskSectorBounds(rmin,rmax,zmin-zPos,zmax-zPos,phiWin), pos);
+  return make_pair(DiskSectorBounds(rmin,rmax,zmin-zPos,zmax-zPos,phiWin), pos);
 }
 
 Surface::RotationType 

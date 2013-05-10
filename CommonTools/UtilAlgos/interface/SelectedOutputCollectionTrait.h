@@ -47,4 +47,3 @@ namespace helper {
 }
 
 #endif
-

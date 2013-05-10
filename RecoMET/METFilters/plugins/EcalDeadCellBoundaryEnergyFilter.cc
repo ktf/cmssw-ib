@@ -20,7 +20,7 @@
 //
 // Original Author:  Konstantinos Theofilatos, Ulla Gebbert and Christian Sander
 //         Created:  Sat Nov 14 18:43:21 CET 2009
-// $Id: EcalDeadCellBoundaryEnergyFilter.cc,v 1.2 2013/03/15 20:09:34 wmtan Exp $
+// $Id: EcalDeadCellBoundaryEnergyFilter.cc,v 1.1 2012/03/21 14:43:35 lhx Exp $
 //
 //
 
@@ -86,11 +86,11 @@ class EcalDeadCellBoundaryEnergyFilter: public edm::EDFilter {
       float * enNeighboursGap_EB;
       float * enNeighboursGap_EE;
 
-      std::vector<BoundaryInformation> v_enNeighboursGap_EB;
-      std::vector<BoundaryInformation> v_enNeighboursGap_EE;
+      vector<BoundaryInformation> v_enNeighboursGap_EB;
+      vector<BoundaryInformation> v_enNeighboursGap_EE;
 
-      std::vector<BoundaryInformation> v_boundaryInfoDeadCells_EB;
-      std::vector<BoundaryInformation> v_boundaryInfoDeadCells_EE;
+      vector<BoundaryInformation> v_boundaryInfoDeadCells_EB;
+      vector<BoundaryInformation> v_boundaryInfoDeadCells_EE;
 
       EcalBoundaryInfoCalculator<EBDetId> ebBoundaryCalc;
       EcalBoundaryInfoCalculator<EEDetId> eeBoundaryCalc;
@@ -98,8 +98,8 @@ class EcalDeadCellBoundaryEnergyFilter: public edm::EDFilter {
       double maxBoundaryEnergy_;
 
       const bool limitFilterToEB_, limitFilterToEE_;
-      const std::vector<int> limitDeadCellToChannelStatusEB_;
-      const std::vector<int> limitDeadCellToChannelStatusEE_;
+      const vector<int> limitDeadCellToChannelStatusEB_;
+      const vector<int> limitDeadCellToChannelStatusEE_;
 
       const bool enableGap_;
       const bool debug_;
@@ -130,8 +130,8 @@ EcalDeadCellBoundaryEnergyFilter::EcalDeadCellBoundaryEnergyFilter(const edm::Pa
 
    , limitFilterToEB_ (iConfig.getUntrackedParameter<bool> ("limitFilterToEB", false))
    , limitFilterToEE_ (iConfig.getUntrackedParameter<bool> ("limitFilterToEE", false))
-   , limitDeadCellToChannelStatusEB_ (iConfig.getParameter<std::vector<int> > ("limitDeadCellToChannelStatusEB"))
-   , limitDeadCellToChannelStatusEE_ (iConfig.getParameter<std::vector<int> > ("limitDeadCellToChannelStatusEE"))
+   , limitDeadCellToChannelStatusEB_ (iConfig.getParameter<vector<int> > ("limitDeadCellToChannelStatusEB"))
+   , limitDeadCellToChannelStatusEE_ (iConfig.getParameter<vector<int> > ("limitDeadCellToChannelStatusEE"))
 
    , enableGap_ (iConfig.getUntrackedParameter<bool> ("enableGap", false))
    , debug_ (iConfig.getParameter<bool>("debug"))
@@ -154,10 +154,10 @@ EcalDeadCellBoundaryEnergyFilter::EcalDeadCellBoundaryEnergyFilter(const edm::Pa
    v_boundaryInfoDeadCells_EB.clear();
    v_boundaryInfoDeadCells_EE.clear();
 
-   if (skimGap_ && debug_ ) std::cout << "Skim Gap!" << std::endl;
-   if (skimDead_ && debug_ ) std::cout << "Skim Dead!" << std::endl;
+   if (skimGap_ && debug_ ) cout << "Skim Gap!" << endl;
+   if (skimDead_ && debug_ ) cout << "Skim Dead!" << endl;
 
-   if( debug_ ) std::cout << "Constructor EcalAnomalousEvent" << std::endl;
+   if( debug_ ) cout << "Constructor EcalAnomalousEvent" << endl;
 
    produces<bool>();
 
@@ -165,7 +165,7 @@ EcalDeadCellBoundaryEnergyFilter::EcalDeadCellBoundaryEnergyFilter(const edm::Pa
 }
 
 EcalDeadCellBoundaryEnergyFilter::~EcalDeadCellBoundaryEnergyFilter() {
-   //std::cout << "destructor Filter" << std::endl;
+   //cout << "destructor Filter" << endl;
 }
 
 // ------------ method called on each new Event  ------------
@@ -203,14 +203,14 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
    i_EBGap = 0;
    i_EEGap = 0;
 
-   std::vector<DetId> sameFlagDetIds;
+   vector<DetId> sameFlagDetIds;
 
    bool pass = true;
 
    if (!limitFilterToEE_) {
 
       if (debug_)
-         std::cout << "process EB" << std::endl;
+         cout << "process EB" << endl;
 
       for (EcalRecHitCollection::const_iterator hit = EBRecHits->begin(); hit != EBRecHits->end(); ++hit) {
 
@@ -224,14 +224,14 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
          bool passChannelLimitation = false;
 
          // check if hit has a dead neighbour
-         std::vector<int> deadNeighbourStati;
+         vector<int> deadNeighbourStati;
          ebBoundaryCalc.checkRecHitHasDeadNeighbour(*hit, ecalStatus, deadNeighbourStati);
 
          for (int cs = 0; cs < (int) limitDeadCellToChannelStatusEB_.size(); ++cs) {
             int channelAllowed = limitDeadCellToChannelStatusEB_[cs];
 
-            for (std::vector<int>::iterator sit = deadNeighbourStati.begin(); sit != deadNeighbourStati.end(); ++sit) {
-               //std::cout << "Neighbouring dead channel with status: " << *sit << std::endl;
+            for (vector<int>::iterator sit = deadNeighbourStati.begin(); sit != deadNeighbourStati.end(); ++sit) {
+               //cout << "Neighbouring dead channel with status: " << *sit << endl;
                if (channelAllowed == *sit || (channelAllowed < 0 && abs(channelAllowed) <= *sit)) {
                   passChannelLimitation = true;
                   break;
@@ -239,7 +239,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
             }
          }
 
-         for (std::vector<DetId>::iterator it = sameFlagDetIds.begin(); it != sameFlagDetIds.end(); it++) {
+         for (vector<DetId>::iterator it = sameFlagDetIds.begin(); it != sameFlagDetIds.end(); it++) {
             if (currDetId == *it)
                detIdAlreadyChecked = true;
          }
@@ -255,7 +255,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                   ecalStatus, geometry);
 
             // get rechits along gap cluster
-            for (std::vector<DetId>::iterator it = gapinfo.detIds.begin(); it != gapinfo.detIds.end(); it++) {
+            for (vector<DetId>::iterator it = gapinfo.detIds.begin(); it != gapinfo.detIds.end(); it++) {
                sameFlagDetIds.push_back(*it);
             }
 
@@ -265,8 +265,8 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                v_enNeighboursGap_EB.push_back(gapinfo);
 
                if (debug_)
-                  std::cout << "EB: gap cluster energy: " << gapinfo.boundaryEnergy << " deadCells: "
-                        << gapinfo.detIds.size() << std::endl;
+                  cout << "EB: gap cluster energy: " << gapinfo.boundaryEnergy << " deadCells: "
+                        << gapinfo.detIds.size() << endl;
             }
          }
 
@@ -281,7 +281,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                   ecalStatus, geometry);
 
             // get boundary of !kDead rechits arround the dead cluster
-            for (std::vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
+            for (vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
                sameFlagDetIds.push_back(*it);
             }
 
@@ -291,8 +291,8 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                v_boundaryInfoDeadCells_EB.push_back(boundinfo);
 
                if (debug_)
-                  std::cout << "EB: boundary Energy dead RecHit: " << boundinfo.boundaryEnergy << " ET: "
-                        << boundinfo.boundaryET << " deadCells: " << boundinfo.detIds.size() << std::endl;
+                  cout << "EB: boundary Energy dead RecHit: " << boundinfo.boundaryEnergy << " ET: "
+                        << boundinfo.boundaryET << " deadCells: " << boundinfo.detIds.size() << endl;
             }
 
          }
@@ -305,7 +305,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
    if (!limitFilterToEB_) {
 
       if (debug_)
-         std::cout << "process EE" << std::endl;
+         cout << "process EE" << endl;
 
       for (EcalRecHitCollection::const_iterator hit = EERecHits->begin(); hit != EERecHits->end(); ++hit) {
 
@@ -319,14 +319,14 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
          bool passChannelLimitation = false;
 
          // check if hit has a dead neighbour
-         std::vector<int> deadNeighbourStati;
+         vector<int> deadNeighbourStati;
          eeBoundaryCalc.checkRecHitHasDeadNeighbour(*hit, ecalStatus, deadNeighbourStati);
 
          for (int cs = 0; cs < (int) limitDeadCellToChannelStatusEE_.size(); ++cs) {
             int channelAllowed = limitDeadCellToChannelStatusEE_[cs];
 
-            for (std::vector<int>::iterator sit = deadNeighbourStati.begin(); sit != deadNeighbourStati.end(); ++sit) {
-               //std::cout << "Neighbouring dead channel with status: " << *sit << std::endl;
+            for (vector<int>::iterator sit = deadNeighbourStati.begin(); sit != deadNeighbourStati.end(); ++sit) {
+               //cout << "Neighbouring dead channel with status: " << *sit << endl;
                if (channelAllowed == *sit || (channelAllowed < 0 && abs(channelAllowed) <= *sit)) {
                   passChannelLimitation = true;
                   break;
@@ -334,7 +334,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
             }
          }
 
-         for (std::vector<DetId>::iterator it = sameFlagDetIds.begin(); it != sameFlagDetIds.end(); it++) {
+         for (vector<DetId>::iterator it = sameFlagDetIds.begin(); it != sameFlagDetIds.end(); it++) {
             if (currDetId == *it)
                detIdAlreadyChecked = true;
          }
@@ -354,7 +354,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                   ecalStatus, geometry);
 
             // get rechits along gap cluster
-            for (std::vector<DetId>::iterator it = gapinfo.detIds.begin(); it != gapinfo.detIds.end(); it++) {
+            for (vector<DetId>::iterator it = gapinfo.detIds.begin(); it != gapinfo.detIds.end(); it++) {
                sameFlagDetIds.push_back(*it);
             }
 
@@ -364,8 +364,8 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                v_enNeighboursGap_EE.push_back(gapinfo);
 
                if (debug_)
-                  std::cout << "EE: gap cluster energy: " << gapinfo.boundaryEnergy << " deadCells: "
-                        << gapinfo.detIds.size() << std::endl;
+                  cout << "EE: gap cluster energy: " << gapinfo.boundaryEnergy << " deadCells: "
+                        << gapinfo.detIds.size() << endl;
             }
          }
 
@@ -380,7 +380,7 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                   ecalStatus, geometry);
 
             // get boundary of !kDead rechits arround the dead cluster
-            for (std::vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
+            for (vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
                sameFlagDetIds.push_back(*it);
             }
 
@@ -390,11 +390,11 @@ bool EcalDeadCellBoundaryEnergyFilter::filter(edm::Event& iEvent, const edm::Eve
                v_boundaryInfoDeadCells_EE.push_back(boundinfo);
 
                if (debug_)
-                  std::cout << "EE: boundary Energy dead RecHit: " << boundinfo.boundaryEnergy << " ET: "
-                        << boundinfo.boundaryET << " deadCells: " << boundinfo.detIds.size() << std::endl;
+                  cout << "EE: boundary Energy dead RecHit: " << boundinfo.boundaryEnergy << " ET: "
+                        << boundinfo.boundaryET << " deadCells: " << boundinfo.detIds.size() << endl;
 
-               //               for (std::vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
-               //                  std::cout << (EEDetId) * it << std::endl;
+               //               for (vector<DetId>::iterator it = boundinfo.detIds.begin(); it != boundinfo.detIds.end(); it++) {
+               //                  cout << (EEDetId) * it << endl;
                //               }
 
             }

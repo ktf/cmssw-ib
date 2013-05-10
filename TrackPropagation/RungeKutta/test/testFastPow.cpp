@@ -18,7 +18,7 @@ inline double fastPow(double a, double b) {
 int main() {
   constexpr double Safety = 0.9;
   double eps=1.e-5;
-  const float cut = std::pow(10.f/Safety,5.f);
+  constexpr float cut = std::pow(10.f/Safety,5.f);
   double accMin = eps/cut;
   std::cout << "eps/cut/accMin " << eps << " " << cut << " " << accMin
 	    << std::endl;

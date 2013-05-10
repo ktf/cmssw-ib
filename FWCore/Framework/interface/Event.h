@@ -18,7 +18,6 @@ For its usage, see "FWCore/Framework/interface/PrincipalGetAdapter.h"
 ----------------------------------------------------------------------*/
 
 #include "DataFormats/Common/interface/BasicHandle.h"
-#include "DataFormats/Common/interface/ConvertHandle.h"
 #include "DataFormats/Common/interface/WrapperOwningHolder.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/OrphanHandle.h"
@@ -32,9 +31,6 @@ For its usage, see "FWCore/Framework/interface/PrincipalGetAdapter.h"
 #include "FWCore/Common/interface/EventBase.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/PrincipalGetAdapter.h"
-#include "FWCore/Utilities/interface/TypeID.h"
-#include "FWCore/Utilities/interface/EDGetToken.h"
-#include "FWCore/Utilities/interface/ProductKindOfType.h"
 
 #include "boost/shared_ptr.hpp"
 
@@ -50,16 +46,12 @@ namespace edm {
   class TriggerResultsByName;
   class TriggerResults;
   class TriggerNames;
-  class EDConsumerBase;
 
   class Event : public EventBase {
   public:
     Event(EventPrincipal& ep, ModuleDescription const& md);
     virtual ~Event();
-    
-    //Used in conjunction with EDGetToken
-    void setConsumer(EDConsumerBase const* iConsumer);
-    
+
     // AUX functions are defined in EventBase
     EventAuxiliary const& eventAuxiliary() const {return aux_;}
 
@@ -123,14 +115,6 @@ namespace edm {
     template<typename PROD>
     void
     getManyByType(std::vector<Handle<PROD> >& results) const;
-    
-    template<typename PROD>
-    bool
-    getByToken(EDGetToken token, Handle<PROD>& result) const;
-
-    template<typename PROD>
-    bool
-    getByToken(EDGetTokenT<PROD> token, Handle<PROD>& result) const;
 
     // Template member overload to deal with Views.
     template<typename ELEMENT>
@@ -147,15 +131,6 @@ namespace edm {
     template<typename ELEMENT>
     bool
     getByLabel(InputTag const& tag, Handle<View<ELEMENT> >& result) const;
-    
-    template<typename ELEMENT>
-    bool
-    getByToken(EDGetToken token, Handle<View<ELEMENT>>& result) const;
-    
-    template<typename ELEMENT>
-    bool
-    getByToken(EDGetTokenT<View<ELEMENT>> token, Handle<View<ELEMENT>>& result) const;
-
 
     template<typename ELEMENT>
     void
@@ -246,8 +221,6 @@ namespace edm {
 
     // We own the retrieved Views, and have to destroy them.
     mutable std::vector<boost::shared_ptr<ViewBase> > gotViews_;
-
-    static const std::string emptyString_;
   };
 
   // The following functions objects are used by Event::put, under the
@@ -260,7 +233,7 @@ namespace edm {
                ptrvec_t& used,
                WrapperOwningHolder const& edp,
                ConstBranchDescription const* desc) const {
-      used.emplace_back(edp, desc);
+      used.push_back(std::make_pair(edp, desc));
     }
   };
 
@@ -272,7 +245,7 @@ namespace edm {
                ptrvec_t& /*ignored*/,
                WrapperOwningHolder const& edp,
                ConstBranchDescription const* desc) const {
-      used.emplace_back(edp, desc);
+      used.push_back(std::make_pair(edp, desc));
     }
   };
 
@@ -359,14 +332,21 @@ namespace edm {
   template<typename PROD>
   bool
   Event::getByLabel(InputTag const& tag, Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getByLabel_(TypeID(typeid(PROD)), tag);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
+    bool ok = provRecorder_.getByLabel(tag, result);
+    if(ok) {
+      addToGotBranchIDs(*result.provenance());
     }
-    addToGotBranchIDs(*result.provenance());
-    return true;
+    return ok;
+  }
+
+  template<typename PROD>
+  bool
+  Event::getByLabel(std::string const& label, Handle<PROD>& result) const {
+    bool ok = provRecorder_.getByLabel(label, result);
+    if(ok) {
+      addToGotBranchIDs(*result.provenance());
+    }
+    return ok;
   }
 
   template<typename PROD>
@@ -374,20 +354,11 @@ namespace edm {
   Event::getByLabel(std::string const& label,
                     std::string const& productInstanceName,
                     Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getByLabel_(TypeID(typeid(PROD)), label, productInstanceName, emptyString_);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
+    bool ok = provRecorder_.getByLabel(label, productInstanceName, result);
+    if(ok) {
+      addToGotBranchIDs(*result.provenance());
     }
-    addToGotBranchIDs(*result.provenance());
-    return true;
-  }
-
-  template<typename PROD>
-  bool
-  Event::getByLabel(std::string const& label, Handle<PROD>& result) const {
-    return getByLabel(label, emptyString_, result);
+    return ok;
   }
 
   template<typename PROD>
@@ -399,46 +370,11 @@ namespace edm {
       addToGotBranchIDs(*it->provenance());
     }
   }
-  
-  template<typename PROD>
-  bool
-  Event::getByToken(EDGetToken token, Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(PROD)),PRODUCT_TYPE, token);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    addToGotBranchIDs(*result.provenance());
-    return true;
-  }
-  
-  template<typename PROD>
-  bool
-  Event::getByToken(EDGetTokenT<PROD> token, Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(PROD)),PRODUCT_TYPE, token);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    addToGotBranchIDs(*result.provenance());
-    return true;
-  }
-
 
   template<typename ELEMENT>
   bool
-  Event::getByLabel(InputTag const& tag, Handle<View<ELEMENT> >& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getMatchingSequenceByLabel_(TypeID(typeid(ELEMENT)), tag);
-    if(bh.failedToGet()) {
-      Handle<View<ELEMENT> > h(bh.whyFailed());
-      h.swap(result);
-      return false;
-    }
-    fillView_(bh, result);
-    return true;
+  Event::getByLabel(std::string const& moduleLabel, Handle<View<ELEMENT> >& result) const {
+    return getByLabel(moduleLabel, std::string(), result);
   }
 
   template<typename ELEMENT>
@@ -447,50 +383,84 @@ namespace edm {
                     std::string const& productInstanceName,
                     Handle<View<ELEMENT> >& result) const {
     result.clear();
-    BasicHandle bh = provRecorder_.getMatchingSequenceByLabel_(TypeID(typeid(ELEMENT)), moduleLabel, productInstanceName, emptyString_);
-    if(bh.failedToGet()) {
-      Handle<View<ELEMENT> > h(bh.whyFailed());
-      h.swap(result);
+
+    TypeID typeID(typeid(ELEMENT));
+
+    BasicHandle bh;
+    std::string processName; // empty
+    int nFound = provRecorder_.getMatchingSequenceByLabel_(typeID,
+                                                           moduleLabel,
+                                                           productInstanceName,
+                                                           processName,
+                                                           bh);
+
+    if(nFound == 0) {
+      boost::shared_ptr<cms::Exception> whyFailed(new edm::Exception(edm::errors::ProductNotFound));
+      *whyFailed
+        << "getByLabel: Found zero products matching all criteria\n"
+        << "Looking for sequence of type: " << typeID << "\n"
+        << "Looking for module label: " << moduleLabel << "\n"
+        << "Looking for productInstanceName: " << productInstanceName << "\n";
+      Handle<View<ELEMENT> > temp(whyFailed);
+      result.swap(temp);
       return false;
     }
+    if(nFound > 1) {
+      Exception e(errors::ProductNotFound);
+      e << "getByLabel: Found more than one product matching all criteria\n"
+        << "Looking for sequence of type: " << typeID << "\n"
+        << "Looking for module label: " << moduleLabel << "\n"
+        << "Looking for productInstanceName: " << productInstanceName << "\n";
+      e.raise();
+    }
+
     fillView_(bh, result);
     return true;
   }
 
   template<typename ELEMENT>
-  bool
-  Event::getByLabel(std::string const& moduleLabel, Handle<View<ELEMENT> >& result) const {
-    return getByLabel(moduleLabel, emptyString_, result);
-  }
-  
-  template<typename ELEMENT>
-  bool
-  Event::getByToken(EDGetToken token, Handle<View<ELEMENT>>& result) const {
+    bool
+    Event::getByLabel(InputTag const& tag, Handle<View<ELEMENT> >& result) const {
     result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(ELEMENT)),ELEMENT_TYPE, token);
-    if(bh.failedToGet()) {
-      Handle<View<ELEMENT> > h(bh.whyFailed());
-      h.swap(result);
-      return false;
-    }
-    fillView_(bh, result);
-    return true;
-  }
-  
-  template<typename ELEMENT>
-  bool
-  Event::getByToken(EDGetTokenT<View<ELEMENT>> token, Handle<View<ELEMENT>>& result) const {
-    result.clear();
-    BasicHandle bh = provRecorder_.getByToken_(TypeID(typeid(ELEMENT)),ELEMENT_TYPE, token);
-    if(bh.failedToGet()) {
-      Handle<View<ELEMENT> > h(bh.whyFailed());
-      h.swap(result);
-      return false;
-    }
-    fillView_(bh, result);
-    return true;
-  }
+    if(tag.process().empty()) {
+      return getByLabel(tag.label(), tag.instance(), result);
+    } else {
+      TypeID typeID(typeid(ELEMENT));
 
+      BasicHandle bh;
+      int nFound = provRecorder_.getMatchingSequenceByLabel_(typeID,
+                                                             tag.label(),
+                                                             tag.instance(),
+                                                             tag.process(),
+                                                             bh);
+
+      if(nFound == 0) {
+        boost::shared_ptr<cms::Exception> whyFailed(new edm::Exception(edm::errors::ProductNotFound));
+        *whyFailed
+          << "getByLabel: Found zero products matching all criteria\n"
+          << "Looking for sequence of type: " << typeID << "\n"
+          << "Looking for module label: " << tag.label() << "\n"
+          << "Looking for productInstanceName: " << tag.instance() << "\n"
+          << "Looking for processName: "<<tag.process() <<"\n";
+        Handle<View<ELEMENT> > temp(whyFailed);
+        result.swap(temp);
+        return false;
+      }
+      if(nFound > 1) {
+        Exception e (errors::ProductNotFound);
+        e << "getByLabel: Found more than one product matching all criteria\n"
+          << "Looking for sequence of type: " << typeID << "\n"
+          << "Looking for module label: " << tag.label() << "\n"
+          << "Looking for productInstanceName: " << tag.instance() << "\n"
+          << "Looking for processName: "<<tag.process() <<"\n";
+        e.raise();
+      }
+
+      fillView_(bh, result);
+      return true;
+    }
+    return false;
+  }
 
   template<typename ELEMENT>
   void

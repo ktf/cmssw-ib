@@ -16,9 +16,13 @@
 
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
 #include "DataFormats/MuonDetId/interface/DTLayerId.h"
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
@@ -94,7 +98,7 @@ static const int statePriorities[] =
     /* Misassoc */ 1
 };
 
-DetLayer getDetLayer(DetId detId, const TrackerTopology *tTopo)
+static DetLayer getDetLayer(DetId detId)
 {
     TrackQuality::Layer::SubDet det = TrackQuality::Layer::Invalid;
     short int layer = 0;
@@ -102,8 +106,43 @@ DetLayer getDetLayer(DetId detId, const TrackerTopology *tTopo)
     switch (detId.det())
     {
     case DetId::Tracker:
-      layer=tTopo->layer(detId);
-      break;
+        switch (detId.subdetId())
+        {
+        case PixelSubdetector::PixelBarrel:
+            det = TrackQuality::Layer::PixelBarrel;
+            layer = PXBDetId(detId).layer();
+            break;
+
+        case PixelSubdetector::PixelEndcap:
+            det = TrackQuality::Layer::PixelForward;
+            layer = PXFDetId(detId).disk();
+            break;
+
+        case StripSubdetector::TIB:
+            det = TrackQuality::Layer::StripTIB;
+            layer = TIBDetId(detId).layer();
+            break;
+
+        case StripSubdetector::TID:
+            det = TrackQuality::Layer::StripTID;
+            layer = TIDDetId(detId).wheel();
+            break;
+
+        case StripSubdetector::TOB:
+            det = TrackQuality::Layer::StripTOB;
+            layer = TOBDetId(detId).layer();
+            break;
+
+        case StripSubdetector::TEC:
+            det = TrackQuality::Layer::StripTEC;
+            layer = TECDetId(detId).wheel();
+            break;
+
+        default:
+            /* should not get here */
+            ;
+        }
+        break;
 
     case DetId::Muon:
         switch (detId.subdetId())
@@ -151,8 +190,7 @@ void TrackQuality::newEvent(const edm::Event &ev, const edm::EventSetup &es)
 }
 
 void TrackQuality::evaluate(SimParticleTrail const &spt,
-                            reco::TrackBaseRef const &tr,
-			    const TrackerTopology *tTopo)
+                            reco::TrackBaseRef const &tr)
 {
     std::vector<MatchedHit> matchedHits;
 
@@ -311,7 +349,7 @@ void TrackQuality::evaluate(SimParticleTrail const &spt,
                 best->state != Layer::Missed)
         {
             layerHitMap.insert(std::make_pair(
-					      getDetLayer(best->detId,tTopo), best));
+                                   getDetLayer(best->detId), best));
         }
     }
 

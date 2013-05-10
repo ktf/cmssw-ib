@@ -17,4 +17,3 @@ namespace reco {
 }
 
 #endif
-

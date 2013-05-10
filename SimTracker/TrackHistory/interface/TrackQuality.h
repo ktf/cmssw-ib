@@ -22,8 +22,6 @@
 
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 
-class TrackerTopology;
-
 //! This class analyses the reconstruction quality for a given track
 class TrackQuality
 {
@@ -75,7 +73,7 @@ public:
     void newEvent(const edm::Event &, const edm::EventSetup &);
 
     //! Compute information about the track reconstruction quality
-    void evaluate(SimParticleTrail const &, reco::TrackBaseRef const &, const TrackerTopology *tTopo);
+    void evaluate(SimParticleTrail const &, reco::TrackBaseRef const &);
 
     //! Return the number of layers with simulated and/or reconstructed hits
     unsigned int numberOfLayers() const

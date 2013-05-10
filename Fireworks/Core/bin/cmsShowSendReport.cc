@@ -97,9 +97,14 @@ int main(int argc, char **argv)
    unsigned long  buffSize;
    getCompressedBuffer(argv[1], &buff, buffSize);
 
-   sendto(sd, buff, buffSize, 0, 
-	  (struct sockaddr *) &remoteServAddr, 
-	  sizeof(remoteServAddr));
-
+   int res = sendto(sd, buff, buffSize, 0, 
+                    (struct sockaddr *) &remoteServAddr, 
+                    sizeof(remoteServAddr));
    free(buff);
+   
+   if (res == -1)
+      std::cerr << "Sending report has failed." << std::endl;
+   else
+      std::cout << "Report has been sent." <<std::endl;
+
 }

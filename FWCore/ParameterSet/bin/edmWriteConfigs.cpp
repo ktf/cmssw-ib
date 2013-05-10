@@ -50,7 +50,7 @@
 #include <exception>
 #include <memory>
 #include <utility>
-#include "FWCore/Utilities/interface/Signal.h"
+#include "sigc++/signal.h"
 #include <sstream>
 
 static char const* const kHelpOpt = "help";

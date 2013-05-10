@@ -2,10 +2,10 @@
 #include "Geometry/CommonDetUnit/interface/ModifiedSurfaceGenerator.h"
 #include "DataFormats/TrackingRecHit/interface/AlignmentPositionError.h"
 
-GeomDet::GeomDet( Plane* plane):
+GeomDet::GeomDet( BoundPlane* plane):
   thePlane(plane), theAlignmentPositionError(0), theLocalAlignmentError(InvalidError()), m_index(-1) {}
 
-GeomDet::GeomDet( const ReferenceCountingPointer<Plane>& plane) :
+GeomDet::GeomDet( const ReferenceCountingPointer<BoundPlane>& plane) :
   thePlane(plane), theAlignmentPositionError(0), theLocalAlignmentError(InvalidError()), m_index(-1) {}
 
 GeomDet::~GeomDet() {delete theAlignmentPositionError;}
@@ -29,7 +29,7 @@ void GeomDet::rotate( const Surface::RotationType& rotation)
 void GeomDet::setPosition( const Surface::PositionType& position, 
 			   const Surface::RotationType& rotation)
 {
-  thePlane = ModifiedSurfaceGenerator<Plane>(thePlane).atNewPosition(position,
+  thePlane = ModifiedSurfaceGenerator<BoundPlane>(thePlane).atNewPosition(position,
 									  rotation);
 }
 

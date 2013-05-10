@@ -42,7 +42,7 @@ namespace reco { namespace modules {
 
        protected:
 	 /// produce one event
-	 void produce( edm::Event &, const edm::EventSetup &) override;
+	 void produce( edm::Event &, const edm::EventSetup &);
 
        private:
 	 /// MVA discriminator

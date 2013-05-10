@@ -7,34 +7,34 @@
 
 #include "RecoTracker/TkTrackingRegions/interface/TrackingRegion.h"
 #include "RecoTracker/TkMSParametrization/interface/MultipleScatteringParametrisation.h"
-#include "FWCore/Utilities/interface/GCC11Compatibility.h"
 
 class DetLayer;
 template<class T> class PixelRecoRange;
 
 #include "DataFormats/GeometryVector/interface/Basic2DVector.h"
 
-class dso_hidden InnerDeltaPhi {
+class InnerDeltaPhi {
 public:
 
-  typedef Basic2DVector<float> Point2D;
+  typedef Basic2DVector<double> Point2D;
 
-  InnerDeltaPhi( const DetLayer& outlayer,const DetLayer& layer,
+  InnerDeltaPhi( const DetLayer& layer,
                  const TrackingRegion & region,
                  const edm::EventSetup& iSetup,
                  bool precise = true,
                  float extraTolerance = 0.f);
 
+   ~InnerDeltaPhi();
 
-  PixelRecoRange<float> operator()( float xHit, float yHit, float zHit, float errRPhi) const {
-    return phiRange( Point2D(xHit,yHit), zHit, errRPhi); 
-  }
+  float operator()( float rHit, float zHit, float errRPhi) const;
+   
+  PixelRecoRange<float> operator()( float rHit, float phiHit, float zHit, float errRPhi) const;
 
 private:
 
   bool theRDefined;
   bool thePrecise;
-  int ol;
+
 
   float theROrigin;
   float theRLayer;

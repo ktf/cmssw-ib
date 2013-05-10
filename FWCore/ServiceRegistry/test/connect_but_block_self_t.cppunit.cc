@@ -30,10 +30,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(testConnectButBlockSelf);
 
 namespace {
    struct ReSignaller {
-      edm::signalslot::Signal<void()>* signal_;
+      sigc::signal<void>* signal_;
       int& seen_;
 
-      ReSignaller(edm::signalslot::Signal<void()>&iSig, int& iSee): signal_(&iSig), seen_(iSee){}
+      ReSignaller(sigc::signal<void>&iSig, int& iSee): signal_(&iSig), seen_(iSee){}
       
       void operator()() {
          //std::cout <<"see signal"<<std::endl;
@@ -47,7 +47,7 @@ void
 testConnectButBlockSelf::test()
 {
    using namespace edm::serviceregistry;
-   edm::signalslot::Signal<void()> theSignal;
+   sigc::signal<void> theSignal;
    
    int iOne(0);
    ReSignaller one(theSignal,iOne);

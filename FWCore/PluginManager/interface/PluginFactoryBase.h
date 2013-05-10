@@ -17,14 +17,14 @@
 //
 // Original Author:  Chris Jones
 //         Created:  Wed Apr  4 12:24:44 EDT 2007
-// $Id: PluginFactoryBase.h,v 1.8 2013/01/20 17:12:17 chrjones Exp $
+// $Id: PluginFactoryBase.h,v 1.7 2009/10/26 14:06:45 eulisse Exp $
 //
 
 // system include files
 #include <string>
 #include <vector>
 #include <map>
-#include "FWCore/Utilities/interface/Signal.h"
+#include "sigc++/signal.h"
 // user include files
 #include "FWCore/PluginManager/interface/PluginInfo.h"
 
@@ -49,7 +49,7 @@ class PluginFactoryBase
       virtual const std::string& category() const = 0;
       
       ///signal containing plugin category, and  plugin info for newly added plugin
-      mutable edm::signalslot::Signal<void(const std::string&, const PluginInfo&)> newPluginAdded_;
+      mutable sigc::signal<void,const std::string&, const PluginInfo&> newPluginAdded_;
 
       // ---------- static member functions --------------------
 

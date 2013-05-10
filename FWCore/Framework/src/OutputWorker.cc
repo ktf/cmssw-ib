@@ -1,6 +1,6 @@
 
 /*----------------------------------------------------------------------
-$Id: OutputWorker.cc,v 1.41 2013/05/03 18:35:58 chrjones Exp $
+$Id: OutputWorker.cc,v 1.39 2012/02/09 22:15:50 chrjones Exp $
 ----------------------------------------------------------------------*/
 
 #include "FWCore/Framework/interface/OutputModule.h"
@@ -8,10 +8,10 @@ $Id: OutputWorker.cc,v 1.41 2013/05/03 18:35:58 chrjones Exp $
 #include "FWCore/Framework/src/OutputWorker.h"
 
 namespace edm {
-  OutputWorker::OutputWorker(std::unique_ptr<OutputModule>&& mod,
+  OutputWorker::OutputWorker(std::auto_ptr<OutputModule> mod,
 			     ModuleDescription const& md,
 			     WorkerParams const& wp):
-  WorkerT<OutputModule>(std::move(mod), md, wp)
+      WorkerT<OutputModule>(mod, md, wp)
   {
   }
 
@@ -56,9 +56,5 @@ namespace edm {
   
   SelectionsArray const& OutputWorker::keptProducts() const {
     return module().keptProducts();
-  }
-
-  void OutputWorker::selectProducts(ProductRegistry const& preg) {
-    module().selectProducts(preg);
   }
 }

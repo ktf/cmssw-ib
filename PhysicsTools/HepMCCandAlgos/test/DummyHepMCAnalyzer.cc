@@ -27,7 +27,7 @@ public:
   {
   }
 private:
-  void analyze( const Event & evt, const EventSetup& es ) override {
+  void analyze( const Event & evt, const EventSetup & es ) {
     Handle<HepMCProduct> hepMC;
     evt.getByLabel( src_, hepMC );
     const GenEvent * mc = hepMC->GetEvent();
@@ -56,6 +56,5 @@ private:
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE( DummyHepMCAnalyzer );
-
 
 

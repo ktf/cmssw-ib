@@ -5,6 +5,9 @@
   
 ProductRegistryHelper: 
 
+$Id: ProductRegistryHelper.h,v 1.16 2011/07/06 20:29:12 wmtan Exp $
+
+
 ----------------------------------------------------------------------*/
 
 #include "FWCore/Utilities/interface/TypeID.h"
@@ -83,7 +86,8 @@ namespace edm {
 
     template <BranchType B>
     TypeLabelItem const& produces(const TypeID& id, std::string const& instanceName=std::string()) {
-       typeLabelList_.emplace_back(B, id, instanceName);
+       TypeLabelItem tli(B, id, instanceName);
+       typeLabelList_.push_back(tli);
        return *typeLabelList_.rbegin();
     }
   private:

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 function die { echo Failure $1: status $2 ; exit $2 ; }
 

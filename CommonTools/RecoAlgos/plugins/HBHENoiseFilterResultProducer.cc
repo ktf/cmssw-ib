@@ -42,7 +42,7 @@ class HBHENoiseFilterResultProducer : public edm::EDProducer {
       ~HBHENoiseFilterResultProducer();
 
    private:
-      virtual void produce(edm::Event&, const edm::EventSetup&) override;
+      virtual void produce(edm::Event&, const edm::EventSetup&);
       
       // ----------member data ---------------------------
 

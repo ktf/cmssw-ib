@@ -494,7 +494,7 @@ int SiStripTemplateReco::StripTempReco1D(int id, float cotalpha, float cotbeta, 
 		beta2 = 1.;
 		if(use_VVIObj) {			
 //  VVIObj is a private port of CERNLIB VVIDIS
-                  sistripvvi::VVIObj vvidist(kappa, beta2, 1);
+		   VVIObj vvidist(kappa, beta2, 1);
 		   prvav = vvidist.fcn(xvav);			
 		} else {
 //  Use faster but less accurate TMath Vavilov distribution function

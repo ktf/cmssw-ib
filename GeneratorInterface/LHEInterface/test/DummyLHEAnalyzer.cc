@@ -24,7 +24,7 @@ public:
   {
   }
 private:
-  void analyze( const Event & iEvent, const EventSetup & iSetup ) override {
+  void analyze( const Event & iEvent, const EventSetup & iSetup ) {
 
     Handle<LHEEventProduct> evt;
     iEvent.getByLabel( src_, evt );
@@ -62,7 +62,7 @@ private:
 
   }
 
-  void beginRun(edm::Run const& iRun, edm::EventSetup const& es) override {
+  void beginRun(edm::Run const& iRun, edm::EventSetup const& es){
 
 
     Handle<LHERunInfoProduct> run;

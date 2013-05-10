@@ -39,7 +39,6 @@ class DirectTrackerNavigation;
 class TrajectoryStateTransform;
 class SimTrack;
 class TrackerGeometry;
-class TrackerTopology;
 
 class FastTSGFromPropagation : public TrackerSeedGenerator {
 
@@ -53,8 +52,7 @@ public:
   virtual ~FastTSGFromPropagation();
 
   /// generate seed(s) for a track
-  void  trackerSeeds(const TrackCand&, const TrackingRegion&, 
-		     const TrackerTopology *tTopo, std::vector<TrajectorySeed>&);
+  void  trackerSeeds(const TrackCand&, const TrackingRegion&, std::vector<TrajectorySeed>&);
     
   /// initialize
   void init(const MuonServiceProxy*);

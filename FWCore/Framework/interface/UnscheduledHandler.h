@@ -34,11 +34,8 @@ namespace edm {
 
    public:
       friend class UnscheduledHandlerSentry;
-      UnscheduledHandler(): m_setup(nullptr), m_context(nullptr) {}
+      UnscheduledHandler(): m_setup(0), m_context(0) {}
       virtual ~UnscheduledHandler();
-
-      UnscheduledHandler(UnscheduledHandler const&) = delete; // Disallow copying and moving
-      UnscheduledHandler& operator=(UnscheduledHandler const&) = delete; // Disallow copying and moving
 
       // ---------- const member functions ---------------------
 
@@ -55,6 +52,10 @@ namespace edm {
    private:
       CurrentProcessingContext const* setCurrentProcessingContext(CurrentProcessingContext const* iContext);
       //void popCurrentProcessingContext();
+
+      UnscheduledHandler(UnscheduledHandler const&); // stop default
+
+      UnscheduledHandler const& operator=(UnscheduledHandler const&); // stop default
 
       virtual bool tryToFillImpl(std::string const&,
                                  EventPrincipal&,

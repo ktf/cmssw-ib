@@ -8,7 +8,7 @@
 //
 // Original Author:  Chris Jones
 //         Created:  Tue Nov 25 10:54:28 EST 2008
-// $Id: FWSimpleRepresentationChecker.cc,v 1.9 2013/02/10 22:12:04 wmtan Exp $
+// $Id: FWSimpleRepresentationChecker.cc,v 1.8 2012/08/03 18:20:28 wmtan Exp $
 //
 
 // system include files
@@ -84,7 +84,7 @@ static bool inheritsFrom(const edm::TypeWithDict& iChild,
    }
    ++distance;
    for(auto const& base : bases) {
-      if(inheritsFrom(edm::BaseWithDict(base).typeOf(),iParentTypeName,distance)) {
+      if(inheritsFrom(edm::BaseWithDict(base).toType(),iParentTypeName,distance)) {
          return true;
       }
    }

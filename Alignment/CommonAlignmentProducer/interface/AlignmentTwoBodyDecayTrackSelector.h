@@ -24,7 +24,7 @@ class AlignmentTwoBodyDecayTrackSelector
   ~AlignmentTwoBodyDecayTrackSelector();
 
   /// select tracks
-  Tracks select(const Tracks& tracks, const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  Tracks select(const Tracks& tracks, const edm::Event& iEvent);
 
   bool useThisFilter();
  private:

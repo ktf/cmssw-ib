@@ -9,7 +9,7 @@ MemberWithDict:  A holder for a class member
 
 #include <string>
 
-class TDataMember;
+#include "Reflex/Member.h"
 
 namespace edm {
 
@@ -18,9 +18,9 @@ namespace edm {
 
   class MemberWithDict {
   public:
-    MemberWithDict();
+    MemberWithDict() : member_() {}
 
-    explicit MemberWithDict(TDataMember* dataMember);
+    explicit MemberWithDict(Reflex::Member const& member) : member_(member) {}
 
     std::string name() const;
 
@@ -48,7 +48,7 @@ namespace edm {
 
   private:
 
-    TDataMember* dataMember_;
+    Reflex::Member member_;
   };
 
 }

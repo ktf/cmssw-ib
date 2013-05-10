@@ -138,10 +138,10 @@ produceDenominatorRealElectronsData = cms.Sequence( ElPrimaryVertexFilter * ElBe
                                                     ElZLegs 
                                                   )
 
-produceDenominator = cms.Sequence(produceDenominatorRealElectronsData)
+produceDenominator = produceDenominatorRealElectronsData
 
 runTauValidationBatchMode = cms.Sequence(
-      produceDenominatorRealElectronsData
+      produceDenominator
       +TauValNumeratorAndDenominatorRealElectronsData
       )
 

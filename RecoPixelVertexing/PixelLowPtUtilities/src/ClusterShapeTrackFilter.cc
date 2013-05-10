@@ -18,7 +18,6 @@
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 inline float sqr(float x) { return x*x; }
 
@@ -129,8 +128,7 @@ vector<GlobalPoint> ClusterShapeTrackFilter::getGlobalPoss
 /*****************************************************************************/
 bool ClusterShapeTrackFilter::operator()
   (const reco::Track* track,
-   const vector<const TrackingRecHit *> & recHits,
-   const TrackerTopology *tTopo ) const
+   const vector<const TrackingRecHit *> & recHits) const
 {
   // Do not even look at pairs
   if(recHits.size() <= 2) return true;
@@ -169,7 +167,7 @@ bool ClusterShapeTrackFilter::operator()
     {
       LogTrace("ClusterShapeTrackFilter")
          << "  [ClusterShapeTrackFilter] clusShape problem"
-         << HitInfo::getInfo(*recHits[i],tTopo);
+         << HitInfo::getInfo(*recHits[i]);
 
       ok = false; break;
     }

@@ -41,10 +41,10 @@ class SiClusterTranslator : public edm::EDProducer
   virtual ~SiClusterTranslator();
   
   //--- The top-level event method.
-  virtual void produce(edm::Event& e, const edm::EventSetup& c) override;
+  virtual void produce(edm::Event& e, const edm::EventSetup& c);
   
   // Begin Job
-  virtual void beginRun(edm::Run const& run, const edm::EventSetup & es) override;
+  virtual void beginRun(edm::Run & run, const edm::EventSetup & es);
   
  private:
   std::vector<edm::DetSet<StripDigiSimLink> > theStripDigiLinkVector;

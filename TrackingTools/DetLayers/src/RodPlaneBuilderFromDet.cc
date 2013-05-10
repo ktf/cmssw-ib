@@ -7,7 +7,7 @@
 using namespace std;
 
 // Warning, remember to assign this pointer to a ReferenceCountingPointer!
-Plane* 
+BoundPlane* 
 RodPlaneBuilderFromDet::operator()( const vector<const Det*>& dets) const
 {
   // find mean position
@@ -20,8 +20,9 @@ RodPlaneBuilderFromDet::operator()( const vector<const Det*>& dets) const
   
   // temporary plane - for the computation of bounds
   Surface::RotationType rotation = computeRotation( dets, meanPos);
-  Plane tmpPlane( meanPos, rotation);
-  auto bo = computeBounds( dets, tmpPlane);
+  BoundPlane tmpPlane( meanPos, rotation);
+  pair<RectangularPlaneBounds,GlobalVector> bo = 
+    computeBounds( dets, tmpPlane);
 
 //   LogDebug("DetLayers") << "Creating plane at position " << meanPos 
 //        << " displaced by " << bo.second ;
@@ -29,12 +30,12 @@ RodPlaneBuilderFromDet::operator()( const vector<const Det*>& dets) const
 //        << " / " <<  bo.first.length() 
 //        << " / " <<  bo.first.thickness() ;
 
-  return new Plane( meanPos+bo.second, rotation, bo.first);
+  return new BoundPlane( meanPos+bo.second, rotation, bo.first);
 }
 
-pair<RectangularPlaneBounds*, GlobalVector>
+pair<RectangularPlaneBounds, GlobalVector>
 RodPlaneBuilderFromDet::computeBounds( const vector<const Det*>& dets,
-				       const Plane& plane) const
+				       const BoundPlane& plane) const
 {
   // go over all corners and compute maximum deviations from mean pos.
   vector<GlobalPoint> corners;
@@ -72,7 +73,7 @@ RodPlaneBuilderFromDet::computeBounds( const vector<const Det*>& dets,
   LocalVector localOffset( (xmin+xmax)/2., (ymin+ymax)/2., (zmin+zmax)/2.);
   GlobalVector offset( plane.toGlobal(localOffset));
   
-  pair<RectangularPlaneBounds*, GlobalVector> result(new RectangularPlaneBounds((xmax-xmin)/2, (ymax-ymin)/2, (zmax-zmin)/2), offset);
+  pair<RectangularPlaneBounds, GlobalVector> result(RectangularPlaneBounds((xmax-xmin)/2, (ymax-ymin)/2, (zmax-zmin)/2), offset);
 
   return result;
 }
@@ -86,8 +87,8 @@ computeRotation( const vector<const Det*>& dets,
   // the rotations of GluedDets coincide with the mono part
   // Simply take the x,y of the first Det if z points out,
   // or -x, y if it doesn't
-  const Plane& plane =
-    dynamic_cast<const Plane&>(dets.front()->surface());
+  const BoundPlane& plane =
+    dynamic_cast<const BoundPlane&>(dets.front()->surface());
   //GlobalVector n = plane.normalVector();
 
   GlobalVector xAxis;

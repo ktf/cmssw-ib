@@ -5,7 +5,5 @@
 <use   name="SimG4Core/Physics"/>
 <use   name="SimG4Core/MagneticField"/>
 <use   name="geant4core"/>
-<use   name="clhep"/>
 <use   name="heppdt"/>
-<use   name="boost"/>
-#<use   name="expat"/>
+<use   name="expat"/>

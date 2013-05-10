@@ -10,180 +10,151 @@
 #include <cmath>
 #include<sstream>
 
-#ifdef DO_BTSCount
-unsigned int BTSCount::maxReferences=0;
-unsigned long long  BTSCount::aveReferences=0;
-unsigned long long  BTSCount::toteReferences=0;
-
-BTSCount::~BTSCount(){
-  maxReferences = std::max(referenceMax_, maxReferences);
-  toteReferences++;
-  aveReferences+=referenceMax_;
-  // if (referenceMax_>100) std::cout <<"BST with " << referenceMax_ << std::endl;
-}
-
-#include<iostream>
-namespace {
-
-  struct Printer{
-    ~Printer() {
-      std::cout << "maxReferences of BTSCount = " 
-                << BTSCount::maxReferences << " " 
-                << double(BTSCount::aveReferences)/double(BTSCount::toteReferences)<< std::endl;
-    }
-  };
-  Printer printer;
-
-}
-#endif
-
-BasicTrajectoryState::~BasicTrajectoryState(){}
-
-namespace {
-  inline
-  FreeTrajectoryState makeFTS(const LocalTrajectoryParameters& par,
-			      const BasicTrajectoryState::SurfaceType& surface,
-			      const MagneticField* field) {
-    GlobalPoint  x = surface.toGlobal(par.position());
-    GlobalVector p = surface.toGlobal(par.momentum());
-    return FreeTrajectoryState(x, p, par.charge(), field);
-  }
-
-}
-
 BasicTrajectoryState::
 BasicTrajectoryState( const FreeTrajectoryState& fts,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const SurfaceSide side) :
-  theFreeState(fts),
+  theFreeState( new FreeTrajectoryState(fts)),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(true),
+  theGlobalParamsUp2Date(true),
   theSurfaceSide(side), 
   theSurfaceP( &aSurface), 
-  theWeight(1.)
+  theWeight(1.),
+  theField( &fts.parameters().magneticField())
 {}    
 
 BasicTrajectoryState::
 BasicTrajectoryState( const GlobalTrajectoryParameters& par,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const SurfaceSide side) :
-  theFreeState(par),
+  theFreeState( new FreeTrajectoryState(par)),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(true),
+   theGlobalParamsUp2Date(true),
   theSurfaceSide(side), 
   theSurfaceP( &aSurface), 
-  theWeight(1.)
+  theWeight(1.),
+  theField( &par.magneticField())
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const GlobalTrajectoryParameters& par,
 			    const CartesianTrajectoryError& err,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const SurfaceSide side) :
-  theFreeState(par, err),
+  theFreeState( new FreeTrajectoryState(par, err)),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(true),
+  theGlobalParamsUp2Date(true),
   theSurfaceSide(side), 
   theSurfaceP( &aSurface), 
-  theWeight(1.)
+  theWeight(1.),
+  theField( &par.magneticField())
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const GlobalTrajectoryParameters& par,
 			    const CurvilinearTrajectoryError& err,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const SurfaceSide side,
 			    double weight) :
-  theFreeState(par, err),
+  theFreeState( new FreeTrajectoryState(par, err)),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(true),
+  theGlobalParamsUp2Date(true),
   theSurfaceSide(side), 
   theSurfaceP( &aSurface), 
-  theWeight(weight)
+  theWeight(weight),
+  theField( &par.magneticField())
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const GlobalTrajectoryParameters& par,
 			    const CurvilinearTrajectoryError& err,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    double weight) :
-  theFreeState(par, err),
+  theFreeState( new FreeTrajectoryState(par, err)),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(true),
+  theGlobalParamsUp2Date(true),
   theSurfaceSide(SurfaceSideDefinition::atCenterOfSurface), 
   theSurfaceP( &aSurface), 
-  theWeight(weight)
+  theWeight(weight),
+  theField( &par.magneticField())
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const LocalTrajectoryParameters& par,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const MagneticField* field,
 			    const SurfaceSide side) :
-  theFreeState(makeFTS(par,aSurface,field)),
+  theFreeState(0),
   theLocalError(InvalidError()),
   theLocalParameters(par),
   theLocalParametersValid(true),
-  theValid(true),
+  theGlobalParamsUp2Date(false),
    theSurfaceSide(side),
   theSurfaceP( &aSurface), 
-  theWeight(1.)
+  theWeight(1.),
+  theField(field) 
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const LocalTrajectoryParameters& par,
 			    const LocalTrajectoryError& err,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const MagneticField* field,
 			    const SurfaceSide side,
 			    double weight) :
-  theFreeState(makeFTS(par,aSurface,field)),
+  theFreeState(0),
   theLocalError(err),
   theLocalParameters(par),
   theLocalParametersValid(true),
-  theValid(true),
+  theGlobalParamsUp2Date(false),
   theSurfaceSide(side), 
   theSurfaceP( &aSurface),
-  theWeight(weight)
+  theWeight(weight),
+  theField(field)
 {}
 
 BasicTrajectoryState::
 BasicTrajectoryState( const LocalTrajectoryParameters& par,
 			    const LocalTrajectoryError& err,
-			    const SurfaceType& aSurface,
+			    const Surface& aSurface,
 			    const MagneticField* field,
 			    double weight) :
-  theFreeState(makeFTS(par,aSurface,field)),
+  theFreeState(0),
   theLocalError(err),
   theLocalParameters(par),
   theLocalParametersValid(true),
-  theValid(true),
+  theGlobalParamsUp2Date(false),
   theSurfaceSide(SurfaceSideDefinition::atCenterOfSurface),
   theSurfaceP( &aSurface), 
-  theWeight(weight){}
+  theWeight(weight),
+  theField(field)
+{}
 
 BasicTrajectoryState::
-BasicTrajectoryState(const SurfaceType& aSurface) :
+BasicTrajectoryState(const Surface& aSurface) :
+  theFreeState(0),
   theLocalError(InvalidError()),
   theLocalParameters(),
   theLocalParametersValid(false),
-  theValid(false),
+  theGlobalParamsUp2Date(false),
   theSurfaceSide(SurfaceSideDefinition::atCenterOfSurface), 
   theSurfaceP( &aSurface), 
-  theWeight(0)
+  theWeight(0.),
+  theField(0)
 {}
 
 
+BasicTrajectoryState::~BasicTrajectoryState(){}
 
 void BasicTrajectoryState::notValid() {
   throw TrajectoryStateException("TrajectoryStateOnSurface is invalid and cannot return any parameters");
@@ -217,37 +188,62 @@ void BasicTrajectoryState::missingError(char const * where) const{
 
 
 
+
+void BasicTrajectoryState::checkGlobalParameters() const {
+  if likely(theGlobalParamsUp2Date) return;
+ 
+  //    cout<<"!theGlobalParamsUp2Date"<<endl;
+  theGlobalParamsUp2Date = true;
+  // calculate global parameters from local
+  GlobalPoint  x = surface().toGlobal(theLocalParameters.position());
+  GlobalVector p = surface().toGlobal(theLocalParameters.momentum());
+  // replace in place
+  FreeTrajectoryState * fts = &(*theFreeState);
+  if (fts) { 
+    fts->~FreeTrajectoryState();
+    new(fts) FreeTrajectoryState(x, p, theLocalParameters.charge(), theField);
+  }else {
+    theFreeState.replaceWith(new FreeTrajectoryState(x, p,
+						     theLocalParameters.charge(),
+						     theField));
+  } 
+}
+
+
+
 void BasicTrajectoryState::checkCurvilinError() const {
-  if likely(theFreeState.hasCurvilinearError()) return;
+  if likely(theFreeState->hasCurvilinearError()) return;
 
   if unlikely(!theLocalParametersValid) createLocalParameters();
   
-  JacobianLocalToCurvilinear loc2Curv(surface(), localParameters(), globalParameters(), *magneticField());
+  
+  JacobianLocalToCurvilinear loc2Curv(surface(), localParameters(), *theField);
   const AlgebraicMatrix55& jac = loc2Curv.jacobian();
+  
   const AlgebraicSymMatrix55 &cov = ROOT::Math::Similarity(jac, theLocalError.matrix());
 
-  theFreeState.setCurvilinearError( cov );
-  
-  verifyLocalErr(theLocalError);
-  verifyCurvErr(cov); 
+   theFreeState->setCurvilinearError( cov );
+ 
+   verifyLocalErr(theLocalError);
+   verifyCurvErr(cov); 
 }
 
 
  
 // create local parameters from global
 void BasicTrajectoryState::createLocalParameters() const {
-  LocalPoint  x = surface().toLocal(theFreeState.position());
-  LocalVector p = surface().toLocal(theFreeState.momentum());
+  LocalPoint  x = surface().toLocal(theFreeState->position());
+  LocalVector p = surface().toLocal(theFreeState->momentum());
 // believe p.z() never exactly equals 0.
-  bool isCharged = theFreeState.charge()!=0;
+  bool isCharged = theFreeState->charge()!=0;
   theLocalParameters =
-    LocalTrajectoryParameters(isCharged?theFreeState.signedInverseMomentum():1./p.mag(),
+    LocalTrajectoryParameters(isCharged?theFreeState->signedInverseMomentum():1./p.mag(),
       p.x()/p.z(), p.y()/p.z(), x.x(), x.y(), p.z()>0. ? 1.:-1., isCharged);
   theLocalParametersValid = true;
 }
 
 void BasicTrajectoryState::createLocalError() const {
-  if likely(theFreeState.hasCurvilinearError())
+  if likely(theFreeState->hasCurvilinearError())
     createLocalErrorFromCurvilinearError();
   else theLocalError = InvalidError();
 }
@@ -255,41 +251,42 @@ void BasicTrajectoryState::createLocalError() const {
 void 
 BasicTrajectoryState::createLocalErrorFromCurvilinearError() const {
   
-  JacobianCurvilinearToLocal curv2Loc(surface(), localParameters(), globalParameters(), *magneticField());
+  JacobianCurvilinearToLocal curv2Loc(surface(), localParameters(), *theField);
   const AlgebraicMatrix55& jac = curv2Loc.jacobian();
   
   const AlgebraicSymMatrix55 &cov = 
-    ROOT::Math::Similarity(jac, theFreeState.curvilinearError().matrix());
+    ROOT::Math::Similarity(jac, theFreeState->curvilinearError().matrix());
   //    cout<<"Clocal via curvilinear error"<<endl;
   theLocalError = LocalTrajectoryError(cov);
 
-  verifyCurvErr(theFreeState.curvilinearError());
+  verifyCurvErr(theFreeState->curvilinearError());
   verifyLocalErr(theLocalError);
 
 }
  
 
+
 void
 BasicTrajectoryState::update( const LocalTrajectoryParameters& p,
-        const SurfaceType& aSurface,
+        const Surface& aSurface,
         const MagneticField* field,
         const SurfaceSide side) 
 {
     theLocalParameters = p;
     if (&aSurface != &*theSurfaceP) theSurfaceP.reset(&aSurface);
+    theField=field;
     theSurfaceSide = side;
     theWeight      = 1.0; 
     theLocalError = InvalidError();
-    theFreeState=makeFTS(p,aSurface,field);
 
-    theValid   = true;
+    theGlobalParamsUp2Date   = false;
     theLocalParametersValid  = true;
 }
 
 void
 BasicTrajectoryState::update( const LocalTrajectoryParameters& p,
         const LocalTrajectoryError& err,
-        const SurfaceType& aSurface,
+        const Surface& aSurface,
         const MagneticField* field,
         const SurfaceSide side, 
         double weight) 
@@ -297,22 +294,24 @@ BasicTrajectoryState::update( const LocalTrajectoryParameters& p,
     theLocalParameters = p;
     theLocalError      = err;
     if (&aSurface != &*theSurfaceP) theSurfaceP.reset(&aSurface);
+    theField=field;
     theSurfaceSide = side;
     theWeight      = weight; 
-    theFreeState=makeFTS(p,aSurface,field);
 
-    theValid   = true;
+    theGlobalParamsUp2Date   = false;
     theLocalParametersValid  = true;
+
 }
 
 void 
 BasicTrajectoryState::rescaleError(double factor) {
   if unlikely(!hasError()) missingError(" trying to rescale");    
-  theFreeState.rescaleError(factor);
+  if (theFreeState)
+    theFreeState->rescaleError(factor);
   
   if (theLocalError.valid()){
     //do it by hand if the free state is not around.
-    bool zeroField = (magneticField()->nominalValue()==0);
+    bool zeroField = (theField->nominalValue()==0);
     if unlikely(zeroField){
       AlgebraicSymMatrix55 errors=theLocalError.matrix();
       //scale the 0 indexed covariance by the square root of the factor
@@ -327,7 +326,15 @@ BasicTrajectoryState::rescaleError(double factor) {
   }
 }
 
-
+FreeTrajectoryState* 
+BasicTrajectoryState::freeTrajectoryState(bool withErrors) const {
+  if(!isValid()) notValid();
+  checkGlobalParameters();
+  if(withErrors && hasError()) { // this is the right thing
+    checkCurvilinError();
+  }
+  return &(*theFreeState);
+}
 
 
 

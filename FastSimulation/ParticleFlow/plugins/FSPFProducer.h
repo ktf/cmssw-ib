@@ -19,7 +19,9 @@ class FSPFProducer : public edm::EDProducer {
   explicit FSPFProducer(const edm::ParameterSet&);
   ~FSPFProducer();
   
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual void beginJob();
+  virtual void beginRun(edm::Run&, const edm::EventSetup&);
 
  private:
 

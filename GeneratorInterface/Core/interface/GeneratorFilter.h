@@ -43,9 +43,16 @@ namespace edm
 
     virtual ~GeneratorFilter();
 
-    virtual bool filter(Event& e, EventSetup const& es) override;
-    virtual bool endRun(Run &, EventSetup const&) override;
-    virtual void beginLuminosityBlock(LuminosityBlock const&, EventSetup const&) override;
+    virtual bool filter(Event& e, EventSetup const& es);
+    virtual void endJob();
+    virtual bool beginRun(Run &, EventSetup const&);
+    virtual bool endRun(Run &, EventSetup const&);
+    virtual bool beginLuminosityBlock(LuminosityBlock &, EventSetup const&);
+    virtual bool endLuminosityBlock(LuminosityBlock &, EventSetup const&);
+    virtual void respondToOpenInputFile(FileBlock const& fb);
+    virtual void respondToCloseInputFile(FileBlock const& fb);
+    virtual void respondToOpenOutputFiles(FileBlock const& fb);
+    virtual void respondToCloseOutputFiles(FileBlock const& fb);
 
   private:
     Hadronizer            hadronizer_;
@@ -166,6 +173,20 @@ namespace edm
   }
 
   template <class HAD, class DEC>
+  void
+  GeneratorFilter<HAD, DEC>::endJob()
+  { }
+
+  template <class HAD, class DEC>
+  bool
+  GeneratorFilter<HAD, DEC>::beginRun( Run &, EventSetup const& es )
+  {
+    
+    return true;
+
+  }
+
+  template <class HAD, class DEC>
   bool
   GeneratorFilter<HAD, DEC>::endRun( Run& r, EventSetup const& )
   {
@@ -185,8 +206,8 @@ namespace edm
   }
 
   template <class HAD, class DEC>
-  void
-  GeneratorFilter<HAD, DEC>::beginLuminosityBlock( LuminosityBlock const&, EventSetup const& es )
+  bool
+  GeneratorFilter<HAD, DEC>::beginLuminosityBlock( LuminosityBlock &, EventSetup const& es )
   {
 
     if ( !hadronizer_.readSettings(0) )
@@ -214,18 +235,42 @@ namespace edm
 	 << "Failed to initialize hadronizer "
 	 << hadronizer_.classname()
 	 << " for internal parton generation\n";
+
+    return true;
+
   }
 
-  // template <class HAD, class DEC>
-  // bool
-  // GeneratorFilter<HAD, DEC>::endLuminosityBlock(LuminosityBlock &, EventSetup const&)
-  // {
+  template <class HAD, class DEC>
+  bool
+  GeneratorFilter<HAD, DEC>::endLuminosityBlock(LuminosityBlock &, EventSetup const&)
+  {
     // If relevant, record the integration luminosity of this
     // luminosity block here.  To do so, we would need a standard
     // function to invoke on the contained hadronizer that would
     // report the integrated luminosity.
-  //  return true;
-  // }
+    return true;
+  }
+
+  template <class HAD, class DEC>
+  void
+  GeneratorFilter<HAD, DEC>::respondToOpenInputFile(FileBlock const& fb)
+  { }
+
+  template <class HAD, class DEC>
+  void
+  GeneratorFilter<HAD, DEC>::respondToCloseInputFile(FileBlock const& fb)
+  { }
+
+  template <class HAD, class DEC>
+  void
+  GeneratorFilter<HAD, DEC>::respondToOpenOutputFiles(FileBlock const& fb)
+  { }
+
+  template <class HAD, class DEC>
+  void
+  GeneratorFilter<HAD, DEC>::respondToCloseOutputFiles(FileBlock const& fb)
+  { }
+
 }
 
 #endif // gen_GeneratorFilter_h

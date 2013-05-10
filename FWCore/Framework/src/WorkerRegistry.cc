@@ -34,7 +34,7 @@ namespace edm {
     // if the worker is not there, make it
     if (workerIt == m_workerMap.end()){
     
-      auto workerPtr=
+      std::auto_ptr<Worker> workerPtr=
         Factory::get()->makeWorker(p,actReg_->preModuleConstructionSignal_,
                                    actReg_->postModuleConstructionSignal_);
     

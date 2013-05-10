@@ -10,7 +10,6 @@ EDProducts into an Event.
 ----------------------------------------------------------------------*/
 
 #include "FWCore/Framework/interface/ProducerBase.h"
-#include "FWCore/Framework/interface/EDConsumerBase.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "DataFormats/Provenance/interface/ModuleDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSetfwd.h"
@@ -19,7 +18,7 @@ EDProducts into an Event.
 #include <vector>
 
 namespace edm {
-  class EDProducer : public ProducerBase, public EDConsumerBase {
+  class EDProducer : public ProducerBase {
   public:
     template <typename T> friend class WorkerT;
     typedef EDProducer ModuleType;
@@ -42,13 +41,13 @@ namespace edm {
 		   CurrentProcessingContext const* cpcp);
     void doBeginJob();
     void doEndJob();
-    void doBeginRun(RunPrincipal& rp, EventSetup const& c,
+    bool doBeginRun(RunPrincipal& rp, EventSetup const& c,
 		   CurrentProcessingContext const* cpc);
-    void doEndRun(RunPrincipal& rp, EventSetup const& c,
+    bool doEndRun(RunPrincipal& rp, EventSetup const& c,
 		   CurrentProcessingContext const* cpc);
-    void doBeginLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
+    bool doBeginLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
 		   CurrentProcessingContext const* cpc);
-    void doEndLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
+    bool doEndLuminosityBlock(LuminosityBlockPrincipal& lbp, EventSetup const& c,
 		   CurrentProcessingContext const* cpc);
     void doRespondToOpenInputFile(FileBlock const& fb);
     void doRespondToCloseInputFile(FileBlock const& fb);
@@ -65,16 +64,10 @@ namespace edm {
     virtual void produce(Event&, EventSetup const&) = 0;
     virtual void beginJob() {}
     virtual void endJob(){}
-    //The following 4 functions are deprecated
     virtual void beginRun(Run&, EventSetup const&){}
     virtual void endRun(Run&, EventSetup const&){}
     virtual void beginLuminosityBlock(LuminosityBlock&, EventSetup const&){}
     virtual void endLuminosityBlock(LuminosityBlock&, EventSetup const&){}
-
-    virtual void beginRun(Run const&iR, EventSetup const&iE){ beginRun(const_cast<Run&>(iR),iE);}
-    virtual void endRun(Run const& iR, EventSetup const& iE){endRun(const_cast<Run&>(iR),iE);}
-    virtual void beginLuminosityBlock(LuminosityBlock const& iL, EventSetup const& iE){beginLuminosityBlock(const_cast<LuminosityBlock&>(iL),iE);}
-    virtual void endLuminosityBlock(LuminosityBlock const& iL, EventSetup const& iE){endLuminosityBlock(const_cast<LuminosityBlock&>(iL),iE);}
     virtual void respondToOpenInputFile(FileBlock const&) {}
     virtual void respondToCloseInputFile(FileBlock const&) {}
     virtual void respondToOpenOutputFiles(FileBlock const&) {}

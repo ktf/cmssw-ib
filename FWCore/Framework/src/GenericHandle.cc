@@ -36,7 +36,17 @@ void convert_handle(BasicHandle const& orig,
   if(!product){
     throw Exception(errors::LogicError)<<"GenericObject could not find 'obj' member";
   }
-  if(product.typeOf() != result.type()) {
+  if(product.isTypedef()){
+    //For a 'Typedef' the 'ToType' method returns the actual type
+    // this is needed since you are now allowed to 'invoke' methods of a 'Typedef'
+    // only for a 'real' class
+    product = ObjectWithDict(product.typeOf().toType(), product.address());
+    assert(!product.isTypedef());
+  }
+  //NOTE: comparing on type doesn't seem to always work! The problem appears to be if we have a typedef
+  if(product.typeOf() != result.type() &&
+     !product.typeOf().isEquivalentTo(result.type()) &&
+     product.typeOf().typeInfo() != result.type().typeInfo()){
     throw Exception(errors::LogicError) << "GenericObject asked for " << result.type().name()
       << " but was given a " << product.typeOf().name();
   }

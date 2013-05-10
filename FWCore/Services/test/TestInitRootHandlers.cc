@@ -105,7 +105,7 @@ namespace {
          addToMap<double>(s_map);
          isFirst = false;
       }
-      TypeToPrintMap::iterator itFound = s_map.find(iObject.typeOf().name());
+      TypeToPrintMap::iterator itFound = s_map.find(iObject.typeName());
       if(itFound == s_map.end()) {
          return false;
       }
@@ -125,9 +125,9 @@ namespace {
       std::string printName = iName;
       edm::ObjectWithDict objectToPrint = iObject;
       std::string indent(iIndent);
-      if(iObject.typeOf().isPointer()) {
+      if(iObject.isPointer()) {
         std::cout << iIndent << iName << kNameValueSep << formatClassName(iObject.typeOf().name()) << std::hex << iObject.address() << std::dec << "\n";
-         edm::TypeWithDict pointedType = iObject.typeOf().toType(); // for Pointers, I get the real type this way
+         edm::TypeWithDict pointedType = iObject.toType();
          if(edm::TypeWithDict::byName("void") == pointedType ||
             pointedType.isPointer() ||
             iObject.address() == 0) {
@@ -148,6 +148,10 @@ namespace {
          typeName = "<unknown>";
       }
 
+      //see if we are dealing with a typedef
+      if(objectToPrint.isTypedef()) {
+        objectToPrint = edm::ObjectWithDict(objectToPrint.toType(), objectToPrint.address());
+      }
       if(printAsBuiltin(printName, objectToPrint, indent)) {
          return;
       }
@@ -182,7 +186,7 @@ namespace {
                          std::string const& iIndentDelta) {
       edm::ObjectWithDict sizeObj;
       try {
-         iObject.typeOf().functionMemberByName("size").invoke(iObject, &sizeObj);
+         iObject.invoke("size", &sizeObj);
          assert(sizeObj.typeOf().typeInfo() == typeid(size_t));
          size_t size = *reinterpret_cast<size_t*>(sizeObj.address());
          edm::FunctionWithDict atMember;

@@ -24,7 +24,7 @@ public:
    DummyProxy() {}
 protected:
    const value_type* make(const record_type&, const DataKey&) {
-      return static_cast<const value_type*>(nullptr) ;
+      return static_cast<const value_type*>(0) ;
    }
    void invalidateCache() {
    }   

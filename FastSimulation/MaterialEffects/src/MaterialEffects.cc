@@ -27,11 +27,9 @@ MaterialEffects::MaterialEffects(const edm::ParameterSet& matEff,
   : PairProduction(0), Bremsstrahlung(0),MuonBremsstrahlung(0),
     MultipleScattering(0), EnergyLoss(0), 
     NuclearInteraction(0),
-    pTmin(999.), random(engine), use_hardcoded(1)
+    pTmin(999.), random(engine)
 {
   // Set the minimal photon energy for a Brem from e+/-
-
-  use_hardcoded = matEff.getParameter<bool >("use_hardcoded_geometry");
 
   bool doPairProduction     = matEff.getParameter<bool>("PairProduction");
   bool doBremsstrahlung     = matEff.getParameter<bool>("Bremsstrahlung");
@@ -283,10 +281,8 @@ void MaterialEffects::interact(FSimEvent& mySimEvent,
 
     // Simulate a nuclear interaction
     double factor = 1.0;
-    if(use_hardcoded){
-      if (layer.layerNumber() >= 19 && layer.layerNumber() <= 27 ) 
-	factor = theTECFudgeFactor;
-    }
+    if (layer.layerNumber() >= 19 && layer.layerNumber() <= 27 ) 
+      factor = theTECFudgeFactor;
     NuclearInteraction->updateState(myTrack,radlen*factor);
 
     if ( NuclearInteraction->nDaughters() ) { 
@@ -419,7 +415,7 @@ MaterialEffects::radLengths(const TrackerLayer& layer,
 			    ParticlePropagator& myTrack) {
 
   // Thickness of layer
-  theThickness = layer.surface().mediumProperties().radLen();
+  theThickness = layer.surface().mediumProperties()->radLen();
 
   GlobalVector P(myTrack.Px(),myTrack.Py(),myTrack.Pz());
   

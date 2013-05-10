@@ -39,7 +39,7 @@
 #include "FastSimulation/Tracking/plugins/TrajectorySeedProducer.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/GenericTransientTrackingRecHit.h"
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+
 
 using namespace std;
 
@@ -69,8 +69,7 @@ FastTSGFromPropagation::~FastTSGFromPropagation()
 
 }
 
-void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const TrackingRegion& region, 
-					  const TrackerTopology *tTopo, std::vector<TrajectorySeed> & result) {
+void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const TrackingRegion& region, std::vector<TrajectorySeed> & result) {
 
   if ( theResetMethod == "discrete" ) getRescalingFactor(staMuon);
 
@@ -152,7 +151,7 @@ void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const Tracki
 
 	       unsigned int outerId = 0;
 	       for( iterRecHit = theRecHitRangeIteratorBegin; iterRecHit != theRecHitRangeIteratorEnd; ++iterRecHit) {
-		 theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry, tTopo);
+		   theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry);
 		   unsigned int id = theSeedHits.hit()->geographicalId().rawId();
 		   if( preY < 0 ) {
 		       if( id > outerId ) outerId = id;
@@ -162,7 +161,7 @@ void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const Tracki
 		   }
 	       }
 	       for( iterRecHit = theRecHitRangeIteratorBegin; iterRecHit != theRecHitRangeIteratorEnd; ++iterRecHit) {
-		 theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry, tTopo);
+		   theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry);
 		   if( itm->recHit()->hit()->geographicalId().rawId() == theSeedHits.hit()->geographicalId().rawId() ) {
 		       aTrackingRecHit = theSeedHits.hit()->clone();
 	               TransientTrackingRecHit::ConstRecHitPointer recHit = theTTRHBuilder->build(aTrackingRecHit);
@@ -214,7 +213,7 @@ void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const Tracki
 
 	       unsigned int outerId = 0;
 	       for( iterRecHit = theRecHitRangeIteratorBegin; iterRecHit != theRecHitRangeIteratorEnd; ++iterRecHit) {
-		 theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry, tTopo);
+		   theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry);
 		   unsigned int id = theSeedHits.hit()->geographicalId().rawId();
 		   if( preY < 0 ) {
 		       if( id > outerId ) outerId = id;
@@ -224,7 +223,7 @@ void FastTSGFromPropagation::trackerSeeds(const TrackCand& staMuon, const Tracki
 		   }
 	       }
 	       for( iterRecHit = theRecHitRangeIteratorBegin; iterRecHit != theRecHitRangeIteratorEnd; ++iterRecHit) {
-		 theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry, tTopo);
+		   theSeedHits = TrackerRecHit(&(*iterRecHit), theGeometry);
 		   if( outerId == theSeedHits.hit()->geographicalId().rawId() ) {
 		       aTrackingRecHit = theSeedHits.hit()->clone();
 	               TransientTrackingRecHit::ConstRecHitPointer recHit = theTTRHBuilder->build(aTrackingRecHit);

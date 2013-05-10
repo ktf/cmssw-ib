@@ -29,7 +29,7 @@ namespace reco {
     //if (mem.isOperator()) return -1*parser::kIsOperator;  // no, some operators are allowed, e.g. operator[]
     if (! mem.isPublic()) return -1*parser::kIsNotPublic;
     if (mem.isStatic()) return -1*parser::kIsStatic;
-    if ( ! mem.isConst() ) return -1*parser::kIsNotConst;
+    if ( ! mem.typeOf().isConst() ) return -1*parser::kIsNotConst;
     if (mem.name().substr(0, 2) == "__") return -1*parser::kIsFunctionAddedByROOT;
     if (mem.declaringType().id() != type.id()) {
         /*std::cerr << "\nMETHOD OVERLOAD " << mem.name() <<
@@ -39,7 +39,7 @@ namespace reco {
     }
     size_t minArgs = mem.functionParameterSize(true), maxArgs = mem.functionParameterSize(false);
     if ((args.size() < minArgs) || (args.size() > maxArgs)) return -1*parser::kWrongNumberOfArguments;
-    /*std::cerr << "\nMETHOD " << mem.name() << " of " << mem.declaringType().name() 
+    /*std::cerr << "\nMETHOD " << mem.name() << " of " << mem.declaringTy[e().name() 
         << ", min #args = " << minArgs << ", max #args = " << maxArgs 
         << ", args = " << args.size() << std::endl;*/
     if (!args.empty()) {
@@ -61,7 +61,7 @@ namespace reco {
         }
         fixuppedArgs.swap(tmpFixups);
     }
-    /*std::cerr << "\nMETHOD " << mem.name() << " of " << mem.declaringType().name() 
+    /*std::cerr << "\nMETHOD " << mem.name() << " of " << mem.declaringTy[e().name() 
         << ", min #args = " << minArgs << ", max #args = " << maxArgs 
         << ", args = " << args.size() << " fixupped args = " << fixuppedArgs.size() << "(" << casts << " implicit casts)" << std::endl; */
     return casts;
@@ -85,7 +85,7 @@ namespace reco {
       throw parser::Exception(iIterator)
 	<< "No dictionary for class \"" << type.name() << "\".";
     while(type.isPointer() || type.isTypedef()) type = type.toType();
-    type = edm::TypeWithDict(type, 0L); // strip const, volatile, c++ ref, ..
+    type = edm::TypeWithDict(type, edm::TypeModifiers::NoMod); // strip const, volatile, c++ ref, ..
 
     pair<edm::FunctionWithDict, bool> mem; mem.second = false;
 
@@ -135,7 +135,7 @@ namespace reco {
     if(! mem.first) {
       edm::TypeBases bases(type);
       for(auto const& base : bases) {
-	      if((mem = findMethod(edm::BaseWithDict(base).typeOf(), name, args, fixuppedArgs,iIterator,baseError)).first) break;
+	      if((mem = findMethod(edm::BaseWithDict(base).toType(), name, args, fixuppedArgs,iIterator,baseError)).first) break;
 	      if(fatalErrorCondition(baseError)) {
             oError = baseError;
             return mem;
@@ -148,10 +148,11 @@ namespace reco {
       // check for edm::Ref or edm::RefToBase or edm::Ptr
       // std::cout << "Mem.first is null, so looking for templates from type " << type.name() << std::endl;
       if(type.isTemplateInstance()) {
-         std::string name = type.templateName();
-         if(name.compare("edm::Ref") == 0 ||
-            name.compare("edm::RefToBase") == 0 ||
-            name.compare("edm::Ptr") == 0) {
+         edm::TypeTemplateWithDict templ(type);
+         std::string name = templ.name();
+         if(name.compare("Ref") == 0 ||
+            name.compare("RefToBase") == 0 ||
+            name.compare("Ptr") == 0) {
           // in this case  i think 'get' should be taken with no arguments!
           std::vector<AnyMethodArgument> empty, empty2; 
           int error;
