@@ -167,7 +167,6 @@ namespace edm {
       //  iReg.watchPreModule(this,
       //       &SimpleMemoryCheck::preModule);
 
-#ifndef __SANITIZE_ADDRESS__
       typedef MallocOpts::opt_type opt_type;
       MallocOptionSetter& mopts = getGlobalOptionSetter();
 
@@ -195,7 +194,6 @@ namespace edm {
         LogWarning("MemoryCheck")
         << "Malloc options: " << mo << "\n";
       }
-#endif
     }
 
     SimpleMemoryCheck::~SimpleMemoryCheck() {

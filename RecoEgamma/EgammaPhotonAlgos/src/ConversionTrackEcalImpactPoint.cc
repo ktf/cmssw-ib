@@ -115,18 +115,18 @@ void ConversionTrackEcalImpactPoint::initialize() {
   Surface::RotationType rot; // unit rotation matrix
 
 
-  theBarrel_ = new Cylinder(barrelRadius(), Surface::PositionType(0,0,0), rot, 
-				 new SimpleCylinderBounds( barrelRadius()-epsilon, 
+  theBarrel_ = new BoundCylinder( Surface::PositionType(0,0,0), rot, 
+				 SimpleCylinderBounds( barrelRadius()-epsilon, 
 				       		       barrelRadius()+epsilon, 
 						       -barrelHalfLength(), 
 						       barrelHalfLength()));
   theNegativeEtaEndcap_ = 
     new BoundDisk( Surface::PositionType( 0, 0, -endcapZ()), rot, 
-		   new SimpleDiskBounds( 0, endcapRadius(), -epsilon, epsilon));
+		   SimpleDiskBounds( 0, endcapRadius(), -epsilon, epsilon));
   
   thePositiveEtaEndcap_ = 
     new BoundDisk( Surface::PositionType( 0, 0, endcapZ()), rot, 
-		   new SimpleDiskBounds( 0, endcapRadius(), -epsilon, epsilon));
+		   SimpleDiskBounds( 0, endcapRadius(), -epsilon, epsilon));
   
   theInit_ = true;
 

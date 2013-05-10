@@ -5,9 +5,9 @@
  *
  *  Build Alignment Parameter Structure 
  *
- *  $Date: 2013/01/07 20:56:25 $
- *  $Revision: 1.12 $
- *  (last update by $Author: wmtan $)
+ *  $Date: 2010/10/26 20:01:51 $
+ *  $Revision: 1.11 $
+ *  (last update by $Author: flucke $)
  */
 
 #include "Alignment/CommonAlignment/interface/Utilities.h"
@@ -20,7 +20,6 @@ class AlignableExtras;
 class AlignableTracker;
 class AlignableMuon;
 class AlignmentParameters;
-class TrackerTopology;
 
 class AlignmentParameterBuilder 
 {
@@ -72,9 +71,6 @@ public:
 
   /// Remove n Alignables from list 
   void fixAlignables( int n );
-
-  /// Alignable tracker   
-  const AlignableTracker* alignableTracker() const;
 
 private:
   /// First remove all spaces (' ') from char selection 'paramSelChar' (coming

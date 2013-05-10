@@ -22,6 +22,7 @@
 #endif
 
 
+
 class TGeoNode;
 class TGeoVolume;
 class TGStatusBar;
@@ -29,7 +30,7 @@ class TGeoManager;
 class TEveWindowSlot;
 class TEveWindowFrame;
 class TEveElement;
-class FWEveDigitSetScalableMarker;
+class TEvePointSet;
 class TEveScene;
 
 class FWTableWidget;
@@ -95,7 +96,6 @@ public:
 
    int getTopNodeIdx() const { return TMath::Max((int)m_topNodeIdx.value(), 0); }
   
-   FWEveDigitSetScalableMarker* getMarker()  {return m_marker;}
    void transparencyChanged();
    
    void  reloadColors();
@@ -132,10 +132,11 @@ protected:
 
 
    const FWConfiguration*  m_viewersConfig;
+
   
    bool m_enableRedraw;
-   
-   FWEveDigitSetScalableMarker* m_marker;
+
+   TEvePointSet* m_marker;
    FWGeoTopNode* m_eveTopNode;
    TEveScene*    m_eveScene;
 
@@ -144,6 +145,8 @@ protected:
 #endif
    //   void resetSetters();
    //   void makeSetter(TGCompositeFrame* frame, FWParameterBase* param);
+
+   void enableHighlight();
 
    void postConst();
    

@@ -19,7 +19,6 @@ namespace edm { class ParameterSet; class EventSetup; }
 class TrackerGeometry;
 class TrackingRecHit;
 class ClusterShapeHitFilter;
-class TrackerTopology;
 
 class ClusterShapeTrackFilter : public PixelTrackFilter 
 {
@@ -28,8 +27,7 @@ class ClusterShapeTrackFilter : public PixelTrackFilter
                           const edm::EventSetup& es);
   virtual ~ClusterShapeTrackFilter();
   virtual bool operator()
-    (const reco::Track*, const std::vector<const TrackingRecHit *> &hits, 
-     const TrackerTopology *tTopo) const;
+    (const reco::Track*, const std::vector<const TrackingRecHit *> &hits) const;
 
  private:
   float areaParallelogram(const Global2DVector & a,

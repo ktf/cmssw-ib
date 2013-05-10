@@ -19,6 +19,9 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
 
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
@@ -75,7 +78,8 @@ PlotRecTracks::~PlotRecTracks()
 }
 
 /*****************************************************************************/
-string PlotRecTracks::getPixelInfo(const TrackingRecHit* recHit, const TrackerTopology* tTopo, const ostringstream& o, const ostringstream& d)
+string PlotRecTracks::getPixelInfo
+  (const TrackingRecHit* recHit, const ostringstream& o, const ostringstream& d)
 {
   const SiPixelRecHit* pixelRecHit =
     dynamic_cast<const SiPixelRecHit *>(recHit);
@@ -108,7 +112,7 @@ string PlotRecTracks::getPixelInfo(const TrackingRecHit* recHit, const TrackerTo
   info += " | " + o.str();
   }
 
-  info += HitInfo::getInfo(*recHit, tTopo);
+  info += HitInfo::getInfo(*recHit);
 
   info += "\"]";
 
@@ -125,7 +129,7 @@ string PlotRecTracks::getPixelInfo(const TrackingRecHit* recHit, const TrackerTo
 
 /*****************************************************************************/
 string PlotRecTracks::getStripInfo
-  (const TrackingRecHit* recHit, const TrackerTopology* tTopo, const ostringstream& o, const ostringstream& d)
+  (const TrackingRecHit* recHit, const ostringstream& o, const ostringstream& d)
 {
   DetId id = recHit->geographicalId();
   LocalPoint lpos = recHit->localPosition();
@@ -155,7 +159,7 @@ string PlotRecTracks::getStripInfo
   info += " | " + o.str();
   }
 
-  info += HitInfo::getInfo(*recHit, tTopo);
+  info += HitInfo::getInfo(*recHit);
 
   if(stripMatchedRecHit != 0)   info += " matched";
   if(stripProjectedRecHit != 0) info += " projected";
@@ -196,13 +200,8 @@ FreeTrajectoryState PlotRecTracks::getTrajectoryAtOuterPoint
 }
 
 /*****************************************************************************/
-void PlotRecTracks::printRecTracks(const edm::Event& ev, const edm::EventSetup& es)
+void PlotRecTracks::printRecTracks(const edm::Event& ev)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   theHitAssociator = new TrackerHitAssociator(ev);
 
   file << ", If[rt, {AbsolutePointSize[6]";
@@ -267,7 +266,7 @@ cerr << " track[" << i << "] " << recTrack->chi2() << " " << it->chiSquared() <<
         if(pixelRecHit != 0)
         {
           theRecHits.printPixelRecHit(pixelRecHit);
-          file << getPixelInfo(recHit, tTopo, o, d);
+          file << getPixelInfo(recHit, o,d);
         }
       }
       else
@@ -303,7 +302,7 @@ cerr << " track[" << i << "] " << recTrack->chi2() << " " << it->chiSquared() <<
         if(stripMatchedRecHit != 0 ||
            stripProjectedRecHit != 0 ||
            stripRecHit != 0)
-          file << getStripInfo(recHit, tTopo, o,d);
+          file << getStripInfo(recHit, o,d);
       }
       }
     }
@@ -365,7 +364,7 @@ cerr << " track[" << i << "] " << recTrack->chi2() << " " << it->chiSquared() <<
 
     // Ecal Barrel
     Cylinder::ConstCylinderPointer theCylinder =
-        Cylinder::build(129.f, Surface::PositionType(0.,0.,0), rot);
+        Cylinder::build(Surface::PositionType(0.,0.,0), rot, 129.);
     tsos = thePropagator->propagate(fts,*theCylinder);
 
     if(tsos.isValid() &&

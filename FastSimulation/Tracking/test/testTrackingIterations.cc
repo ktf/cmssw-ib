@@ -11,8 +11,12 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TECDetId.h" 
 
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiTrackerGSRecHit2DCollection.h" 
@@ -46,8 +50,8 @@ public :
   explicit testTrackingIterations(const edm::ParameterSet&);
   ~testTrackingIterations();
 
-  virtual void produce(edm::Event&, const edm::EventSetup& ) override;
-  virtual void beginRun(edm::Run const&, edm::EventSetup const& ) override;
+  virtual void produce(edm::Event&, const edm::EventSetup& );
+  virtual void beginRun(edm::Run&, edm::EventSetup const& );
 private:
   
   // See RecoParticleFlow/PFProducer/interface/PFProducer.h
@@ -327,7 +331,7 @@ testTrackingIterations::~testTrackingIterations()
 
 }
 
-void testTrackingIterations::beginRun(edm::Run const&, edm::EventSetup const& es)
+void testTrackingIterations::beginRun(edm::Run& run, edm::EventSetup const& es)
 {
   // init Particle data table (from Pythia)
   edm::ESHandle < HepPDT::ParticleDataTable > pdt;
@@ -348,12 +352,6 @@ void testTrackingIterations::beginRun(edm::Run const&, edm::EventSetup const& es
 void
 testTrackingIterations::produce(edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHand;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHand);
-  const TrackerTopology *tTopo=tTopoHand.product();
-
-
 
   ++totalNEvt;
 
@@ -545,7 +543,28 @@ testTrackingIterations::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 	
 	const DetId& theDetId = ihit->geographicalId();
 	//	theGeomDet = theGeometry->idToDet(theDetId);
-	theLayerNumber=tTopo->layer(theDetId);
+	theSubDetId = theDetId.subdetId(); 
+	if ( theSubDetId == StripSubdetector::TIB) { 
+	  TIBDetId tibid(theDetId.rawId()); 
+	  theLayerNumber = tibid.layer();
+	} else if ( theSubDetId ==  StripSubdetector::TOB ) { 
+	  TOBDetId tobid(theDetId.rawId()); 
+	  theLayerNumber = tobid.layer();
+	} else if ( theSubDetId ==  StripSubdetector::TID) { 
+	  TIDDetId tidid(theDetId.rawId());
+	  theLayerNumber = tidid.wheel();
+	  // theRingNumber = tidid.ring();
+	} else if ( theSubDetId ==  StripSubdetector::TEC ) { 
+	  TECDetId tecid(theDetId.rawId()); 
+	  theLayerNumber = tecid.wheel(); 
+	  // theRingNumber = tecid.ring();
+	} else if ( theSubDetId ==  PixelSubdetector::PixelBarrel ) { 
+	  PXBDetId pxbid(theDetId.rawId()); 
+	  theLayerNumber = pxbid.layer(); 
+	} else if ( theSubDetId ==  PixelSubdetector::PixelEndcap ) { 
+	  PXFDetId pxfid(theDetId.rawId()); 
+	  theLayerNumber = pxfid.disk();  
+	}
 	if(hit==0){
 	  const SiTrackerGSMatchedRecHit2D * theFirstSeedingRecHit = (const SiTrackerGSMatchedRecHit2D*) (&(*(ihit)));
 	  firstID = theFirstSeedingRecHit->simtrackId();
@@ -592,7 +611,7 @@ testTrackingIterations::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 		iterRecHit != theRecHitRangeIteratorEnd; 
 		++iterRecHit) {
 	    
-	    theCurrentRecHit = TrackerRecHit(&(*iterRecHit),theGeometry,tTopo);
+	    theCurrentRecHit = TrackerRecHit(&(*iterRecHit),theGeometry);
 	    std::cout << hitnum << " Hit DetID = " <<   theCurrentRecHit.subDetId() << "\tLayer = " << theCurrentRecHit.layerNumber() << std::endl;	
 	    hitnum++;
 	  }
@@ -656,8 +675,28 @@ testTrackingIterations::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 	
 	const DetId& theDetId = ihit->geographicalId();
 	//	theGeomDet = theGeometry->idToDet(theDetId);
-	theLayerNumber=tTopo->layer(theDetId);
-
+	theSubDetId = theDetId.subdetId(); 
+	if ( theSubDetId == StripSubdetector::TIB) { 
+	  TIBDetId tibid(theDetId.rawId()); 
+	  theLayerNumber = tibid.layer();
+	} else if ( theSubDetId ==  StripSubdetector::TOB ) { 
+	  TOBDetId tobid(theDetId.rawId()); 
+	  theLayerNumber = tobid.layer();
+	} else if ( theSubDetId ==  StripSubdetector::TID) { 
+	  TIDDetId tidid(theDetId.rawId());
+	  theLayerNumber = tidid.wheel();
+	  //	  theRingNumber = tidid.ring();
+	} else if ( theSubDetId ==  StripSubdetector::TEC ) { 
+	  TECDetId tecid(theDetId.rawId()); 
+	  theLayerNumber = tecid.wheel(); 
+	  //	  theRingNumber = tecid.ring();
+	} else if ( theSubDetId ==  PixelSubdetector::PixelBarrel ) { 
+	  PXBDetId pxbid(theDetId.rawId()); 
+	  theLayerNumber = pxbid.layer(); 
+	} else if ( theSubDetId ==  PixelSubdetector::PixelEndcap ) { 
+	  PXFDetId pxfid(theDetId.rawId()); 
+	  theLayerNumber = pxfid.disk();  
+	}
 	if(hit==0){
 	  const SiTrackerGSMatchedRecHit2D * theFirstSeedingRecHit = (const SiTrackerGSMatchedRecHit2D*) (&(*(ihit)));
 	  firstID = theFirstSeedingRecHit->simtrackId();
@@ -705,7 +744,7 @@ testTrackingIterations::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 		iterRecHit != theRecHitRangeIteratorEnd; 
 		++iterRecHit) {
 	    
-	    theCurrentRecHit = TrackerRecHit(&(*iterRecHit),theGeometry,tTopo);
+	    theCurrentRecHit = TrackerRecHit(&(*iterRecHit),theGeometry);
 	    std::cout << hitnum << " Hit DetID = " <<   theCurrentRecHit.subDetId() << "\tLayer = " << theCurrentRecHit.layerNumber() << std::endl;	
 	    hitnum++;
 	    

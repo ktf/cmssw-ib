@@ -118,9 +118,9 @@ bool TrackExtrapolator::propagateTrackToVolume( const reco::Track& fTrack,
 
   TrajectoryStateOnSurface 
     propagatedInfo = fPropagator.propagate (trackState, 
-					    *Cylinder::build (volume.minR(), Surface::PositionType (0,0,0),
-							      Surface::RotationType()
-							     )
+					    *Cylinder::build (Surface::PositionType (0,0,0),
+							      Surface::RotationType(),
+							      volume.minR())
 					    );
 
   // if the track went through either side of the endcaps, repropagate the track

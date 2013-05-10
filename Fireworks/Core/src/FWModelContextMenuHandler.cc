@@ -8,7 +8,7 @@
 //
 // Original Author:  Chris Jones
 //         Created:  Tue Sep 22 13:26:04 CDT 2009
-// $Id: FWModelContextMenuHandler.cc,v 1.26 2013/01/25 19:36:33 wmtan Exp $
+// $Id: FWModelContextMenuHandler.cc,v 1.25 2012/08/28 22:25:42 wmtan Exp $
 //
 
 // system include files
@@ -16,7 +16,6 @@
 #include "TGMenu.h"
 #include "KeySymbols.h"
 
-#include "FWCore/Utilities/interface/FunctionWithDict.h"
 #include "FWCore/Utilities/interface/ObjectWithDict.h"
 #include "FWCore/Utilities/interface/TypeWithDict.h"
 #include "TClass.h"
@@ -259,7 +258,7 @@ FWModelContextMenuHandler::showSelectedModelContext(Int_t iX, Int_t iY, FWViewCo
          edm::TypeWithDict rtype(edm::TypeWithDict::byName(id.item()->modelType()->GetName()));
          edm::ObjectWithDict o(rtype, const_cast<void *>(id.item()->modelData(id.index())));
          edm::TypeMemberQuery inh =  edm::TypeMemberQuery::InheritedAlso;
-         if ( rtype.functionMemberByName("print",edm::TypeWithDict(edm::TypeWithDict::byName("void (std::ostream&)"), Long_t(kIsConstant)), 0, inh))
+         if ( rtype.functionMemberByName("print",edm::TypeWithDict(edm::TypeWithDict::byName("void (std::ostream&)"), edm::TypeModifiers::Const), edm::TypeModifiers::NoMod, inh))
          {
             m_modelPopup->EnableEntry(kPrint);
             // std::cout <<  "Enable " <<std::endl;

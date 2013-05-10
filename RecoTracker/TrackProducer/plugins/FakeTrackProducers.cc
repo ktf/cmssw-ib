@@ -1,6 +1,6 @@
 
 //
-// $Id: FakeTrackProducers.cc,v 1.2 2013/02/27 14:58:17 muzaffar Exp $
+// $Id: FakeTrackProducers.cc,v 1.1 2012/09/12 15:59:34 gpetrucc Exp $
 //
 
 /**
@@ -8,7 +8,7 @@
   \brief    Matcher of reconstructed objects to other reconstructed objects using the tracks inside them 
             
   \author   Giovanni Petrucciani
-  \version  $Id: FakeTrackProducers.cc,v 1.2 2013/02/27 14:58:17 muzaffar Exp $
+  \version  $Id: FakeTrackProducers.cc,v 1.1 2012/09/12 15:59:34 gpetrucc Exp $
 */
 
 
@@ -43,7 +43,7 @@ class FakeTrackProducer : public edm::EDProducer {
       explicit FakeTrackProducer(const edm::ParameterSet & iConfig);
       virtual ~FakeTrackProducer() { }
 
-      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup) override;
+      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
     private:
       /// Labels for input collections
       edm::InputTag src_;

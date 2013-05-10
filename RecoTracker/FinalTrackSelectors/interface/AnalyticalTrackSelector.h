@@ -6,9 +6,9 @@
  * 
  * \author Paolo Azzurri, Giovanni Petrucciani 
  *
- * \version $Revision: 1.22 $
+ * \version $Revision: 1.21 $
  *
- * $Id: AnalyticalTrackSelector.h,v 1.22 2013/02/28 09:57:34 muzaffar Exp $
+ * $Id: AnalyticalTrackSelector.h,v 1.21 2012/03/19 12:44:20 dmytro Exp $
  *
  */
 
@@ -49,7 +49,7 @@ namespace reco { namespace modules {
         protected:
             typedef math::XYZPoint Point;
             /// process one event
-            void produce( edm::Event& evt, const edm::EventSetup& es )  override;
+            void produce( edm::Event& evt, const edm::EventSetup& es ) ;
  
             /// copy only the tracks, not extras and rechits (for AOD)
             bool copyExtras_;

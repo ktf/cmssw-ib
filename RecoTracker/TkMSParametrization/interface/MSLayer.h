@@ -6,8 +6,6 @@
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoRange.h"
 #include <iosfwd>
 
-#include "FWCore/Utilities/interface/GCC11Compatibility.h"
-
 class DetLayer;
 class MSLayersKeeper;
 
@@ -29,18 +27,12 @@ public:
   };
 
 public:
-  MSLayer(const DetLayer* layer, DataX0 dataX0 = DataX0(0) ) dso_hidden;
+  MSLayer(const DetLayer* layer, DataX0 dataX0 = DataX0(0) );
   MSLayer() { }
 
   MSLayer(GeomDetEnumerators::Location part, float position, Range range, 
 	   float halfThickness = 0., 
-	   DataX0 dataX0 = DataX0(0) ) dso_hidden;
-
-
-  // sequential number to be used in "maps"
-  int seqNum() const { return theSeqNum;}
-  // void setSeqNum(int sq) { theSeqNum=sq;}
-
+	   DataX0 dataX0 = DataX0(0) );
 
   const Range & range() const  { return theRange; }
  
@@ -48,18 +40,13 @@ public:
   float position() const { return thePosition; }
   float halfThickness() const { return theHalfThickness; }
 
-  float x0(float cotTheta) const dso_hidden;
-  float sumX0D(float cotTheta) const dso_hidden; 
+  float x0(float cotTheta) const;
+  float sumX0D(float cotTheta) const; 
 
-  
-  bool operator== (const MSLayer &o) const dso_hidden;
-  bool operator<  (const MSLayer &o) const dso_hidden;
-  
-  std::pair<PixelRecoPointRZ,bool> crossing(const PixelRecoLineRZ &line) const  dso_hidden;
-  std::pair<PixelRecoPointRZ,bool> crossing(const SimpleLineRZ &line) const  dso_hidden;
-
- 
- float distance2(const PixelRecoPointRZ & point) const  dso_hidden;
+  bool operator== (const MSLayer &o) const;
+  bool operator<  (const MSLayer &o) const;
+  std::pair<PixelRecoPointRZ,bool> crossing(const PixelRecoLineRZ &line) const;
+  float distance(const PixelRecoPointRZ & point) const;
 
 private:
 
@@ -67,8 +54,6 @@ private:
   float thePosition;
   Range theRange;
   float theHalfThickness;
-  int theSeqNum;
-
   DataX0 theX0Data;
 
   friend struct MSLayersKeeper;
@@ -76,6 +61,6 @@ private:
 
 };
 
-std::ostream& operator<<( std::ostream& s, const MSLayer & l)  dso_hidden;
-std::ostream& operator<<( std::ostream& s, const MSLayer::DataX0 & d)  dso_hidden;
+std::ostream& operator<<( std::ostream& s, const MSLayer & l);
+std::ostream& operator<<( std::ostream& s, const MSLayer::DataX0 & d);
 #endif

@@ -17,7 +17,7 @@
 //
 // Original Author:  Ursula Berthon, Claude Charlot
 //         Created:  Mon Mar 27 13:22:06 CEST 2006
-// $Id: PixelHitMatcher.h,v 1.32 2013/01/02 18:59:12 dlange Exp $
+// $Id: PixelHitMatcher.h,v 1.31 2011/01/14 21:23:42 chamont Exp $
 //
 //
 
@@ -48,7 +48,6 @@ class MagneticField;
 class GeometricSearchTracker;
 class LayerMeasurements;
 class TrackerGeometry;
-class TrackerTopology;
 
 class RecHitWithDist
  {
@@ -157,9 +156,7 @@ class PixelHitMatcher
     void setES( const MagneticField *, const MeasurementTracker * theMeasurementTracker, const TrackerGeometry * trackerGeometry ) ;
 
     std::vector<std::pair<RecHitWithDist,ConstRecHitPointer> >
-    compatibleHits(const GlobalPoint& xmeas, const GlobalPoint& vprim, 
-		   float energy, float charge,
-		   const TrackerTopology *tTopo) ;
+    compatibleHits(const GlobalPoint& xmeas, const GlobalPoint& vprim, float energy, float charge ) ;
 
     // compatibleSeeds(edm::Handle<TrajectorySeedCollection> &seeds, const GlobalPoint& xmeas,
     std::vector<SeedWithInfo>

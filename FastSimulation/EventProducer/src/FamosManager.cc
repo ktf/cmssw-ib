@@ -8,7 +8,6 @@
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/Provenance/interface/EventID.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 
@@ -109,7 +108,7 @@ FamosManager::~FamosManager()
 }
 
 void 
-FamosManager::setupGeometryAndField(edm::Run const& run, const edm::EventSetup & es)
+FamosManager::setupGeometryAndField(edm::Run & run, const edm::EventSetup & es)
 {
   // Particle data table (from Pythia)
   edm::ESHandle < HepPDT::ParticleDataTable > pdt;
@@ -174,8 +173,7 @@ FamosManager::setupGeometryAndField(edm::Run const& run, const edm::EventSetup &
 void 
 FamosManager::reconstruct(const HepMC::GenEvent* evt,
 			  const reco::GenParticleCollection* particles,
-			  const HepMC::GenEvent* pu,
-			  const TrackerTopology *tTopo)
+			  const HepMC::GenEvent* pu)
 {
 
   //  myGenEvent = evt;
@@ -206,7 +204,7 @@ FamosManager::reconstruct(const HepMC::GenEvent* evt,
     */
     
     // And propagate the particles through the detector
-    myTrajectoryManager->reconstruct(tTopo);
+    myTrajectoryManager->reconstruct();
     /*
       mySimEvent->print();
       std::cout << "=========================================" 
@@ -228,11 +226,11 @@ FamosManager::reconstruct(const HepMC::GenEvent* evt,
   
 }
 
-void FamosManager::reconstruct(const reco::GenParticleCollection* particles, const TrackerTopology *tTopo){
+void FamosManager::reconstruct(const reco::GenParticleCollection* particles){
   iEvent++;
   edm::EventID id(m_pRunNumber,1U,iEvent);
   mySimEvent->fill(*particles,id);
-  myTrajectoryManager->reconstruct(tTopo);
+  myTrajectoryManager->reconstruct();
   if ( myCalorimetry ) myCalorimetry->reconstruct();
 
   

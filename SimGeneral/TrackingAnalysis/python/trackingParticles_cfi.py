@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 mergedtruth = cms.EDProducer("TrackingTruthProducer",
 
-    mixLabel = cms.string('mix'),
     simHitLabel = cms.string('g4SimHits'),
     volumeRadius = cms.double(1200.0),
     vertexDistanceCut = cms.double(0.003),

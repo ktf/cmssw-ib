@@ -29,7 +29,7 @@
 #include "Utilities/Timing/interface/TimingReport.h"
 #include "Utilities/Timing/interface/TimerStack.h"
 
-class TrackerTopology;
+
 
 
 class TrackingTruthProducer : public edm::EDProducer
@@ -43,6 +43,8 @@ private:
 
     void produce( edm::Event &, const edm::EventSetup & );
 
+    int LayerFromDetid(const unsigned int&);
+
     edm::ParameterSet conf_;
 
     std::vector<std::string> dataLabels_;
@@ -53,7 +55,6 @@ private:
     double                   volumeZ_;
     bool                     mergedBremsstrahlung_;
     bool                     removeDeadModules_;
-    std::string              mixLabel_;
     std::string              simHitLabel_;
 
     std::string MessageCategory_;
@@ -117,12 +118,11 @@ private:
         std::auto_ptr<TrackingParticleCollection> & tPC
     );
 
-    void createTrackingTruth(const TrackerTopology *tTopo);
+    void createTrackingTruth();
 
     bool setTrackingParticle(
         SimTrack const &,
-        TrackingParticle &,
-	const TrackerTopology *tTopo
+        TrackingParticle &
     );
 
     int setTrackingVertex(

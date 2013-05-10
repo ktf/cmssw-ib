@@ -13,7 +13,7 @@
 //
 // Original Author:  Giuseppe Cerati
 //         Created:  Mon Sep 17 10:31:30 CEST 2007
-// $Id: TestOutliers.cc,v 1.16 2013/01/09 03:47:51 dlange Exp $
+// $Id: TestOutliers.cc,v 1.14 2012/01/24 08:58:27 innocent Exp $
 //
 //
 
@@ -45,8 +45,12 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/ErrorFrameTransformer.h"
 #include "CommonTools/RecoAlgos/interface/RecoTrackSelector.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -161,11 +165,6 @@ TestOutliers::~TestOutliers()
 // ------------ method called to for each event  ------------
 void
 TestOutliers::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  iSetup.get<IdealGeometryRecord>().get(tTopo);
-
-
 
   using namespace edm;
   using namespace std;
@@ -186,8 +185,8 @@ TestOutliers::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   theAssociatorOld = new TrackAssociatorByHits(psetold);
   theAssociatorOut = new TrackAssociatorByHits(psetout);
-  reco::RecoToSimCollection recSimCollOut=theAssociatorOut->associateRecoToSim(tracksOut, tps, &iEvent,&iSetup);
-  reco::RecoToSimCollection recSimCollOld=theAssociatorOld->associateRecoToSim(tracksOld, tps, &iEvent,&iSetup);
+  reco::RecoToSimCollection recSimCollOut=theAssociatorOut->associateRecoToSim(tracksOut, tps, &iEvent);
+  reco::RecoToSimCollection recSimCollOld=theAssociatorOld->associateRecoToSim(tracksOld, tps, &iEvent);
   sizeOut->Fill(recSimCollOut.size());
   sizeOld->Fill(recSimCollOld.size());
   sizeOutT->Fill(tracksOut->size());
@@ -584,8 +583,14 @@ TestOutliers::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	      
 	    //find the layer of the hit
 	    int subdetId = (*itHit)->geographicalId().subdetId();
+	    int layerId  = 0;
 	    DetId id = (*itHit)->geographicalId();
-	    int layerId  = tTopo->layer(id);
+	    if (id.subdetId()==3) layerId = ((TIBDetId)(id)).layer();
+	    if (id.subdetId()==5) layerId = ((TOBDetId)(id)).layer();
+	    if (id.subdetId()==1) layerId = ((PXBDetId)(id)).layer();
+	    if (id.subdetId()==4) layerId = ((TIDDetId)(id)).wheel();
+	    if (id.subdetId()==6) layerId = ((TECDetId)(id)).wheel();
+	    if (id.subdetId()==2) layerId = ((PXFDetId)(id)).disk();
 	    layerval = subdetId*10+layerId;
       
 	    //LogTrace("TestOutliers") << "gpos";		  

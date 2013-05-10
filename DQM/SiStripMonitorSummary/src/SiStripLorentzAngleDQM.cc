@@ -39,13 +39,8 @@ void SiStripLorentzAngleDQM::getActiveDetIds(const edm::EventSetup & eSetup){
 
 
 // -----
-void SiStripLorentzAngleDQM::fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds, const edm::EventSetup& es){
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
+void SiStripLorentzAngleDQM::fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds){
+   
   // -----
   // LA on layer-level : fill at once all detIds belonging to same layer when encountering first detID in the layer 
 
@@ -59,13 +54,13 @@ void SiStripLorentzAngleDQM::fillSummaryMEs(const std::vector<uint32_t> & select
 	<< std::endl;
     }    
     else if (SummaryOnLayerLevel_On_) {    
-      if( fillNext) { fillMEsForLayer(/*SummaryMEsMap_,*/ selectedDetIds[i],tTopo);} 
-      if( getLayerNameAndId(selectedDetIds[i+1],tTopo)==getLayerNameAndId(selectedDetIds[i],tTopo)){ fillNext=false;}
+      if( fillNext) { fillMEsForLayer(/*SummaryMEsMap_,*/ selectedDetIds[i]);} 
+      if( getLayerNameAndId(selectedDetIds[i+1])==getLayerNameAndId(selectedDetIds[i])){ fillNext=false;}
       else { fillNext=true;}
     } 
     else if (SummaryOnStringLevel_On_) {
-      if( fillNext) { fillMEsForLayer(/*SummaryMEsMap_,*/ selectedDetIds[i],tTopo);} 
-      if( getStringNameAndId(selectedDetIds[i+1],tTopo)==getStringNameAndId(selectedDetIds[i],tTopo)){ fillNext=false;}
+      if( fillNext) { fillMEsForLayer(/*SummaryMEsMap_,*/ selectedDetIds[i]);} 
+      if( getStringNameAndId(selectedDetIds[i+1])==getStringNameAndId(selectedDetIds[i])){ fillNext=false;}
       else { fillNext=true;}
     } 
   }
@@ -124,7 +119,7 @@ void SiStripLorentzAngleDQM::fillSummaryMEs(const std::vector<uint32_t> & select
 
 
 // -----
-void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMap_,*/ uint32_t selDetId_, const TrackerTopology* tTopo){
+void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMap_,*/ uint32_t selDetId_){  
 
   SiStripHistoId hidmanager;
 
@@ -152,31 +147,31 @@ void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selME
 
   if (SummaryOnStringLevel_On_) {  //FILLING FOR STRING LEVEL
 
-    hSummary_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getStringNameAndId(selDetId_,tTopo).first, "") ;
-    std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getStringNameAndId(selDetId_,tTopo).second);
+    hSummary_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getStringNameAndId(selDetId_).first, "") ;
+    std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getStringNameAndId(selDetId_).second);
     
     ModMEs selME_;
     if ( selMEsMapIter_ != SummaryMEsMap_.end())
       selME_ =selMEsMapIter_->second;
 
-    getSummaryMEs(selME_,selDetId_,tTopo);
+    getSummaryMEs(selME_,selDetId_ );
   
     // -----   					   
     sameLayerDetIds_.clear();
    
     if(selSubDetId_==3){  //  TIB
-      if(tTopo->tibIsInternalString(selDetId_)){
-	substructure_.getTIBDetectors(activeDetIds, sameLayerDetIds_, tTopo->tibLayer(selDetId_),0,1,tTopo->tibString(selDetId_));
+      if(TIBDetId(selDetId_).isInternalString()){
+	substructure_.getTIBDetectors(activeDetIds, sameLayerDetIds_, TIBDetId(selDetId_).layerNumber(),0,1,TIBDetId(selDetId_).stringNumber());
       }
-      if(tTopo->tibIsExternalString(selDetId_)){
-	substructure_.getTIBDetectors(activeDetIds, sameLayerDetIds_, tTopo->tibLayer(selDetId_),0,2,tTopo->tibString(selDetId_));
+      if(TIBDetId(selDetId_).isExternalString()){
+	substructure_.getTIBDetectors(activeDetIds, sameLayerDetIds_, TIBDetId(selDetId_).layerNumber(),0,2,TIBDetId(selDetId_).stringNumber());
       } 
     }
     else if(selSubDetId_==4){  // TID
       substructure_.getTIDDetectors(activeDetIds, sameLayerDetIds_, 0,0,0,0);
     }
     else if(selSubDetId_==5){  // TOB
-      substructure_.getTOBDetectors(activeDetIds, sameLayerDetIds_, tTopo->tobLayer(selDetId_),0,tTopo->tobRod(selDetId_));
+      substructure_.getTOBDetectors(activeDetIds, sameLayerDetIds_, TOBDetId(selDetId_).layerNumber(),0,TOBDetId(selDetId_).rodNumber());
     }
     else if(selSubDetId_==6){  // TEC
       substructure_.getTECDetectors(activeDetIds, sameLayerDetIds_, 0,0,0,0,0,0);
@@ -211,7 +206,7 @@ void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selME
       return;
     }
     
-    hSummaryOfCumul_name = hidmanager.createHistoLayer(hSummaryOfCumul_description, "layer", getStringNameAndId(selDetId_,tTopo).first, "") ;
+    hSummaryOfCumul_name = hidmanager.createHistoLayer(hSummaryOfCumul_description, "layer", getStringNameAndId(selDetId_).first, "") ;
     
     for(unsigned int i=0;i< sameLayerDetIds_.size(); i++){
 	selME_.SummaryOfCumulDistr->Fill(lorentzangleHandle_->getLorentzAngle(sameLayerDetIds_[i]));
@@ -221,22 +216,22 @@ void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selME
   
   else { //FILLING FOR LAYER LEVEL
 
-    std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getLayerNameAndId(selDetId_,tTopo).second);
+    std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getLayerNameAndId(selDetId_).second);
     
     ModMEs selME_;
     if ( selMEsMapIter_ != SummaryMEsMap_.end())
       selME_ =selMEsMapIter_->second;
     
-    getSummaryMEs(selME_,selDetId_,tTopo);
+    getSummaryMEs(selME_,selDetId_ );
     
     if(hPSet_.getParameter<bool>("FillSummaryProfileAtLayerLevel")){
 
-      hSummary_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getLayerNameAndId(selDetId_,tTopo).first, "") ;    
+      hSummary_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getLayerNameAndId(selDetId_).first, "") ;    
     
       // -----   					   
       sameLayerDetIds_.clear();
 
-      sameLayerDetIds_=GetSameLayerDetId(activeDetIds,selDetId_,tTopo);     
+      sameLayerDetIds_=GetSameLayerDetId(activeDetIds,selDetId_);     
 
       for(unsigned int i=0;i< sameLayerDetIds_.size(); i++){
 	  selME_.SummaryOfProfileDistr->Fill(i+1,lorentzangleHandle_->getLorentzAngle(sameLayerDetIds_[i]));
@@ -267,7 +262,7 @@ void SiStripLorentzAngleDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selME
 	return;
       }
     
-      hSummaryOfCumul_name = hidmanager.createHistoLayer(hSummaryOfCumul_description, "layer", getLayerNameAndId(selDetId_,tTopo).first, "") ;
+      hSummaryOfCumul_name = hidmanager.createHistoLayer(hSummaryOfCumul_description, "layer", getLayerNameAndId(selDetId_).first, "") ;
     
       for(unsigned int i=0;i< sameLayerDetIds_.size(); i++){
 	  selME_.SummaryOfCumulDistr->Fill(lorentzangleHandle_->getLorentzAngle(sameLayerDetIds_[i]));

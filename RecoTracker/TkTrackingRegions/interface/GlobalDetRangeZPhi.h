@@ -3,7 +3,7 @@
 
 #include <utility>
 
-class Plane;
+class BoundPlane;
 
 /** Implementation class for PhiZMeasurementEstimator etc.
  */
@@ -13,7 +13,7 @@ public:
 
   typedef std::pair<float,float> Range;
 
-  GlobalDetRangeZPhi( const Plane& det);
+  GlobalDetRangeZPhi( const BoundPlane& det);
 
   Range zRange() const { return theZRange;}
   Range phiRange() const { return thePhiRange;}

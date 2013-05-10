@@ -148,7 +148,8 @@ namespace edm {
                        if(itFound->second.maker_->saveConfiguration()) {
                          itFound->second.pset_->addUntrackedParameter("@save_config", true);
                        }
-                       std::string type(typeDemangle(itType->name()));
+                       std::string type;
+                       typeDemangle(itType->name(), type);
                        LogInfo("Configuration") << "Warning: You have reconfigured service\n"
                                  <<  "'" << type << "' in a subprocess.\n"
                                  << "This service has already been configured.\n"

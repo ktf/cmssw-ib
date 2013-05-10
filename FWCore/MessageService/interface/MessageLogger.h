@@ -27,7 +27,6 @@
 #include <string>
 #include <set>
 #include <map>
-#include <vector>
 
 // user include files
 
@@ -40,7 +39,6 @@
 // forward declarations
 
 namespace edm  {
-class ModuleDescription;
 class ParameterSet;
 namespace service  {
 
@@ -147,9 +145,7 @@ private:
   bool nonModule_infoEnabled;
   bool nonModule_warningEnabled;  
   bool nonModule_errorEnabled;  
-
-  std::vector<ModuleDescription const*> moduleStack_;
-
+  
 };  // MessageLogger
 
   inline

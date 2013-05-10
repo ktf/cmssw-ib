@@ -100,14 +100,14 @@ typedef std::map<edm::ParameterSetID, edm::ParameterSetBlob> ParameterSetMap;
 
     void printHistory(std::string const& iIndent = std::string("  ")) const;
     void printEventSetupHistory(ParameterSetMap const& iPSM,
-                                std::vector<std::string> const& iFindMatch,
+                                std::string const& iFindMatch,
                                 std::ostream& oErrorLog) const;
     void printOtherModulesHistory(ParameterSetMap const& iPSM,
                                   ModuleToIdBranches const&,
-                                  std::vector<std::string> const& iFindMatch,
+                                  std::string const& iFindMatch,
                                   std::ostream& oErrorLog) const;
     void printTopLevelPSetsHistory(ParameterSetMap const& iPSM,
-                                   std::vector<std::string> const& iFindMatch,
+                                   std::string const& iFindMatch,
                                    std::ostream& oErrorLog) const;
 
     edm::ProcessConfigurationID
@@ -176,7 +176,7 @@ std::string eventSetupComponent(char const* iType,
 }
 
 void HistoryNode::printEventSetupHistory(ParameterSetMap const& iPSM,
-                                         std::vector<std::string> const& iFindMatch,
+                                         std::string const& iFindMatch,
                                          std::ostream& oErrorLog) const {
   for(const_iterator itH = begin(), e = end();
        itH != e;
@@ -195,16 +195,7 @@ void HistoryNode::printEventSetupHistory(ParameterSetMap const& iPSM,
                                                    *itM,
                                                    processConfig,
                                                    itH->processName());
-        bool foundMatch = true;
-        if(!iFindMatch.empty()) {
-          for (auto const& stringToFind : iFindMatch) {
-            if (retValue.find(stringToFind) == std::string::npos) {
-              foundMatch = false;
-              break;
-            }
-          }
-        }
-        if (foundMatch) {
+        if(iFindMatch.empty() or retValue.find(iFindMatch) != std::string::npos) {
           sourceStrings.push_back(std::move(retValue));
         }
       }
@@ -215,16 +206,7 @@ void HistoryNode::printEventSetupHistory(ParameterSetMap const& iPSM,
                                                    *itM,
                                                    processConfig,
                                                    itH->processName());
-        bool foundMatch = true;
-        if(!iFindMatch.empty()) {
-          for (auto const& stringToFind : iFindMatch) {
-            if (retValue.find(stringToFind) == std::string::npos) {
-              foundMatch = false;
-              break;
-            }
-          }
-        }
-        if (foundMatch) {
+        if(iFindMatch.empty() or retValue.find(iFindMatch) != std::string::npos) {
           moduleStrings.push_back(std::move(retValue));
         }
       }
@@ -256,7 +238,7 @@ std::string nonProducerComponent(std::string const& iCompName,
 
 void HistoryNode::printOtherModulesHistory(ParameterSetMap const& iPSM,
                                            ModuleToIdBranches const& iModules,
-                                           std::vector<std::string> const& iFindMatch,
+                                           std::string const& iFindMatch,
                                            std::ostream& oErrorLog) const {
   for(const_iterator itH = begin(), e = end();
        itH != e;
@@ -277,16 +259,7 @@ void HistoryNode::printOtherModulesHistory(ParameterSetMap const& iPSM,
                                                     *itM,
                                                     processConfig,
                                                     itH->processName()));
-          bool foundMatch = true;
-          if(!iFindMatch.empty()) {
-            for (auto const& stringToFind : iFindMatch) {
-              if (retValue.find(stringToFind) == std::string::npos) {
-                foundMatch = false;
-                break;
-              }
-            }
-          }
-          if (foundMatch) {
+          if(iFindMatch.empty() or retValue.find(iFindMatch) != std::string::npos) {
             moduleStrings.push_back(std::move(retValue));
           }
         }
@@ -320,7 +293,7 @@ static std::string topLevelPSet(std::string const& iName,
 
 
 void HistoryNode::printTopLevelPSetsHistory(ParameterSetMap const& iPSM,
-                                            std::vector<std::string> const& iFindMatch,
+                                            std::string const& iFindMatch,
                                             std::ostream& oErrorLog) const {
   for(const_iterator itH = begin(), e = end();
       itH != e;
@@ -353,17 +326,7 @@ void HistoryNode::printTopLevelPSetsHistory(ParameterSetMap const& iPSM,
           continue;
         }
         std::string retValue = topLevelPSet(name,processConfig,itH->processName());
-
-        bool foundMatch = true;
-        if(!iFindMatch.empty()) {
-          for (auto const& stringToFind : iFindMatch) {
-            if (retValue.find(stringToFind) == std::string::npos) {
-              foundMatch = false;
-              break;
-            }
-          }
-        }
-        if (foundMatch) {
+        if(iFindMatch.empty() or retValue.find(iFindMatch) != std::string::npos) {
           results.push_back(std::move(retValue));
         }
       }
@@ -482,13 +445,10 @@ public:
   // legal C-style string is required.
   ProvenanceDumper(std::string const& filename,
                    bool showDependencies,
-                   bool extendedAncestors,
-                   bool extendedDescendants,
                    bool excludeESModules,
                    bool showAllModules,
                    bool showTopLevelPSets,
-                   std::vector<std::string> const& findMatch,
-                   bool dontPrintProducts);
+                   std::string const& findMatch);
 
   ProvenanceDumper(ProvenanceDumper const&) = delete; // Disallow copying and moving
   ProvenanceDumper& operator=(ProvenanceDumper const&) = delete; // Disallow copying and moving
@@ -499,16 +459,6 @@ public:
   int exitCode() const;
 
 private:
-
-  void addAncestors(edm::BranchID const& branchID,
-                    std::set<edm::BranchID>& ancestorBranchIDs,
-                    std::ostringstream& sout,
-                    std::map<edm::BranchID, std::set<edm::ParentageID> >& perProductParentage) const;
-
-  void addDescendants(edm::BranchID const& branchID, std::set<edm::BranchID>& descendantBranchIDs,
-                      std::ostringstream& sout,
-                      std::map<edm::BranchID, std::set<edm::BranchID> >& parentToChildren) const;
-
   std::string              filename_;
   std::unique_ptr<TFile>   inputFile_;
   int                      exitCode_;
@@ -520,13 +470,10 @@ private:
   ParameterSetMap          psm_;
   HistoryNode              historyGraph_;
   bool                     showDependencies_;
-  bool                     extendedAncestors_;
-  bool                     extendedDescendants_;
   bool                     excludeESModules_;
   bool                     showOtherModules_;
   bool                     showTopLevelPSets_;
-  std::vector<std::string> findMatch_;
-  bool                     dontPrintProducts_;
+  std::string              findMatch_;
 
   void work_();
   void dumpProcessHistory_();
@@ -537,26 +484,20 @@ private:
 
 ProvenanceDumper::ProvenanceDumper(std::string const& filename,
                                    bool showDependencies,
-                                   bool extendedAncestors,
-                                   bool extendedDescendants,
                                    bool excludeESModules,
                                    bool showOtherModules,
                                    bool showTopLevelPSets,
-                                   std::vector<std::string> const& findMatch,
-                                   bool dontPrintProducts) :
+                                   std::string const& findMatch) :
   filename_(filename),
   inputFile_(makeTFile(filename)),
   exitCode_(0),
   errorLog_(),
   errorCount_(0),
   showDependencies_(showDependencies),
-  extendedAncestors_(extendedAncestors),
-  extendedDescendants_(extendedDescendants),
   excludeESModules_(excludeESModules),
   showOtherModules_(showOtherModules),
   showTopLevelPSets_(showTopLevelPSets),
-  findMatch_(findMatch),
-  dontPrintProducts_(dontPrintProducts) {
+  findMatch_(findMatch) {
 }
 
 void
@@ -768,13 +709,11 @@ ProvenanceDumper::work_() {
   //Prepare the parentage information if requested
   std::map<edm::BranchID, std::set<edm::ParentageID> > perProductParentage;
 
-  if(showDependencies_ || extendedAncestors_ || extendedDescendants_){
+  if(showDependencies_){
     TTree* parentageTree = dynamic_cast<TTree*>(inputFile_->Get(edm::poolNames::parentageTreeName().c_str()));
     if(0 == parentageTree) {
-      std::cerr << "ERROR, no Parentage tree available so can not show dependencies/n";
+      std::cerr << "no Parentage tree available so can not show dependencies/n";
       showDependencies_ = false;
-      extendedAncestors_ = false;
-      extendedDescendants_ = false;
     } else {
 
       edm::ParentageRegistry& registry = *edm::ParentageRegistry::instance();
@@ -796,10 +735,8 @@ ProvenanceDumper::work_() {
         eventMetaTree = dynamic_cast<TTree*>(inputFile_->Get(edm::BranchTypeToProductTreeName(edm::InEvent).c_str()));
       }
       if(0 == eventMetaTree) {
-        std::cerr << "ERROR, no '" << edm::BranchTypeToProductTreeName(edm::InEvent)<< "' Tree in file so can not show dependencies\n";
+        std::cerr << "no '" << edm::BranchTypeToProductTreeName(edm::InEvent)<< "' Tree in file so can not show dependencies\n";
         showDependencies_ = false;
-        extendedAncestors_ = false;
-        extendedDescendants_ = false;
       } else {
         TBranch* storedProvBranch = eventMetaTree->GetBranch(edm::BranchTypeToProductProvenanceBranchName(edm::InEvent).c_str());
 
@@ -830,36 +767,14 @@ ProvenanceDumper::work_() {
               }
             }
           } else {
-            std::cerr <<" ERROR, could not find provenance information so can not show dependencies\n";
+            std::cerr <<" could not find provenance information so can not show dependencies\n";
             showDependencies_=false;
-            extendedAncestors_ = false;
-            extendedDescendants_ = false;
           }
         }
       }
     }
   }
 
-  std::map<edm::BranchID, std::set<edm::BranchID> > parentToChildren;
-  edm::ParentageRegistry& registry = *edm::ParentageRegistry::instance();
-
-  if (extendedDescendants_) {
-    for (auto const& itParentageSet : perProductParentage) {
-      edm::BranchID childBranchID = itParentageSet.first;
-      for (auto const& itParentageID : itParentageSet.second) {
-        edm::Parentage const* parentage = registry.getMapped(itParentageID);
-        if(0 != parentage) {
-            for(std::vector<edm::BranchID>::const_iterator itBranch = parentage->parents().begin(), itEndBranch = parentage->parents().end();
-                itBranch != itEndBranch;
-                ++itBranch) {
-              parentToChildren[*itBranch].insert(childBranchID);
-            }
-        } else {
-          std::cerr << "  ERROR:parentage info not in registry ParentageID=" << itParentageID << std::endl;
-        }
-      }
-    }
-  }
 
   dumpEventFilteringParameterSets_(inputFile_.get());
 
@@ -881,7 +796,7 @@ ProvenanceDumper::work_() {
     //force it to rebuild the branch name
     it->second.init();
 
-    if(showDependencies_ || extendedAncestors_ || extendedDescendants_) {
+    if(showDependencies_) {
       branchIDToBranchName[it->second.branchID()] = it->second.branchName();
     }
     /*
@@ -900,33 +815,26 @@ ProvenanceDumper::work_() {
       //idToBranches[*itId].push_back(it->second);
     }
   }
-
   for(ModuleToIdBranches::const_iterator it = moduleToIdBranches.begin(),
          itEnd = moduleToIdBranches.end();
        it != itEnd;
        ++it) {
     std::ostringstream sout;
     sout << "Module: " << it->first.second << " " << it->first.first << std::endl;
-    std::set<edm::BranchID> allBranchIDsForLabelAndProcess;
     IdToBranches const& idToBranches = it->second;
     for(IdToBranches::const_iterator itIdBranch = idToBranches.begin(),
            itIdBranchEnd = idToBranches.end();
          itIdBranch != itIdBranchEnd;
          ++itIdBranch) {
       sout << " PSet id:" << itIdBranch->first << std::endl;
-      if(!dontPrintProducts_) {
-        sout << " products: {" << std::endl;
-      }
+      sout << " products: {" << std::endl;
       std::set<edm::BranchID> branchIDs;
       for(std::vector<edm::BranchDescription>::const_iterator itBranch = itIdBranch->second.begin(),
              itBranchEnd = itIdBranch->second.end();
            itBranch != itBranchEnd;
            ++itBranch) {
-        if(!dontPrintProducts_) {
-          sout << "  " << itBranch->branchName() << std::endl;
-        }
+        sout << "  " << itBranch->branchName() << std::endl;
         branchIDs.insert(itBranch->branchID());
-        allBranchIDsForLabelAndProcess.insert(itBranch->branchID());
       }
       sout << " }" << std::endl;
       edm::ParameterSetID psid(itIdBranch->first);
@@ -941,14 +849,13 @@ ProvenanceDumper::work_() {
         sout << std::endl;
       }
       if(showDependencies_) {
+        edm::ParentageRegistry& registry = *edm::ParentageRegistry::instance();
 
         sout << " dependencies: {" << std::endl;
         std::set<edm::ParentageID> parentageIDs;
         for(std::set<edm::BranchID>::const_iterator itBranch = branchIDs.begin(), itBranchEnd = branchIDs.end();
             itBranch != itBranchEnd;
             ++itBranch) {
-
-          //Save these BranchIDs
           std::set<edm::ParentageID> const& temp = perProductParentage[*itBranch];
           parentageIDs.insert(temp.begin(), temp.end());
         }
@@ -971,43 +878,11 @@ ProvenanceDumper::work_() {
         }
         sout << " }" << std::endl;
       }
-    } // end loop over PSetIDs
-    if (extendedAncestors_) {
-      sout << " extendedAncestors: {" << std::endl;
-      std::set<edm::BranchID> ancestorBranchIDs;
-      for (auto const& branchID : allBranchIDsForLabelAndProcess) {
-        addAncestors(branchID, ancestorBranchIDs, sout, perProductParentage);
-      }
-      for (auto const& ancestorBranchID : ancestorBranchIDs) {
-        sout << "  " << branchIDToBranchName[ancestorBranchID] << "\n";
-      }
-      sout << " }" << std::endl;
-    }
-
-    if (extendedDescendants_) {
-      sout << " extendedDescendants: {" << std::endl;
-      std::set<edm::BranchID> descendantBranchIDs;
-      for (auto const& branchID : allBranchIDsForLabelAndProcess) {
-        addDescendants(branchID, descendantBranchIDs, sout, parentToChildren);
-      }
-      for (auto const& descendantBranchID : descendantBranchIDs) {
-        sout << "  " << branchIDToBranchName[descendantBranchID] << "\n";
-      }
-      sout << " }" << std::endl;
-    }
-    bool foundMatch = true;
-    if(!findMatch_.empty()) {
-      for (auto const& stringToFind : findMatch_) {
-        if (sout.str().find(stringToFind) == std::string::npos) {
-          foundMatch = false;
-          break;
-        }
+      if(findMatch_.empty() or sout.str().find(findMatch_) != std::string::npos) {
+        std::cout <<sout.str()<<std::endl;
       }
     }
-    if (foundMatch) {
-      std::cout <<sout.str()<<std::endl;
-    }
-  } // end loop over module label/process
+  }
   if(showOtherModules_) {
     std::cout << "---------Other Modules---------" << std::endl;
     historyGraph_.printOtherModulesHistory(psm_, moduleToIdBranches, findMatch_, errorLog_);
@@ -1027,57 +902,16 @@ ProvenanceDumper::work_() {
   }
 }
 
-void
-ProvenanceDumper::addAncestors(edm::BranchID const& branchID, std::set<edm::BranchID>& ancestorBranchIDs, std::ostringstream& sout,
-                               std::map<edm::BranchID, std::set<edm::ParentageID> >& perProductParentage) const {
-
-  edm::ParentageRegistry& registry = *edm::ParentageRegistry::instance();
-
-  std::set<edm::ParentageID> const& parentIDs = perProductParentage[branchID];
-  for (auto const& parentageID : parentIDs) {
-    edm::Parentage const* parentage = registry.getMapped(parentageID);
-    if(0 != parentage) {
-      for(std::vector<edm::BranchID>::const_iterator itBranch = parentage->parents().begin(), itEndBranch = parentage->parents().end();
-          itBranch != itEndBranch;
-          ++itBranch) {
-
-        if (ancestorBranchIDs.insert(*itBranch).second) {
-          addAncestors(*itBranch, ancestorBranchIDs, sout, perProductParentage);
-        }
-      }
-    } else {
-      sout << "  ERROR:parentage info not in registry ParentageID=" << parentageID << std::endl;
-    }
-  }
-}
-
-void
-ProvenanceDumper::addDescendants(edm::BranchID const& branchID, std::set<edm::BranchID>& descendantBranchIDs, std::ostringstream& sout,
-                                 std::map<edm::BranchID, std::set<edm::BranchID> >& parentToChildren) const {
-
-  for (auto const& childBranchID : parentToChildren[branchID]) {
-    if (descendantBranchIDs.insert(childBranchID).second) {
-      addDescendants(childBranchID, descendantBranchIDs, sout, parentToChildren);
-    }
-  }
-}
-
 static char const* const kSortOpt = "sort";
 static char const* const kSortCommandOpt = "sort,s";
 static char const* const kDependenciesOpt = "dependencies";
 static char const* const kDependenciesCommandOpt = "dependencies,d";
-static char const* const kExtendedAncestorsOpt = "extendedAncestors";
-static char const* const kExtendedAncestorsCommandOpt = "extendedAncestors,x";
-static char const* const kExtendedDescendantsOpt = "extendedDescendants";
-static char const* const kExtendedDescendantsCommandOpt = "extendedDescendants,c";
 static char const* const kExcludeESModulesOpt = "excludeESModules";
 static char const* const kExcludeESModulesCommandOpt = "excludeESModules,e";
 static char const* const kShowAllModulesOpt = "showAllModules";
 static char const* const kShowAllModulesCommandOpt = "showAllModules,a";
 static char const* const kFindMatchOpt = "findMatch";
 static char const* const kFindMatchCommandOpt = "findMatch,f";
-static char const* const kDontPrintProductsOpt = "dontPrintProducts";
-static char const* const kDontPrintProductsCommandOpt = "dontPrintProducts,p";
 static char const* const kShowTopLevelPSetsOpt = "showTopLevelPSets";
 static char const* const kShowTopLevelPSetsCommandOpt ="showTopLevelPSets,t";
 static char const* const kHelpOpt = "help";
@@ -1097,20 +931,14 @@ int main(int argc, char* argv[]) {
   (kSortCommandOpt
    , "alphabetially sort EventSetup components")
   (kDependenciesCommandOpt
-   , "print what data each EDProducer is directly dependent upon")
-  (kExtendedAncestorsCommandOpt
-   , "print what data each EDProducer is dependent upon including indirect dependences")
-  (kExtendedDescendantsCommandOpt
-   , "print what data depends on the data each EDProducer produces including indirect dependences")
+   , "print what data each EDProducer is dependent upon")
   (kExcludeESModulesCommandOpt
    , "do not print ES module information")
   (kShowAllModulesCommandOpt
    , "show all modules (not just those that created data in the file)")
   (kShowTopLevelPSetsCommandOpt,"show all top level PSets")
-  (kFindMatchCommandOpt, boost::program_options::value<std::vector<std::string> >(),
-    "show only modules whose information contains the matching string (or all the matching strings, this option can be repeated with different strings)")
-  (kDontPrintProductsCommandOpt
-   , "do not print products produced by module")
+  (kFindMatchCommandOpt, boost::program_options::value<std::string>(),
+    "show only modules whose information contains the matching string")
   ;
   //we don't want users to see these in the help messages since this
   // name only exists since the parser needs it
@@ -1147,16 +975,6 @@ int main(int argc, char* argv[]) {
     showDependencies = true;
   }
 
-  bool extendedAncestors = false;
-  if(vm.count(kExtendedAncestorsOpt)) {
-    extendedAncestors = true;
-  }
-
-  bool extendedDescendants = false;
-  if(vm.count(kExtendedDescendantsOpt)) {
-    extendedDescendants = true;
-  }
-
   bool excludeESModules = false;
   if(vm.count(kExcludeESModulesOpt)) {
     excludeESModules = true;
@@ -1186,19 +1004,14 @@ int main(int argc, char* argv[]) {
     return 2;
   }
 
-  std::vector<std::string> findMatch;
+  std::string findMatch;
   if(vm.count(kFindMatchOpt)) {
     try {
-      findMatch = vm[kFindMatchOpt].as<std::vector<std::string> >();
+      findMatch = vm[kFindMatchOpt].as<std::string>();
     } catch(boost::bad_any_cast const& e) {
       std::cout << e.what() << std::endl;
       return 2;
     }
-  }
-
-  bool dontPrintProducts = false;
-  if(vm.count(kDontPrintProductsOpt)) {
-    dontPrintProducts=true;
   }
 
   //silence ROOT warnings about missing dictionaries
@@ -1207,8 +1020,7 @@ int main(int argc, char* argv[]) {
   //make sure dictionaries can be used for reading
   ROOT::Cintex::Cintex::Enable();
 
-  ProvenanceDumper dumper(fileName, showDependencies, extendedAncestors, extendedDescendants,
-                          excludeESModules, showAllModules, showTopLevelPSets, findMatch, dontPrintProducts);
+  ProvenanceDumper dumper(fileName, showDependencies, excludeESModules, showAllModules, showTopLevelPSets, findMatch);
   int exitCode(0);
   try {
     dumper.dump();

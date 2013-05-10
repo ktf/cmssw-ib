@@ -2,7 +2,6 @@
 #define CALORIMETRYMANAGER_H
 
 #include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
-#include "SimG4CMS/Calo/interface/CaloHitID.h"
 
 // FastSimulation headers
 #include "FastSimulation/Particle/interface/RawParticle.h"
@@ -10,9 +9,6 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "FastSimulation/Utilities/interface/FamosDebug.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
-#include "FastSimulation/CaloHitMakers/interface/EcalHitMaker.h"
-#include "FastSimulation/CaloHitMakers/interface/HcalHitMaker.h"
-#include "FastSimulation/CaloHitMakers/interface/PreshowerHitMaker.h"
 
 // For the uint32_t
 //#include <boost/cstdint.hpp>
@@ -74,6 +70,9 @@ class CalorimetryManager{
   // Simulation of electromagnetic showers in PS, ECAL, HCAL
   void EMShowerSimulation(const FSimTrack& myTrack);
   
+  // Simulation of electromagnetic showers in VFCAL
+  void reconstructECAL(const FSimTrack& track) ;
+
   void reconstructHCAL(const FSimTrack& myTrack);
 
   void MuonMipSimulation(const FSimTrack & myTrack);
@@ -84,10 +83,10 @@ class CalorimetryManager{
   // Read the parameters 
   void readParameters(const edm::ParameterSet& fastCalo);
 
-  void updateECAL(const std::map<CaloHitID,float>& hitMap, int onEcal, int trackID=0, float corr=1.0); 
-  void updateHCAL(const std::map<CaloHitID,float>& hitMap, int trackID=0, float corr=1.0); 
-  void updatePreshower(const std::map<CaloHitID,float>& hitMap, int trackID=0, float corr=1.0); 
-  
+  void updateMap(uint32_t cellid,float energy,int id,std::map<uint32_t,std::vector<std::pair<int,float> > >& mymap);
+
+  void updateMap(int hi,float energy,int id,std::vector<std::vector<std::pair<int,float> > > & mymap,std::vector<int> & firedCells);
+
   void respCorr(double);
 
   void clean(); 
@@ -104,11 +103,18 @@ class CalorimetryManager{
   HCALResponse* myHDResponse_;
   HSParameters * myHSParameters_;
 
-  std::vector<std::pair<CaloHitID,float> > EBMapping_;
-  std::vector<std::pair<CaloHitID,float> > EEMapping_;
-  std::vector<std::pair<CaloHitID,float> > HMapping_;
-  std::vector<std::pair<CaloHitID,float> > ESMapping_;
+  // In the not unfolded case (standard) the most inner vector will be of size = 1 
+  // the preshower does not have hashed_indices, hence the map 
+  std::vector<std::vector<std::pair<int,float> > > EBMapping_;
+  std::vector<std::vector<std::pair<int,float> > > EEMapping_;
+  std::map<uint32_t,std::vector<std::pair<int,float> > > HMapping_;
+  std::map<uint32_t,std::vector<std::pair<int,float> > > ESMapping_;
 
+  std::vector<int> firedCellsEB_;
+  std::vector<int> firedCellsEE_;
+  std::vector<DetId> firedCellsHCAL_;
+
+  
   bool debug_;
   bool useDQM_;
   std::vector<unsigned int> evtsToDebug_;
@@ -121,11 +127,9 @@ class CalorimetryManager{
   std::vector<double> samplingHBHE_;
   std::vector<double> samplingHF_;
   std::vector<double> samplingHO_;
-  int ietaShiftHB_, ietaShiftHE_, ietaShiftHO_, ietaShiftHF_;
-  std::vector<double> timeShiftHB_;
-  std::vector<double> timeShiftHE_;
-  std::vector<double> timeShiftHF_;
-  std::vector<double> timeShiftHO_;
+  bool smearTimeHF_;
+  double timeShiftHF_;
+  double timeSmearingHF_;
 
   /// A few pointers to save time
   RawParticle myElec;
@@ -184,5 +188,8 @@ class CalorimetryManager{
   GflashPiKShowerProfile *thePiKProfile;
   GflashProtonShowerProfile *theProtonProfile;
   GflashAntiProtonShowerProfile *theAntiProtonProfile;
+
+  // Small utility
+  double gaussShootNoNegative(double e, double sigma);
 };
 #endif

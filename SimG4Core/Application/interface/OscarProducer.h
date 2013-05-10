@@ -24,10 +24,10 @@ public:
 
     explicit OscarProducer(edm::ParameterSet const & p);
     virtual ~OscarProducer();
-    virtual void beginRun(const edm::Run & r,const edm::EventSetup& c) override;
+    virtual void beginRun(edm::Run & r,const edm::EventSetup & c);
     virtual void beginJob();
     virtual void endJob();
-    virtual void produce(edm::Event & e, const edm::EventSetup& c) override;
+    virtual void produce(edm::Event & e, const edm::EventSetup & c);
 protected:
     RunManager*   m_runManager;
     Producers     m_producers;

@@ -163,7 +163,7 @@
 
 	// Call at end of job ---------------------------------------------------------
 
-	void MuonMillepedeAlgorithm::terminate(const edm::EventSetup& iSetup)
+	void MuonMillepedeAlgorithm::terminate(void)
 	{
 
 	  if( isCollectionJob )

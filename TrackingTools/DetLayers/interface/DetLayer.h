@@ -11,6 +11,8 @@
  *  NavigationSchool and activated with a NavigationSetter before they 
  *  can be used.
  *
+ *  $Date: 2009/07/07 14:57:32 $
+ *  $Revision: 1.12 $
  */
 
 #include "TrackingTools/DetLayers/interface/GeometricSearchDet.h"
@@ -27,17 +29,9 @@ class DetLayer : public  virtual GeometricSearchDet {
   typedef GeomDetEnumerators::SubDetector SubDetector;
   typedef GeomDetEnumerators::Location Location;
 
-  DetLayer(bool ibar) : theNavigableLayer(0), theSeqNum(-1), iAmBarrel(ibar) {}
+  DetLayer() : theNavigableLayer(0){};
 
   virtual ~DetLayer();
-
-  // a detLayer can be either barrel or forward
-  bool isBarrel() const { return iAmBarrel;}
-  bool isForward() const { return !isBarrel();}
-
-  // sequential number to be used in "maps"
-  int seqNum() const { return theSeqNum;}
-  void setSeqNum(int sq) { theSeqNum=sq;}
 
   // Extension of the interface 
 
@@ -51,32 +45,43 @@ class DetLayer : public  virtual GeometricSearchDet {
   NavigableLayer* navigableLayer() const { return theNavigableLayer;}
 
   /// Set the NavigableLayer associated with this DetLayer
-  void setNavigableLayer( NavigableLayer* nlp);
+  virtual void setNavigableLayer( NavigableLayer* nlp);
 
   /// Return the next (closest) layer(s) that can be reached in the specified
   /// NavigationDirection
-  template<typename... Args>
+  virtual std::vector<const DetLayer*> 
+  nextLayers( NavigationDirection direction) const;
+
+  /// Return the next (closest) layer(s) compatible with the specified
+  /// FreeTrajectoryState and PropagationDirection
+  virtual std::vector<const DetLayer*> 
+  nextLayers( const FreeTrajectoryState& fts, 
+	      PropagationDirection timeDirection) const;
+
+  /// Return all layers that can be reached from this one along the
+  /// specified PropagationDirection 
   std::vector<const DetLayer*> 
-  nextLayers(Args && ...args) const {
-    return theNavigableLayer
-      ? theNavigableLayer->nextLayers(std::forward<Args>(args)...)
-      : std::vector<const DetLayer*>();
-  }
-  
-  /// Returns all layers compatible 
-  template<typename... Args>
+  compatibleLayers( NavigationDirection direction ) const;
+
+  /// Returns all layers compatible with the specified FreeTrajectoryState
+  /// and PropagationDirection  
   std::vector<const DetLayer*> 
-  compatibleLayers(Args && ...args) const {
-    return theNavigableLayer
-      ? theNavigableLayer->compatibleLayers(std::forward<Args>(args)...)
-      : std::vector<const DetLayer*>();
-  }
-  
+  compatibleLayers(const FreeTrajectoryState& fts, 
+		   PropagationDirection timeDirection) const;
+
+
+  /// Returns all layers compatible with the specified FreeTrajectoryState
+  /// and PropagationDirection. the counter is used to count how many levels the recursive call was depth;
+  /// counter = -1 is returned in case of error.
+  std::vector<const DetLayer*> 
+  compatibleLayers(const FreeTrajectoryState& fts, 
+		   PropagationDirection timeDirection,
+		   int& counter) const;
+
   
  private:
   NavigableLayer* theNavigableLayer;
-  int theSeqNum;
-  bool iAmBarrel;
+
 };
 
 #endif 

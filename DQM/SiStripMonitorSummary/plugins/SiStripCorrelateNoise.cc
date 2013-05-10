@@ -1,7 +1,9 @@
 #include "DQM/SiStripMonitorSummary/plugins/SiStripCorrelateNoise.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "TCanvas.h"
 
@@ -37,6 +39,7 @@ SiStripCorrelateNoise::beginRun(const edm::Run& run, const edm::EventSetup& es){
   if(getNoiseCache(es)==cacheID_noise )
     return;
 
+  
   edm::LogInfo("") << "[SiStripCorrelateNoise::beginRun]  cacheID_noise " << cacheID_noise << std::endl; 
   
   es.get<SiStripNoisesRcd>().get(noiseHandle_);
@@ -53,7 +56,7 @@ SiStripCorrelateNoise::beginRun(const edm::Run& run, const edm::EventSetup& es){
     file->cd("");
     file->mkdir(dir);
     file->cd(dir);
-    DoAnalysis(es,*noiseHandle_.product(),*refNoise);
+    DoAnalysis(*noiseHandle_.product(),*refNoise);
     DoPlots(); 
   }
 
@@ -113,16 +116,11 @@ SiStripCorrelateNoise::DoPlots(){
 }
 
 void 
-SiStripCorrelateNoise::DoAnalysis(const edm::EventSetup& es, SiStripNoises Noise, SiStripNoises& refNoise){
+SiStripCorrelateNoise::DoAnalysis(SiStripNoises Noise, SiStripNoises& refNoise){
   typedef std::vector<SiStripNoises::ratioData> collection; 
   collection divNoise=Noise/refNoise;
 
   edm::LogInfo("") << "[Doanalysis]";
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   std::vector<TH1F *>histos;
 
@@ -133,7 +131,7 @@ SiStripCorrelateNoise::DoAnalysis(const edm::EventSetup& es, SiStripNoises Noise
   float gainRatio=1.;
   //Divide result by d
   for(;iter!=iterE;++iter){
-    getHistos(iter->detid, tTopo, histos);
+    getHistos(iter->detid,histos);
     
     size_t strip=0, stripE= iter->values.size();
     size_t apvNb=7;
@@ -180,7 +178,7 @@ SiStripCorrelateNoise::getMeanNoise(const SiStripNoises::Range& noiseRange,const
 }
 
 void
-SiStripCorrelateNoise::getHistos(const uint32_t& detid, const TrackerTopology* tTopo, std::vector<TH1F*>& histos){
+SiStripCorrelateNoise::getHistos(const uint32_t& detid,std::vector<TH1F*>& histos){
   
   histos.clear();
   
@@ -188,16 +186,16 @@ SiStripCorrelateNoise::getHistos(const uint32_t& detid, const TrackerTopology* t
   SiStripDetId a(detid);
   if ( a.subdetId() == 3 ){
     subdet=0;
-    component=tTopo->tibLayer(detid);
+    component=TIBDetId(detid).layer();
   } else if ( a.subdetId() == 4 ) {
     subdet=1;
-    component=tTopo->tidSide(detid)==2?tTopo->tidWheel(detid):tTopo->tidWheel(detid)+3;
+    component=TIDDetId(detid).side()==2?TIDDetId(detid).wheel():TIDDetId(detid).wheel()+3;
   } else if ( a.subdetId() == 5 ) {
     subdet=2;
-    component=tTopo->tobLayer(detid);
+    component=TOBDetId(detid).layer();
   } else if ( a.subdetId() == 6 ) {
     subdet=3;
-    component=tTopo->tecSide(detid)==2?tTopo->tecWheel(detid):tTopo->tecWheel(detid)+9;
+    component=TECDetId(detid).side()==2?TECDetId(detid).wheel():TECDetId(detid).wheel()+9;
   } 
   
   int index=100+subdet*100+component;

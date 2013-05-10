@@ -4,7 +4,6 @@ import FWCore.ParameterSet.Config as cms
 
 mergedtruth = cms.EDProducer("TrackingTruthProducer",
 
-                             mixLabel = cms.string('mix'), # note: to become mixHits when the new sequences with mixing at SIM and RECO levels will be default
                              simHitLabel = cms.string('famosSimHits'),
                              volumeRadius = cms.double(1200.0),
                              vertexDistanceCut = cms.double(0.003),

@@ -57,10 +57,6 @@ bool HcalHitMaker::addHit(const XYZPoint& point, unsigned layer)
   double pointeta = fabs(point.eta());
   if(pointeta > 5.19) return false; 
 
-  //calculate time of flight
-  double dist = std::sqrt(point.X()*point.X() + point.Y()*point.Y() + point.Z()*point.Z());
-  double tof = dist/29.98; //speed of light
-
   DetId thecellID(myCalorimeter->getClosestCell(point,false,false));
   
   HcalDetId myDetId(thecellID);
@@ -88,23 +84,22 @@ bool HcalHitMaker::addHit(const XYZPoint& point, unsigned layer)
     }
     HcalDetId myDetId2((HcalSubdetector)myDetId.subdetId(),myDetId.ieta(),myDetId.iphi(),mylayer);
     thecellID = myDetId2;
-	myDetId = myDetId2;
   }
 
 
   
-  if(!thecellID.null()  && myDetId.depth()>0)
+  if(!thecellID.null())
     {	
-      CaloHitID current_id(thecellID.rawId(),tof,0); //no track yet
+      uint32_t cell(thecellID.rawId());
       
       //      std::cout << " FamosHcalHitMaker::addHit - the cell num " << cell
       //      		<< std::endl;
 
-      std::map<CaloHitID,float>::iterator cellitr;
-      cellitr = hitMap_.find(current_id);
+      std::map<uint32_t,float>::iterator cellitr;
+      cellitr = hitMap_.find(cell);
       if(cellitr==hitMap_.end())
 	{
-	  hitMap_.insert(std::pair<CaloHitID,float>(current_id,spotEnergy));
+	  hitMap_.insert(std::pair<uint32_t,float>(cell,spotEnergy));
 	}
       else
 	{

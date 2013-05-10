@@ -4,9 +4,9 @@
 /*
  * \file L1TEfficiencyHarvesting.h
  *
- * $Date: 2013/03/18 17:17:52 $
- * $Revision: 1.2 $
- * \author J. Pela, C. Battilana
+ * $Date: 2012/11/22 17:10:18 $
+ * $Revision: 1.1 $
+ * \author J. Pela
  *
  */
 
@@ -36,41 +36,17 @@
 #include <vector>
 
 //
-// Efficiency helper class declaration
-//
-
-class L1TEfficiencyPlotHandler {
-
- public:
-
-  L1TEfficiencyPlotHandler(std::string dir, std::string plotName, DQMStore* dbe)  : 
-    m_dir(dir), m_plotName(plotName), m_dbe(dbe), m_effHisto(0) { };
-
-  L1TEfficiencyPlotHandler(const L1TEfficiencyPlotHandler &handler);
-
-  ~L1TEfficiencyPlotHandler() { };
-
-  // book efficiency histo
-  void book(bool verbose);
-
-  // compute efficiency
-  void computeEfficiency(bool verbose);
-
- private :
-
-  std::string m_dir;
-  std::string m_plotName;
-  DQMStore * m_dbe;  
-
-  MonitorElement* m_effHisto;
-
-};
-
-//
-// DQM class declaration
+// class declaration
 //
 
 class L1TEfficiency_Harvesting : public edm::EDAnalyzer {
+  
+public:
+  
+  enum Errors{
+    UNKNOWN                = 1,
+    WARNING_PY_MISSING_FIT = 2
+  };
   
 public:
   
@@ -95,11 +71,11 @@ protected:
   virtual void endLuminosityBlock  (edm::LuminosityBlock const& lumiBlock, edm::EventSetup const& c);
   
 private:
-
+  
   // bool
   bool  m_verbose;
   
-  std::vector<L1TEfficiencyPlotHandler> m_plotHandlers;
+  DQMStore* dbe;  // The DQM Service Handle
   
 };
 

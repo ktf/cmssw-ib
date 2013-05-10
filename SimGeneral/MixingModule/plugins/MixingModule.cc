@@ -65,6 +65,7 @@ namespace edm {
           InputTag tagCF = InputTag();
           std::string labelCF = " ";
 
+          //SimTracks
           if (object=="SimTrack") {
             InputTag tag;
             if (tags.size()>0) tag=tags[0];
@@ -80,16 +81,6 @@ namespace edm {
             LogInfo("MixingModule") <<"Will mix "<<object<<"s with InputTag= "<<tag.encode()<<", label will be "<<label;
             //            std::cout <<"Will mix "<<object<<"s with InputTag= "<<tag.encode()<<", label will be "<<label<<std::endl;
 
-          } else if (object=="RecoTrack") {
-            InputTag tag;
-            if (tags.size()>0) tag=tags[0];
-            std::string label;
-
-            branchesActivate(TypeID(typeid(std::vector<reco::Track>)).friendlyClassName(),std::string(""),tag,label);
-	    // note: no crossing frame is foreseen to be used for this object type
-
-	    LogInfo("MixingModule") <<"Will mix "<<object<<"s with InputTag= "<<tag.encode()<<", label will be "<<label;
-	    //std::cout <<"Will mix "<<object<<"s with InputTag= "<<tag.encode()<<", label will be "<<label<<std::endl;
 
           } else if (object=="SimVertex") {
             InputTag tag;
@@ -350,8 +341,10 @@ dropUnwantedBranches(wantedBranches_);
             boost::bind(&MixingModule::pileAllWorkers, boost::ref(*this), _1, bunchIdx,
                         _2, vertexOffset, boost::ref(setup)), NumPU_Events
             );
+
           playbackInfo_->setStartEventId(recordEventID, readSrcIdx, bunchIdx, KeepTrackOfPileup);
           KeepTrackOfPileup+=NumPU_Events;
+
         } else {
           int dummyId = 0;
           const std::vector<edm::EventID>& playEventID =
@@ -415,25 +408,25 @@ dropUnwantedBranches(wantedBranches_);
     }
   }
 
-  void MixingModule::beginRun(edm::Run const& run, edm::EventSetup const& setup) {
+  void MixingModule::beginRun(edm::Run& run, edm::EventSetup const& setup) {
     for(Accumulators::const_iterator accItr = digiAccumulators_.begin(), accEnd = digiAccumulators_.end(); accItr != accEnd; ++accItr) {
       (*accItr)->beginRun(run, setup);
     }
   }
 
-  void MixingModule::endRun(edm::Run const& run, edm::EventSetup const& setup) {
+  void MixingModule::endRun(edm::Run& run, edm::EventSetup const& setup) {
     for(Accumulators::const_iterator accItr = digiAccumulators_.begin(), accEnd = digiAccumulators_.end(); accItr != accEnd; ++accItr) {
       (*accItr)->endRun(run, setup);
     }
   }
 
-  void MixingModule::beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
+  void MixingModule::beginLuminosityBlock(edm::LuminosityBlock& lumi, edm::EventSetup const& setup) {
     for(Accumulators::const_iterator accItr = digiAccumulators_.begin(), accEnd = digiAccumulators_.end(); accItr != accEnd; ++accItr) {
       (*accItr)->beginLuminosityBlock(lumi, setup);
     }
   }
 
-  void MixingModule::endLuminosityBlock(edm::LuminosityBlock const & lumi, edm::EventSetup const& setup) {
+  void MixingModule::endLuminosityBlock(edm::LuminosityBlock& lumi, edm::EventSetup const& setup) {
     for(Accumulators::const_iterator accItr = digiAccumulators_.begin(), accEnd = digiAccumulators_.end(); accItr != accEnd; ++accItr) {
       (*accItr)->endLuminosityBlock(lumi, setup);
     }

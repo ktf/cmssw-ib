@@ -1,7 +1,7 @@
 //  Author     : Gero Flucke (based on code by Edmund Widl replacing ORCA's TkReferenceTrack)
 //  date       : 2006/09/17
-//  last update: $Date: 2013/04/12 13:22:30 $
-//  by         : $Author: innocent $
+//  last update: $Date: 2012/06/20 12:07:28 $
+//  by         : $Author: flucke $
 
 #include <memory>
 
@@ -9,6 +9,7 @@
 
 #include "DataFormats/GeometrySurface/interface/Surface.h" 
 #include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/GeometrySurface/interface/OpenBounds.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
@@ -25,7 +26,7 @@
 #include "TrackingTools/AnalyticalJacobians/interface/JacobianCurvilinearToLocal.h"
 
 #include "TrackingTools/GeomPropagators/interface/AnalyticalPropagator.h"
-#include "TrackPropagation/RungeKutta/interface/defaultRKPropagator.h"
+#include "TrackPropagation/RungeKutta/interface/RKTestPropagator.h"
 
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 #include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
@@ -169,9 +170,9 @@ bool ReferenceTrajectory::construct(const TrajectoryStateOnSurface &refTsos,
     
     GlobalVector momDir(pcaFts.momentum());
     GlobalVector perpDir(bd.cross(momDir));
-    Plane::RotationType rotation(perpDir, bd);
+    BoundPlane::RotationType rotation(perpDir, bd);
     
-    BeamSpotGeomDet * bsGeom = new BeamSpotGeomDet(Plane::build(bs, rotation));
+    BeamSpotGeomDet * bsGeom = new BeamSpotGeomDet(BoundPlane::build(bs, rotation, OpenBounds()));
 
     // There is also a constructor taking the magentic field. Use this one instead?
     theRefTsos = TrajectoryStateOnSurface(pcaFts, bsGeom->surface());
@@ -352,8 +353,8 @@ ReferenceTrajectory::createUpdator(MaterialEffects materialEffects, double mass)
 
 //__________________________________________________________________________________
 
-bool ReferenceTrajectory::propagate(const Plane &previousSurface, const TrajectoryStateOnSurface &previousTsos,
-				    const Plane &newSurface, TrajectoryStateOnSurface &newTsos, AlgebraicMatrix &newJacobian, 
+bool ReferenceTrajectory::propagate(const BoundPlane &previousSurface, const TrajectoryStateOnSurface &previousTsos,
+				    const BoundPlane &newSurface, TrajectoryStateOnSurface &newTsos, AlgebraicMatrix &newJacobian, 
 				    AlgebraicMatrix &newCurvlinJacobian, double &nextStep,
 				    const PropagationDirection propDir, const MagneticField *magField) const
 {
@@ -365,8 +366,8 @@ bool ReferenceTrajectory::propagate(const Plane &previousSurface, const Trajecto
   // Hard coded RungeKutta instead Analytical (avoid bias in TEC), but
   // work around TrackPropagation/RungeKutta/interface/RKTestPropagator.h and
   // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.9
-  defaultRKPropagator::Product  rkprod(magField, propDir); //double tolerance = 5.e-5)
-  Propagator &aPropagator = rkprod.propagator;
+  RKTestPropagator bPropagator(magField, propDir); //double tolerance = 5.e-5)
+  Propagator &aPropagator = bPropagator;
   const std::pair<TrajectoryStateOnSurface, double> tsosWithPath =
     aPropagator.propagateWithPath(previousTsos, newSurface);
 

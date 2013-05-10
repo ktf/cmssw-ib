@@ -4,8 +4,8 @@
 /** \class GlobalMuonRefitter
  *  class to build muon trajectory
  *
- *  $Date: 2013/01/06 19:16:51 $
- *  $Revision: 1.15 $
+ *  $Date: 2011/11/02 02:22:15 $
+ *  $Revision: 1.14 $
  *
  *  \author N. Neumeister 	 Purdue University
  *  \author C. Liu 		 Purdue University
@@ -29,7 +29,6 @@ namespace edm {class Event;}
 namespace reco {class TransientTrack;}
 
 class TrajectoryStateOnSurface;
-class TrackerTopology;
 
 class MuonDetLayerMeasurements;
 class MuonServiceProxy;
@@ -71,15 +70,13 @@ class GlobalMuonRefitter {
     void setServices(const edm::EventSetup&);
 
     /// build combined trajectory from sta Track and tracker RecHits
-    std::vector<Trajectory> refit(const reco::Track& globalTrack, const int theMuonHitsOption, 
-				  const TrackerTopology *tTopo) const;
+    std::vector<Trajectory> refit(const reco::Track& globalTrack, const int theMuonHitsOption) const;
 
     /// build combined trajectory from subset of sta Track and tracker RecHits
     std::vector<Trajectory> refit(const reco::Track& globalTrack,
 				  const reco::TransientTrack track,
 				  TransientTrackingRecHit::ConstRecHitContainer allRecHitsTemp,
-				  const int theMuonHitsOption,
-				  const TrackerTopology *tTopo) const;
+				  const int theMuonHitsOption) const;
 
     /// refit the track with a new set of RecHits
     std::vector<Trajectory> transform(const reco::Track& newTrack,
@@ -87,8 +84,7 @@ class GlobalMuonRefitter {
                                       TransientTrackingRecHit::ConstRecHitContainer recHitsForReFit) const;
     
     // get rid of selected station RecHits
-    ConstRecHitContainer getRidOfSelectStationHits(ConstRecHitContainer hits,
-						   const TrackerTopology *tTopo) const;
+    ConstRecHitContainer getRidOfSelectStationHits(ConstRecHitContainer hits) const;
 
 
   protected:

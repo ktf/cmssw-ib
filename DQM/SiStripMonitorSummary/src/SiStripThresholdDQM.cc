@@ -37,20 +37,15 @@ void SiStripThresholdDQM::getActiveDetIds(const edm::EventSetup & eSetup){
 
 
 // -----
-void SiStripThresholdDQM::fillModMEs(const std::vector<uint32_t> & selectedDetIds, const edm::EventSetup& es){
+void SiStripThresholdDQM::fillModMEs(const std::vector<uint32_t> & selectedDetIds){
    
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   ModMEs CondObj_ME;
   
     
   for(std::vector<uint32_t>::const_iterator detIter_ = selectedDetIds.begin();
       detIter_!= selectedDetIds.end();detIter_++){
       
-    fillMEsForDet(CondObj_ME,*detIter_,tTopo);
+    fillMEsForDet(CondObj_ME,*detIter_);
       
   }
 }    
@@ -63,7 +58,7 @@ void SiStripThresholdDQM::fillModMEs(const std::vector<uint32_t> & selectedDetId
 
 
 
-void SiStripThresholdDQM::fillMEsForDet(ModMEs selModME_, uint32_t selDetId_, const TrackerTopology* tTopo){
+void SiStripThresholdDQM::fillMEsForDet(ModMEs selModME_, uint32_t selDetId_){
 
   std::vector<uint32_t> DetIds;
   thresholdHandle_->getDetIds(DetIds);
@@ -73,7 +68,7 @@ void SiStripThresholdDQM::fillMEsForDet(ModMEs selModME_, uint32_t selDetId_, co
   int nStrip =  reader->getNumberOfApvsAndStripLength(selDetId_).first*128;
 
 
-    getModMEs(selModME_,selDetId_,tTopo);
+    getModMEs(selModME_,selDetId_);
 
 
     
@@ -96,16 +91,11 @@ void SiStripThresholdDQM::fillMEsForDet(ModMEs selModME_, uint32_t selDetId_, co
 
 //=======================================================================================
 // -----
-void SiStripThresholdDQM::fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds, const edm::EventSetup& es){
+void SiStripThresholdDQM::fillSummaryMEs(const std::vector<uint32_t> & selectedDetIds){
    
-   //Retrieve tracker topology from geometry
-   edm::ESHandle<TrackerTopology> tTopoHandle;
-   es.get<IdealGeometryRecord>().get(tTopoHandle);
-   const TrackerTopology* const tTopo = tTopoHandle.product();
-
    for(std::vector<uint32_t>::const_iterator detIter_ = selectedDetIds.begin();
        detIter_!= selectedDetIds.end();detIter_++){
-     fillMEsForLayer(/*SummaryMEsMap_,*/ *detIter_,tTopo);
+     fillMEsForLayer(/*SummaryMEsMap_,*/ *detIter_);
 
    }
   
@@ -115,7 +105,7 @@ void SiStripThresholdDQM::fillSummaryMEs(const std::vector<uint32_t> & selectedD
 
 //=======================================================================================
 // -----
-void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMap_,*/ uint32_t selDetId_, const TrackerTopology* tTopo){
+void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMap_,*/ uint32_t selDetId_){
 
   // ----
   int subdetectorId_ = ((selDetId_>>25)&0x7);
@@ -129,12 +119,12 @@ void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMa
   }
   // ----
      
-   std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getLayerNameAndId(selDetId_,tTopo).second);
+   std::map<uint32_t, ModMEs>::iterator selMEsMapIter_ = SummaryMEsMap_.find(getLayerNameAndId(selDetId_).second);
    ModMEs selME_;
    if ( selMEsMapIter_ != SummaryMEsMap_.end())
      selME_ =selMEsMapIter_->second;
 
-   getSummaryMEs(selME_,selDetId_,tTopo);
+   getSummaryMEs(selME_,selDetId_);
 
     
    SiStripThreshold::Range ThresholdRange = thresholdHandle_->getRange(selDetId_);
@@ -152,7 +142,7 @@ void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMa
   
     std::string hSummaryOfProfile_name; 
   
-    hSummaryOfProfile_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getLayerNameAndId(selDetId_,tTopo).first, "") ;
+    hSummaryOfProfile_name = hidmanager.createHistoLayer(hSummaryOfProfile_description, "layer", getLayerNameAndId(selDetId_).first, "") ;
 
   
     
@@ -186,7 +176,7 @@ void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMa
     std::string hSummary_name; 
     hSummary_name = hidmanager.createHistoLayer(hSummary_description, 
 						"layer", 
-						getLayerNameAndId(selDetId_,tTopo).first, 
+						getLayerNameAndId(selDetId_).first, 
 						"") ;
 
 
@@ -207,7 +197,7 @@ void SiStripThresholdDQM::fillMEsForLayer( /*std::map<uint32_t, ModMEs> selMEsMa
     // -----
     // get detIds belonging to same layer to fill X-axis with detId-number
   
-    std::vector<uint32_t> sameLayerDetIds_=GetSameLayerDetId(activeDetIds,selDetId_,tTopo);
+    std::vector<uint32_t> sameLayerDetIds_=GetSameLayerDetId(activeDetIds,selDetId_);
   
     unsigned int iBin=0;
     for(unsigned int i=0;i<sameLayerDetIds_.size();i++){

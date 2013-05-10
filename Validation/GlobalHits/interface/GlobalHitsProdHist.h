@@ -5,8 +5,8 @@
  *  
  *  Class to fill dqm monitor elements from existing EDM file
  *
- *  $Date: 2013/02/27 13:28:59 $
- *  $Revision: 1.9 $
+ *  $Date: 2012/09/04 20:38:33 $
+ *  $Revision: 1.8 $
  *  \author M. Strang SUNY-Buffalo
  */
 
@@ -84,8 +84,8 @@ class GlobalHitsProdHist : public edm::EDProducer
   virtual ~GlobalHitsProdHist();
   virtual void beginJob( void );
   virtual void endJob();  
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
-  virtual void endRun(edm::Run&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual void endRun(edm::Run&, const edm::EventSetup&);
   
  private:
 

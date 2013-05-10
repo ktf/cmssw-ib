@@ -6,8 +6,8 @@
  *  The parametrisation function in DTDriftTimeParametrization 
  *  from P.G.Abia, J.Puerta is used in all cases where it is applicable. 
  *
- *  $Date: 2013/03/02 12:37:47 $
- *  $Revision: 1.13 $
+ *  $Date: 2008/07/01 07:41:35 $
+ *  $Revision: 1.12 $
  *  \authors: G. Bevilacqua, N. Amapane, G. Cerminara, R. Bellan
  */
 
@@ -123,7 +123,6 @@ class DTDigitizer : public edm::EDProducer {
   float LinksTimeWindow;
   
   //Name of Collection use for create the XF 
-  std::string mix_;
   std::string collection_for_XF;
 
 };

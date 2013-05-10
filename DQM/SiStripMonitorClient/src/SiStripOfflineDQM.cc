@@ -13,7 +13,7 @@
 //
 // Original Author:  Samvel Khalatyan (ksamdev at gmail dot com)
 //         Created:  Wed Oct  5 16:42:34 CET 2006
-// $Id: SiStripOfflineDQM.cc,v 1.42 2013/01/02 17:41:51 wmtan Exp $
+// $Id: SiStripOfflineDQM.cc,v 1.41 2012/11/20 10:24:11 venturia Exp $
 //
 //
 
@@ -190,7 +190,7 @@ void SiStripOfflineDQM::endRun(edm::Run const& run, edm::EventSetup const& eSetu
   }
 
   // Fill Global Status
-  if (globalStatusFilling_ > 0) actionExecutor_->fillStatus(dqmStore_, det_cabling, eSetup);
+  if (globalStatusFilling_ > 0) actionExecutor_->fillStatus(dqmStore_, det_cabling);
 
   if (!usedWithEDMtoMEConverter_) {
 
@@ -208,7 +208,7 @@ void SiStripOfflineDQM::endRun(edm::Run const& run, edm::EventSetup const& eSetu
 	  std::string map_type = it->getUntrackedParameter<std::string>("mapName","");
 	  tkMapPSet.augment(configPar_.getUntrackedParameter<edm::ParameterSet>("TkmapParameters"));
 	  edm::LogInfo("TkMapParameters") << tkMapPSet;
-	  actionExecutor_->createOfflineTkMap(tkMapPSet, dqmStore_, map_type, eSetup); 
+	  actionExecutor_->createOfflineTkMap(tkMapPSet, dqmStore_, map_type); 
 	}
       }
     } 

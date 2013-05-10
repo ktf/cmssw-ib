@@ -23,7 +23,6 @@
 #include "xdata/Boolean.h"
 #include "xdata/UnsignedInteger32.h"
 #include "xdata/Double.h"
-#include "i2o/exception/Exception.h"
 
 #include "interface/shared/frl_header.h"
 #include "interface/shared/fed_header.h"
@@ -43,7 +42,7 @@ class EvffedFillerRB;
 /**
  * Main class of the Resource Broker XDAQ application.
  *
- * $Author: eulisse $
+ * $Author: aspataru $
  *
  */
 
@@ -74,22 +73,22 @@ public:
 	/**
 	 * I2O TAKE callback, received from BU
 	 */
-	void I2O_FU_TAKE_Callback(toolbox::mem::Reference *bufRef) throw(i2o::exception::Exception);
+	void I2O_FU_TAKE_Callback(toolbox::mem::Reference *bufRef);
 
 	/**
 	 * I2O DATA DISCARD callback, received from SM
 	 */
-	void I2O_FU_DATA_DISCARD_Callback(toolbox::mem::Reference *bufRef) throw(i2o::exception::Exception);
+	void I2O_FU_DATA_DISCARD_Callback(toolbox::mem::Reference *bufRef);
 
 	/**
 	 * I2O DQM DISCARD callback, received from SM
 	 */
-	void I2O_FU_DQM_DISCARD_Callback(toolbox::mem::Reference *bufRef) throw(i2o::exception::Exception);
+	void I2O_FU_DQM_DISCARD_Callback(toolbox::mem::Reference *bufRef);
 
 	/**
 	 * I2O End Of Lumisection callback, received from EVM
 	 */
-	void I2O_EVM_LUMISECTION_Callback(toolbox::mem::Reference *bufRef) throw(i2o::exception::Exception);
+	void I2O_EVM_LUMISECTION_Callback(toolbox::mem::Reference *bufRef);
 
 	// Hyper DAQ web page(s) [see Utilities/WebGUI]
 	void webPageRequest(xgi::Input *in, xgi::Output *out)

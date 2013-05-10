@@ -4,7 +4,7 @@ ClassImp(ZGeneratorLineShape)
 
 ZGeneratorLineShape::ZGeneratorLineShape(const char *name, const char *title,
 					 RooAbsReal& _m, 
-					 const char* genfile, const char* histoName
+					 char* genfile, char* histoName
 					 ): 
   RooAbsPdf(name,title),
   m("m","m", this,_m),  

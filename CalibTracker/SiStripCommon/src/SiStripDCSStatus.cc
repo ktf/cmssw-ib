@@ -15,8 +15,10 @@
 #include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
 
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <iostream>
@@ -97,10 +99,6 @@ bool SiStripDCSStatus::getStatus(edm::Event const& e, edm::EventSetup const& eSe
 // -- initialise
 //
 void SiStripDCSStatus::initialise(edm::Event const& e, edm::EventSetup const& eSetup) {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  eSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   edm::ESHandle< SiStripFedCabling > fedCabling_;
   eSetup.get<SiStripFedCablingRcd>().get(fedCabling_);
@@ -132,8 +130,8 @@ void SiStripDCSStatus::initialise(edm::Event const& e, edm::EventSetup const& eS
 	TOBinDAQ = true;
 	break;
       } else if (subdet.subdetId() == StripSubdetector::TEC) {
-	if (tTopo->tecSide(detId) == 2) TECFinDAQ = true;
-	else if (tTopo->tecSide(detId) == 1) TECBinDAQ = true;
+	if (TECDetId(detId).side() == 2) TECFinDAQ = true;
+	else if (TECDetId(detId).side() == 1) TECBinDAQ = true;
 	break;
       }
     }

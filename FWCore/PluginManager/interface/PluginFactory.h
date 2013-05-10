@@ -28,48 +28,48 @@
 // forward declarations
 
 namespace edmplugin {
-template< class T> class PluginFactory;
+  template< class T> class PluginFactory;
   class DummyFriend;
   
-template<typename R, typename... Args>
-class PluginFactory<R*(Args...)> : public PluginFactoryBase
+template<class R>
+class PluginFactory<R * (void)> : public PluginFactoryBase
 {
       friend class DummyFriend;
    public:
-      typedef R* TemplateArgType(Args...);
+      typedef R* TemplateArgType(void);
 
       struct PMakerBase {
-        virtual R* create(Args...) const = 0;
+        virtual R* create(void) const = 0;
         virtual ~PMakerBase() {}
       };
       template<class TPlug>
       struct PMaker : public PMakerBase {
         PMaker(const std::string& iName) {
-          PluginFactory<R*(Args...)>::get()->registerPMaker(this,iName);
+          PluginFactory<R*(void)>::get()->registerPMaker(this,iName);
         }
-        virtual R* create(Args... args) const {
-          return new TPlug(args...);
+        virtual R* create() const {
+          return new TPlug();
         }
       };
 
       // ---------- const member functions ---------------------
       virtual const std::string& category() const ;
       
-      R* create(const std::string& iName, Args... args) const {
-        return reinterpret_cast<PMakerBase*>(PluginFactoryBase::findPMaker(iName)->second.front().first)->create(args...);
+      R* create(const std::string& iName) const {
+        return reinterpret_cast<PMakerBase*>(PluginFactoryBase::findPMaker(iName)->second.front().first)->create();
       }
 
       ///like above but returns 0 if iName is unknown
-      R* tryToCreate(const std::string& iName, Args... args) const {
+      R* tryToCreate(const std::string& iName) const {
         typename Plugins::const_iterator itFound = PluginFactoryBase::tryToFindPMaker(iName);
         if(itFound ==m_plugins.end() ) {
           return 0;
         }
-        return reinterpret_cast<PMakerBase*>(itFound->second.front().first)->create(args...);
+        return reinterpret_cast<PMakerBase*>(itFound->second.front().first)->create();
       }
       // ---------- static member functions --------------------
 
-      static PluginFactory<R*(Args...)>* get();
+      static PluginFactory<R*(void)>* get();
       // ---------- member functions ---------------------------
       void registerPMaker(PMakerBase* iPMaker, const std::string& iName) {
         PluginFactoryBase::registerPMaker(iPMaker, iName);
@@ -79,11 +79,117 @@ class PluginFactory<R*(Args...)> : public PluginFactoryBase
       PluginFactory() {
         finishedConstruction();
       }
-      PluginFactory(const PluginFactory&) = delete; // stop default
+      PluginFactory(const PluginFactory&); // stop default
 
-      const PluginFactory& operator=(const PluginFactory&) = delete; // stop default
+      const PluginFactory& operator=(const PluginFactory&); // stop default
 
 };
+
+template<class R, class Arg>
+class PluginFactory<R * (Arg)> : public PluginFactoryBase
+{
+  friend class DummyFriend;
+public:
+  typedef R *TemplateArgType(Arg);
+  struct PMakerBase {
+    virtual R* create(Arg) const = 0;
+    virtual ~PMakerBase() {}
+  };
+  template<class TPlug>
+    struct PMaker : public PMakerBase {
+      PMaker(const std::string& iName) {
+        PluginFactory<R*(Arg)>::get()->registerPMaker(this,iName);
+      }
+      virtual R* create(Arg iArg) const {
+        return new TPlug(iArg);
+      }
+    };
+  
+  // ---------- const member functions ---------------------
+  virtual const std::string& category() const ;
+  
+  R* create(const std::string& iName, Arg iArg) const {
+    return reinterpret_cast<PMakerBase *>(PluginFactoryBase::findPMaker(iName)->second.front().first)->create(iArg);
+  }
+  ///like above but returns 0 if iName is unknown
+  R* tryToCreate(const std::string& iName, Arg iArg) const {
+    typename Plugins::const_iterator itFound = PluginFactoryBase::tryToFindPMaker(iName);
+    if(itFound ==m_plugins.end() ) {
+      return 0;
+    }
+    return reinterpret_cast<PMakerBase *>(itFound->second.front().first)->create(iArg);
+  }
+  // ---------- static member functions --------------------
+  
+  static PluginFactory<R*(Arg)>* get();
+  // ---------- member functions ---------------------------
+  void registerPMaker(PMakerBase* iPMaker, const std::string& iName) {
+    PluginFactoryBase::registerPMaker(iPMaker, iName);
+  }
+  
+private:
+    PluginFactory() {
+      finishedConstruction();
+    }
+  PluginFactory(const PluginFactory&); // stop default
+  
+  const PluginFactory& operator=(const PluginFactory&); // stop default
+  
+};
+
+template<class R, class Arg1, class Arg2>
+class PluginFactory<R * (Arg1, Arg2)> : public PluginFactoryBase
+{
+  friend class DummyFriend;
+public:
+  typedef R *TemplateArgType(Arg1,Arg2);
+  struct PMakerBase {
+    virtual R* create(Arg1, Arg2) const = 0;
+    virtual ~PMakerBase() {}
+  };
+  template<class TPlug>
+    struct PMaker : public PMakerBase {
+      PMaker(const std::string& iName) {
+        PluginFactory<R*(Arg1,Arg2)>::get()->registerPMaker(this,iName);
+      }
+      virtual R* create(Arg1 iArg1, Arg2 iArg2) const {
+        return new TPlug(iArg1, iArg2);
+      }
+    };
+  
+  // ---------- const member functions ---------------------
+  virtual const std::string& category() const ;
+  
+  R* create(const std::string& iName, Arg1 iArg1, Arg2 iArg2) const {
+    return reinterpret_cast<PMakerBase *>(PluginFactoryBase::findPMaker(iName)->second.front().first)->create(iArg1, iArg2);
+  }
+  ///like above but returns 0 if iName is unknown
+  R* tryToCreate(const std::string& iName, Arg1 iArg1, Arg2 iArg2) const {
+    typename Plugins::const_iterator itFound = PluginFactoryBase::tryToFindPMaker(iName);
+    if(itFound ==m_plugins.end() ) {
+      return 0;
+    }
+    return reinterpret_cast<PMakerBase *>(itFound->second.front().first)->create(iArg1,iArg2);
+  }
+
+  // ---------- static member functions --------------------
+  
+  static PluginFactory<R*(Arg1,Arg2)>* get();
+  // ---------- member functions ---------------------------
+  void registerPMaker(PMakerBase* iPMaker, const std::string& iName) {
+    PluginFactoryBase::registerPMaker(iPMaker, iName);
+  }
+  
+private:
+    PluginFactory() {
+      finishedConstruction();
+    }
+  PluginFactory(const PluginFactory&); // stop default
+  
+  const PluginFactory& operator=(const PluginFactory&); // stop default
+  
+};
+
 }
 #define CONCATENATE_HIDDEN(a,b) a ## b 
 #define CONCATENATE(a,b) CONCATENATE_HIDDEN(a,b)

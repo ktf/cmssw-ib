@@ -1,28 +1,27 @@
 // -*-c++-*-
-// $Id: HLTPerformanceInfo.h,v 1.15 2013/04/02 09:10:28 fwyzard Exp $
+// $Id: HLTPerformanceInfo.h,v 1.14 2008/08/04 14:52:28 bdahmes Exp $
 #ifndef HLTPERFORMANCEINFO_H
 #define HLTPERFORMANCEINFO_H
 
 #include <string>
 #include <vector>
 
-#include "FWCore/Utilities/interface/typedefs.h"
 #include "DataFormats/Common/interface/HLTPathStatus.h"
 
 class HLTPerformanceInfo {
 public:
   class Path;
   class Module;
-  typedef std::vector<Path>         PathList;
-  typedef std::vector<Module>       Modules;
-  typedef std::vector<cms_uint32_t> ModulesInPath;
+  typedef std::vector<Path> PathList;
+  typedef std::vector<Module> Modules;
+  typedef std::vector<size_t> ModulesInPath;
   HLTPerformanceInfo();
   //
   class Module {
   private:
-    std::string name_;  // module instance name
-    double dt_;         // Wall-clock time
-    double dtCPU_ ;     // CPU time
+    std::string name_; // module instance name
+    double dt_; // Wall-clock time
+    double dtCPU_ ; // CPU time
     // I am using this even for modules....
     edm::HLTPathStatus status_;
   public:

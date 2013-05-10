@@ -35,7 +35,7 @@ namespace edm {
     
     ~ProductFromFwdPtrProducer() {}
 
-    virtual void produce(edm::Event & iEvent, const edm::EventSetup& iSetup) override {
+    virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup){
 
       edm::Handle< std::vector<edm::FwdPtr<T> > > hSrc;
       iEvent.getByLabel( src_, hSrc );

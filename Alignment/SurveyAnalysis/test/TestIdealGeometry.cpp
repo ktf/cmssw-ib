@@ -35,9 +35,8 @@
 #include "CondFormats/Alignment/interface/AlignTransformError.h"
 #include "CondFormats/AlignmentRecord/interface/TrackerAlignmentErrorRcd.h"*/
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
-#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 
 #include "Alignment/SurveyAnalysis/interface/SurveyDataReader.h"
 //
@@ -112,11 +111,7 @@ TestIdealGeometry::~TestIdealGeometry()
 void
 TestIdealGeometry::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
+   
   edm::LogInfo("TrackerAlignment") << "Starting!";
 
   //
@@ -134,7 +129,7 @@ TestIdealGeometry::analyze( const edm::Event& iEvent, const edm::EventSetup& iSe
   for (int ii=0 ; ii<NFILES ;ii++) {
     if ( textFileNames[ii] == "NONE" )
       throw cms::Exception("BadConfig") << fileType[ii] << " input file not found in configuration";
-    dataReader.readFile( textFileNames[ii], fileType[ii], tTopo );
+    dataReader.readFile( textFileNames[ii], fileType[ii] );
   } 
 
   edm::LogInfo("TrackerAlignment") << "Files read";
@@ -172,24 +167,24 @@ TestIdealGeometry::analyze( const edm::Event& iEvent, const edm::EventSetup& iSe
 	    if (((*iGeomDet)->geographicalId()).subdetId() == int(StripSubdetector::TIB)) {
 	      
 	      comparisonVect[0] = int(StripSubdetector::TIB);
-	      
-	      comparisonVect[1] = tTopo->tibLayer((*iGeomDet)->geographicalId());
+	      TIBDetId thisTIBid( (*iGeomDet)->geographicalId() );
+	      comparisonVect[1] = thisTIBid.layer();
               if (comparisonVect[1] < 3) countDet = countDet + 2;  
-	      std::vector<unsigned int> theString = tTopo->tibStringInfo((*iGeomDet)->geographicalId());
+	      std::vector<unsigned int> theString = thisTIBid.string();
 	      comparisonVect[2] = theString[0];
 	      comparisonVect[3] = theString[1];
 	      comparisonVect[4] = theString[2];
-	      comparisonVect[5] = tTopo->tibModule((*iGeomDet)->geographicalId());
+	      comparisonVect[5] = thisTIBid.module();
 	      
 	    } else if (((*iGeomDet)->geographicalId()).subdetId() == int(StripSubdetector::TID)) {
 	      
 	      comparisonVect[0] = int(StripSubdetector::TID);
-	      
-	      comparisonVect[1] = tTopo->tidSide((*iGeomDet)->geographicalId());
-	      comparisonVect[2] = tTopo->tidWheel((*iGeomDet)->geographicalId());
-	      comparisonVect[3] = tTopo->tidRing((*iGeomDet)->geographicalId());
+	      TIDDetId thisTIDid( (*iGeomDet)->geographicalId() );
+	      comparisonVect[1] = thisTIDid.side();
+	      comparisonVect[2] = thisTIDid.wheel();
+	      comparisonVect[3] = thisTIDid.ring();
               if (comparisonVect[3] < 3) countDet = countDet + 2; 
-	      std::vector<unsigned int> theModule = tTopo->tidModuleInfo((*iGeomDet)->geographicalId());
+	      std::vector<unsigned int> theModule = thisTIDid.module();
 	      comparisonVect[4] = theModule[0];
 	      comparisonVect[5] = theModule[1];
 	      

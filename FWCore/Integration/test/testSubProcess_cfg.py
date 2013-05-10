@@ -61,30 +61,7 @@ prodProcess.noPut = cms.EDProducer("ThingWithMergeProducer",
     noPut = cms.untracked.bool(True)
 )
 
-prodProcess.putInt = cms.EDProducer("IntProducer",
-    ivalue = cms.int32(6)
-)
-
-prodProcess.putInt2 = cms.EDProducer("IntProducer",
-    ivalue = cms.int32(6)
-)
-
-prodProcess.putInt3 = cms.EDProducer("IntProducer",
-    ivalue = cms.int32(6)
-)
-
-prodProcess.getInt = cms.EDAnalyzer("TestFindProduct",
-  inputTags = cms.untracked.VInputTag(
-      cms.InputTag("putInt"),
-  ),
-  expectedSum = cms.untracked.int32(180),
-  inputTagsNotFound = cms.untracked.VInputTag(
-  )
-)
-
-prodProcess.path1 = cms.Path(prodProcess.get * prodProcess.putInt * prodProcess.putInt2 * prodProcess.putInt3 * prodProcess.getInt)
-
-
+prodProcess.path1 = cms.Path(prodProcess.get)
 
 prodProcess.path2 = cms.Path(prodProcess.noPut)
 
@@ -101,11 +78,7 @@ copy2Process.DoodadESSource = cms.ESSource("DoodadESSource"
 # ---------------------------------------------------------------
 
 prod2Process = cms.Process("PROD2")
-copy2Process.subProcess = cms.SubProcess(prod2Process,
-    outputCommands = cms.untracked.vstring(
-        "keep *", 
-        "drop *_putInt_*_*"),
-)
+copy2Process.subProcess = cms.SubProcess(prod2Process)
 prod2Process.DoodadESSource = cms.ESSource("DoodadESSource"
                                            , appendToDataLabel = cms.string('abc')
                                            , test2 = cms.untracked.string('zz')
@@ -201,15 +174,6 @@ prod2Process.get = cms.EDAnalyzer("EventSetupRecordDataGetter",
     verbose = cms.untracked.bool(True)
 )
 
-prod2Process.getInt = cms.EDAnalyzer("TestFindProduct",
-  inputTags = cms.untracked.VInputTag(
-  ),
-  expectedSum = cms.untracked.int32(0),
-  inputTagsNotFound = cms.untracked.VInputTag(
-    cms.InputTag("putInt"),
-  )
-)
-
 prod2Process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('testSubProcess.root')
 )
@@ -218,7 +182,7 @@ prod2Process.path1 = cms.Path(prod2Process.thingWithMergeProducer)
 
 prod2Process.path2 = cms.Path(prod2Process.test*prod2Process.testmerge)
 
-prod2Process.path3 = cms.Path(prod2Process.get*prod2Process.getInt)
+prod2Process.path3 = cms.Path(prod2Process.get)
 
 prod2Process.path4 = cms.Path(prod2Process.dependsOnNoPut)
 
