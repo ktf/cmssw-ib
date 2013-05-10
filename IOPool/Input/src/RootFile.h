@@ -38,7 +38,7 @@ namespace edm {
   class DaqProvenanceHelper;
   class DuplicateChecker;
   class EventSkipperByID;
-  class GroupSelectorRules;
+  class ProductSelectorRules;
   class InputFile;
   class ProvenanceReaderBase;
   class ProvenanceAdaptor;
@@ -64,7 +64,7 @@ namespace edm {
              InputSource::ProcessingMode processingMode,
              RunNumber_t const& forcedRunNumber,
              bool noEventSort,
-             GroupSelectorRules const& groupSelectorRules,
+             ProductSelectorRules const& productSelectorRules,
              InputType::InputType inputType,
              boost::shared_ptr<BranchIDListHelper> branchIDListHelper,
              boost::shared_ptr<DuplicateChecker> duplicateChecker,
@@ -82,7 +82,6 @@ namespace edm {
 
     void reportOpened(std::string const& inputType);
     void close();
-    EventPrincipal* clearAndReadCurrentEvent(EventPrincipal& cache);
     EventPrincipal* readCurrentEvent(EventPrincipal& cache);
     EventPrincipal* readEvent(EventPrincipal& cache);
 
@@ -107,7 +106,7 @@ namespace edm {
     std::array<bool, NumBranchTypes> const& hasNewlyDroppedBranch() const {return hasNewlyDroppedBranch_;}
     bool branchListIndexesUnchanged() const {return branchListIndexesUnchanged_;}
     bool modifiedIDs() const {return daqProvenanceHelper_.get() != 0;}
-    boost::shared_ptr<FileBlock> createFileBlock() const;
+    std::unique_ptr<FileBlock> createFileBlock() const;
     bool setEntryAtItem(RunNumber_t run, LuminosityBlockNumber_t lumi, EventNumber_t event) {
       return event ? setEntryAtEvent(run, lumi, event) : (lumi ? setEntryAtLumi(run, lumi) : setEntryAtRun(run));
     }
@@ -138,9 +137,6 @@ namespace edm {
     bool wasFirstEventJustRead() const;
     IndexIntoFile::IndexIntoFileItr indexIntoFileIter() const;
     void setPosition(IndexIntoFile::IndexIntoFileItr const& position);
-    EventPrincipal& secondaryEventPrincipal() {
-      return *secondaryEventPrincipal_;
-    }
 
   private:
     void checkReleaseVersion();
@@ -159,7 +155,7 @@ namespace edm {
     void overrideRunNumber(LuminosityBlockID& id);
     void overrideRunNumber(EventID& id, bool isRealData);
     std::string const& newBranchToOldBranch(std::string const& newBranch) const;
-    void dropOnInput(ProductRegistry& reg, GroupSelectorRules const& rules, bool dropDescendants, InputType::InputType inputType);
+    void dropOnInput(ProductRegistry& reg, ProductSelectorRules const& rules, bool dropDescendants, InputType::InputType inputType);
     void readParentageTree();
     void readEntryDescriptionTree();
     void readEventHistoryTree();
@@ -213,7 +209,6 @@ namespace edm {
     boost::shared_ptr<DuplicateChecker> duplicateChecker_;
     std::unique_ptr<ProvenanceAdaptor> provenanceAdaptor_; // backward comatibility
     std::unique_ptr<MakeProvenanceReader> provenanceReaderMaker_;
-    mutable std::unique_ptr<EventPrincipal> secondaryEventPrincipal_;
     mutable boost::shared_ptr<BranchMapper> eventBranchMapper_;
     std::vector<ParentageID> parentageIDLookup_;
     std::unique_ptr<DaqProvenanceHelper> daqProvenanceHelper_;

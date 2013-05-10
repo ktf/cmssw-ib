@@ -60,7 +60,7 @@ namespace edm {
     treeCacheSize_(noEventSort_ ? pset.getUntrackedParameter<unsigned int>("cacheSize", roottree::defaultCacheSize) : 0U),
     treeMaxVirtualSize_(pset.getUntrackedParameter<int>("treeMaxVirtualSize", -1)),
     setRun_(pset.getUntrackedParameter<unsigned int>("setRunNumber", 0U)),
-    groupSelectorRules_(pset, "inputCommands", "InputSource"),
+    productSelectorRules_(pset, "inputCommands", "InputSource"),
     duplicateChecker_(inputType == InputType::Primary ? new DuplicateChecker(pset) : 0),
     dropDescendants_(pset.getUntrackedParameter<bool>("dropDescendantsOfDroppedBranches", inputType != InputType::SecondarySource)),
     labelRawDataLikeMC_(pset.getUntrackedParameter<bool>("labelRawDataLikeMC", true)),
@@ -77,13 +77,15 @@ namespace edm {
       enablePrefetching_ = pSLC->enablePrefetching();
     }
 
-    if(inputType_ == InputType::Primary) {
-      //NOTE: we do not want to stage in secondary files since we can be given a list of
-      // thousands of files and prestaging all those files can cause a site to fail
-      StorageFactory *factory = StorageFactory::get();
-      for(fileIter_ = fileIterBegin_; fileIter_ != fileIterEnd_; ++fileIter_) {
-        factory->activateTimeout(fileIter_->fileName());
-        factory->stagein(fileIter_->fileName());
+    StorageFactory *factory = StorageFactory::get();
+    for(fileIter_ = fileIterBegin_; fileIter_ != fileIterEnd_; ++fileIter_) {
+      factory->activateTimeout(fileIter_->fileName());
+      factory->stagein(fileIter_->fileName());
+      //NOTE: we do not want to stage in all secondary files since we can be given a list of
+      // thousands of files and prestaging all those files can cause a site to fail.
+      // So, we stage in the first secondary file only.
+      if(inputType_ != InputType::Primary) {
+        break;
       }
     }
 
@@ -93,16 +95,14 @@ namespace edm {
     std::string branchesMustMatch = pset.getUntrackedParameter<std::string>("branchesMustMatch", std::string("permissive"));
     if(branchesMustMatch == std::string("strict")) branchesMustMatch_ = BranchDescription::Strict;
 
-    if(inputType != InputType::SecondarySource) {
-      for(fileIter_ = fileIterBegin_; fileIter_ != fileIterEnd_; ++fileIter_) {
-        initFile(skipBadFiles_);
-        if(rootFile_) break;
-      }
-      if(rootFile_) {
-        productRegistryUpdate().updateFromInput(rootFile_->productRegistry()->productList());
-        if(initialNumberOfEventsToSkip_ != 0) {
-          skipEvents(initialNumberOfEventsToSkip_);
-        }
+    for(fileIter_ = fileIterBegin_; fileIter_ != fileIterEnd_; ++fileIter_) {
+      initFile(skipBadFiles_);
+      if(rootFile_) break;
+    }
+    if(rootFile_) {
+      productRegistryUpdate().updateFromInput(rootFile_->productRegistry()->productList());
+      if(initialNumberOfEventsToSkip_ != 0) {
+        skipEvents(initialNumberOfEventsToSkip_);
       }
     }
   }
@@ -117,7 +117,7 @@ namespace edm {
     closeFile_();
   }
 
-  boost::shared_ptr<FileBlock>
+  std::unique_ptr<FileBlock>
   RootInputFileSequence::readFile_() {
     if(firstFile_) {
       // The first input file has already been opened.
@@ -131,7 +131,7 @@ namespace edm {
       }
     }
     if(!rootFile_) {
-      return boost::shared_ptr<FileBlock>(new FileBlock);
+      return std::unique_ptr<FileBlock>(new FileBlock);
     }
     return rootFile_->createFileBlock();
   }
@@ -250,7 +250,7 @@ namespace edm {
           input_.processingMode(),
           setRun_,
           noEventSort_,
-          groupSelectorRules_,
+          productSelectorRules_,
           inputType_,
           (inputType_ == InputType::SecondarySource ?  boost::shared_ptr<BranchIDListHelper>(new BranchIDListHelper()) :  input_.branchIDListHelper()),
           duplicateChecker_,
@@ -370,10 +370,10 @@ namespace edm {
   // readEvent() is responsible for setting up the EventPrincipal.
   //
   //   1. fill an EventPrincipal with a unique EventID
-  //   2. For each entry in the provenance, put in one Group,
+  //   2. For each entry in the provenance, put in one ProductHolder,
   //      holding the Provenance for the corresponding EDProduct.
   //   3. set up the caches in the EventPrincipal to know about this
-  //      Group.
+  //      ProductHolder.
   //
   // We do *not* create the EDProduct instance (the equivalent of reading
   // the branch containing this EDProduct. That will be done by the Delayed Reader,
@@ -588,11 +588,11 @@ namespace edm {
     }
     ParameterSet pset;
     pset.addUntrackedParameter("inputCommands", rules);
-    groupSelectorRules_ = GroupSelectorRules(pset, "inputCommands", "InputSource");
+    productSelectorRules_ = ProductSelectorRules(pset, "inputCommands", "InputSource");
   }
 
   EventPrincipal*
-  RootInputFileSequence::readOneSequential() {
+  RootInputFileSequence::readOneSequential(EventPrincipal& cache) {
     skipBadFiles_ = false;
     if(fileIter_ == fileIterEnd_ || !rootFile_) {
       if(fileIterEnd_ == fileIterBegin_) {
@@ -603,7 +603,7 @@ namespace edm {
       rootFile_->setAtEventEntry(-1);
     }
     rootFile_->nextEventEntry();
-    EventPrincipal* ep = rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal());
+    EventPrincipal* ep = rootFile_->readCurrentEvent(cache);
     if(ep == 0) {
       ++fileIter_;
       if(fileIter_ == fileIterEnd_) {
@@ -611,13 +611,13 @@ namespace edm {
       }
       initFile(false);
       rootFile_->setAtEventEntry(-1);
-      return readOneSequential();
+      return readOneSequential(cache);
     }
     return ep;
   }
 
   EventPrincipal*
-  RootInputFileSequence::readOneSequentialWithID(LuminosityBlockID const& id) {
+  RootInputFileSequence::readOneSequentialWithID(EventPrincipal& cache, LuminosityBlockID const& id) {
     if(fileIterEnd_ == fileIterBegin_) {
       throw Exception(errors::Configuration) << "RootInputFileSequence::readOneSequentialWithID(): no input files specified.\n";
     }
@@ -631,18 +631,18 @@ namespace edm {
       }
     }
     bool nextFound = rootFile_->setEntryAtNextEventInLumi(id.run(), id.luminosityBlock());
-    EventPrincipal* ep = (nextFound ? rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal()) : 0);
+    EventPrincipal* ep = (nextFound ? rootFile_->readCurrentEvent(cache) : 0);
     if(ep == 0) {
       bool found = skipToItemInNewFile(id.run(), id.luminosityBlock(), 0);
       if(found) {
-        return readOneSequentialWithID(id);
+        return readOneSequentialWithID(cache, id);
       }
     }
     return ep;
   }
 
   EventPrincipal*
-  RootInputFileSequence::readOneSpecified(EventID const& id) {
+  RootInputFileSequence::readOneSpecified(EventPrincipal& cache, EventID const& id) {
     skipBadFiles_ = false;
     bool found = skipToItem(id.run(), id.luminosityBlock(), id.event());
     if(!found) {
@@ -651,13 +651,13 @@ namespace edm {
          fileIter_->fileName() <<
          " does not contain specified event:\n" << id << "\n";
     }
-    EventPrincipal* ep = rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal());
+    EventPrincipal* ep = rootFile_->readCurrentEvent(cache);
     assert(ep != 0);
     return ep;
   }
 
   EventPrincipal*
-  RootInputFileSequence::readOneRandom() {
+  RootInputFileSequence::readOneRandom(EventPrincipal& cache) {
     if(fileIterEnd_ == fileIterBegin_) {
       throw Exception(errors::Configuration) << "RootInputFileSequence::readOneRandom(): no input files specified.\n";
     }
@@ -684,10 +684,10 @@ namespace edm {
     }
     rootFile_->nextEventEntry();
 
-    EventPrincipal* ep = rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal());
+    EventPrincipal* ep = rootFile_->readCurrentEvent(cache);
     if(ep == 0) {
       rootFile_->setAtEventEntry(0);
-      ep = rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal());
+      ep = rootFile_->readCurrentEvent(cache);
       assert(ep != 0);
     }
     --eventsRemainingInFile_;
@@ -697,7 +697,7 @@ namespace edm {
   // bool RootFile::setEntryAtNextEventInLumi(RunNumber_t run, LuminosityBlockNumber_t lumi) {
 
   EventPrincipal*
-  RootInputFileSequence::readOneRandomWithID(LuminosityBlockID const& id) {
+  RootInputFileSequence::readOneRandomWithID(EventPrincipal& cache, LuminosityBlockID const& id) {
     if(fileIterEnd_ == fileIterBegin_) {
       throw Exception(errors::Configuration) << "RootInputFileSequence::readOneRandomWithID(): no input files specified.\n";
     }
@@ -725,11 +725,11 @@ namespace edm {
       }
     }
     bool nextFound = rootFile_->setEntryAtNextEventInLumi(id.run(), id.luminosityBlock());
-    EventPrincipal* ep = (nextFound ? rootFile_->clearAndReadCurrentEvent(rootFile_->secondaryEventPrincipal()) : 0);
+    EventPrincipal* ep = (nextFound ? rootFile_->readCurrentEvent(cache) : 0);
     if(ep == 0) {
       bool found = rootFile_->setEntryAtItem(id.run(), id.luminosityBlock(), 0);
       if(found) {
-        return readOneRandomWithID(id);
+        return readOneRandomWithID(cache, id);
       }
     }
     return ep;
@@ -766,7 +766,7 @@ namespace edm {
     desc.addUntracked<bool>("labelRawDataLikeMC", true)
         ->setComment("If True: replace module label for raw data to match MC. Also use 'LHC' as process.");
 
-    GroupSelectorRules::fillDescription(desc, "inputCommands");
+    ProductSelectorRules::fillDescription(desc, "inputCommands");
     EventSkipperByID::fillDescription(desc);
     DuplicateChecker::fillDescription(desc);
   }

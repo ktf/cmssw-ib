@@ -5,7 +5,7 @@
 // 
 //
 // Original Author:  Dmytro Kovalskyi
-// $Id: MuonIdProducer.cc,v 1.72 2012/10/09 20:33:08 slava77 Exp $
+// $Id: MuonIdProducer.cc,v 1.74 2013/02/25 21:29:14 chrjones Exp $
 //
 //
 
@@ -261,6 +261,7 @@ reco::Muon MuonIdProducer::makeMuon(edm::Event& iEvent, const edm::EventSetup& i
 
    aMuon.setMuonTrack(type,track);
    aMuon.setBestTrack(type);
+   aMuon.setTunePBestTrack(type);
 
    return aMuon;
 }
@@ -315,6 +316,7 @@ reco::Muon MuonIdProducer::makeMuon( const reco::MuonTrackLinks& links )
    aMuon.setOuterTrack( links.standAloneTrack() );
    aMuon.setGlobalTrack( links.globalTrack() );
    aMuon.setBestTrack(chosenTrack.second);
+   aMuon.setTunePBestTrack(chosenTrack.second);
 
    if(fillGlobalTrackRefits_){
      if (tpfmsCollectionHandle_.isValid() && !tpfmsCollectionHandle_.failedToGet()) {
@@ -411,7 +413,7 @@ int MuonIdProducer::overlap(const reco::Muon& muon, const reco::Track& track)
    return numberOfCommonDetIds;
 }
 
-void MuonIdProducer::beginRun(edm::Run& iRun, const edm::EventSetup& iSetup)
+void MuonIdProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
   edm::ESHandle<CSCGeometry> geomHandle;
   iSetup.get<MuonGeometryRecord>().get(geomHandle);
@@ -865,7 +867,7 @@ void MuonIdProducer::fillMuonId(edm::Event& iEvent, const edm::EventSetup& iSetu
 	
 	// fill segments
 	for( std::vector<TAMuonSegmentMatch>::const_iterator segment = chamber->segments.begin();
-	     segment != chamber->segments.end(); segment++ ) 
+     segment != chamber->segments.end(); segment++ ) 
 	  {
 	     reco::MuonSegmentMatch matchedSegment;
 	     matchedSegment.x = segment->segmentLocalPosition.x();

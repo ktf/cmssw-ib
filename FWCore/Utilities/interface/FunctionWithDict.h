@@ -20,7 +20,7 @@ namespace edm {
   public:
     FunctionWithDict() : function_() {}
 
-    explicit FunctionWithDict(Reflex::Member const& function) : function_(function) {}
+    explicit FunctionWithDict(Reflex::Member const& function);
 
     std::string name() const;
 
@@ -43,6 +43,8 @@ namespace edm {
     bool isStatic() const;
 
     TypeWithDict returnType() const;
+
+    TypeWithDict finalReturnType() const;
 
     size_t functionParameterSize(bool required = false) const;
 

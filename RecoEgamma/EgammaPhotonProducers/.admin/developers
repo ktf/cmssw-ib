@@ -25,7 +25,6 @@
 # of developers to include in the list.
 #
 >Developers
-mabalazs : Michael Balazs : Michael.Balazs@cern.ch
 mangano : Boris Mangano : boris.mangano@cern.ch
 dwjang : Dong Wook Jang : Dong.Wook.Jang@cern.ch
 askew : Andrew Askew : askew@fnal.gov
@@ -33,6 +32,10 @@ nancy : Nancy Marinelli : Nancy.Marinelli@cern.ch
 bendavid: Josh Bendavid : jbendavid@MIT.EDU
 giordano : Domenico Giordano : Domenico.Giordano@cern.ch
 arun : Arun Kumar : Arun.Kumar@cern.ch
+sguazz : Giacomo Sguazzoni : Giacomo.Sguazzoni@cern.ch
+stenson : Kevin Stenson : kevin.stenson@colorado.edu
+cerati : Giuseppe Cerati : giuseppe.cerati@cern.ch
+
 
 >Administrators
 futyand : David Futyan : David.Futyan@cern.ch
