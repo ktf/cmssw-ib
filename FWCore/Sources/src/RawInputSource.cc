@@ -58,7 +58,7 @@ namespace edm {
 
   void
   RawInputSource::preForkReleaseResources() {
-    closeFile(nullptr, false);
+    closeFile(boost::shared_ptr<FileBlock>(), false);
   }
 
   InputSource::ItemType

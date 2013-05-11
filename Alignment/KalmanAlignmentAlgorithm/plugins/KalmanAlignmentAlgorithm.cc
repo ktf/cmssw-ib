@@ -80,7 +80,7 @@ void KalmanAlignmentAlgorithm::initialize( const edm::EventSetup& setup,
 }
 
 
-void KalmanAlignmentAlgorithm::terminate( const edm::EventSetup& setup )
+void KalmanAlignmentAlgorithm::terminate( void )
 {
   if ( theMergerFlag )
   {
@@ -203,7 +203,7 @@ void KalmanAlignmentAlgorithm::run( const edm::EventSetup & setup, const EventIn
   catch( cms::Exception& exception )
   {
     cout << exception.what() << endl;
-    terminate(setup);
+    terminate();
     throw exception;
   }
 }
@@ -211,11 +211,6 @@ void KalmanAlignmentAlgorithm::run( const edm::EventSetup & setup, const EventIn
 
 void KalmanAlignmentAlgorithm::initializeAlignmentParameters( const edm::EventSetup& setup )
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  setup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   // Just to be sure, set all APEs to zero ...
   setAPEToZero();
 
@@ -408,13 +403,13 @@ void KalmanAlignmentAlgorithm::initializeAlignmentParameters( const edm::EventSe
 	  {
 	    //cout << "apply param and cov from FILE -> none stored, apply DEFAULT " << endl;
 	    alignmentParameters = (*itAlignable)->alignmentParameters()->clone( startParameters, startError );
-	    alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, tTopo, updateGraph ) );
+	    alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, updateGraph ) );
 	  }
 	  else
 	  {
 	    //cout << "apply param and cov from FILE" << endl;
 	    alignmentParameters = alignmentParametersMap[*itAlignable].back();
-	    KalmanAlignmentUserVariables* userVariables = new KalmanAlignmentUserVariables( *itAlignable, tTopo, updateGraph );
+	    KalmanAlignmentUserVariables* userVariables = new KalmanAlignmentUserVariables( *itAlignable, updateGraph );
 	    userVariables->update( alignmentParameters );
 	    alignmentParameters->setUserVariables( userVariables );
 	  }
@@ -424,13 +419,13 @@ void KalmanAlignmentAlgorithm::initializeAlignmentParameters( const edm::EventSe
 	  if ( alignmentParametersMap.find( *itAlignable ) == alignmentParametersMap.end() )
 	  {
 	    alignmentParameters = (*itAlignable)->alignmentParameters()->clone( startParameters, startError );
-	    alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, tTopo, updateGraph ) );
+	    alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, updateGraph ) );
 	  }
 	  else
 	  {
 	    AlgebraicVector parameters = alignmentParametersMap[*itAlignable].back()->parameters();
 	    alignmentParameters = (*itAlignable)->alignmentParameters()->clone( parameters, startError );
-	    KalmanAlignmentUserVariables* userVariables = new KalmanAlignmentUserVariables( *itAlignable, tTopo, updateGraph );
+	    KalmanAlignmentUserVariables* userVariables = new KalmanAlignmentUserVariables( *itAlignable, updateGraph );
 	    userVariables->update( alignmentParameters );
 	    alignmentParameters->setUserVariables( userVariables );
 	  }
@@ -440,7 +435,7 @@ void KalmanAlignmentAlgorithm::initializeAlignmentParameters( const edm::EventSe
 	  //cout << "apply DEFAULT param and cov" << endl;
 	  alignmentParameters = (*itAlignable)->alignmentParameters()->clone( startParameters, startError );
 	  //alignmentParameters = (*itAlignable)->alignmentParameters()->clone( trueParameters, startError );
-	  alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, tTopo, updateGraph ) );
+	  alignmentParameters->setUserVariables( new KalmanAlignmentUserVariables( *itAlignable, updateGraph ) );
 	}
 
 	(*itAlignable)->setAlignmentParameters( alignmentParameters );

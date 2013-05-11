@@ -46,7 +46,7 @@ class DeltaRNearestObjectComputer : public edm::EDProducer {
         explicit DeltaRNearestObjectComputer(const edm::ParameterSet & iConfig);
         virtual ~DeltaRNearestObjectComputer() ;
 
-        virtual void produce(edm::Event & iEvent, const edm::EventSetup& iSetup) override;
+        virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
 
     private:
         edm::InputTag probes_;            

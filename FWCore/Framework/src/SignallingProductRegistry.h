@@ -22,22 +22,20 @@
 #include <map>
 #include <string>
 
-#include "FWCore/Utilities/interface/Signal.h"
+#include "boost/utility.hpp"
+#include "sigc++/signal.h"
 
 // user include files
 #include "DataFormats/Provenance/interface/ProductRegistry.h"
 
 // forward declarations
 namespace edm {
-   class SignallingProductRegistry : public ProductRegistry {
+   class SignallingProductRegistry : public ProductRegistry, private boost::noncopyable {
 
    public:
       SignallingProductRegistry() : ProductRegistry(), productAddedSignal_(), typeAddedStack_() {}
       explicit SignallingProductRegistry(ProductRegistry const& preg) : ProductRegistry(preg.productList(), false), productAddedSignal_(), typeAddedStack_() {}
-      signalslot::Signal<void(BranchDescription const&)> productAddedSignal_;
-
-      SignallingProductRegistry(SignallingProductRegistry const&) = delete; // Disallow copying and moving
-      SignallingProductRegistry& operator=(SignallingProductRegistry const&) = delete; // Disallow copying and moving
+      sigc::signal<void, BranchDescription const&> productAddedSignal_;
 
    private:
       virtual void addCalled(BranchDescription const&, bool);

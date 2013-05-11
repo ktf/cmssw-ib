@@ -28,16 +28,29 @@ GlobalTrajectoryBuilderCommon.TrackTransformer.TrackerRecHitBuilder = 'WithoutRe
 # ECAL severity
 from RecoLocalCalo.EcalRecAlgos.EcalSeverityLevelESProducer_cfi import *
 
-# CaloMode is defined here
-# 0: custom local reco bypassing digis, ECAL and HCAL; default before 61x
-# 1: as 0, but full digi + std local reco in ECAL <---- DEFAULT
+# CaloMode is defined in FastSimulation.CaloRecHitsProducer.CaloRecHits_cff
+# 0: custom local reco bypassing digis, ECAL and HCAL
+# 1: as 0, but full digi + std local reco in ECAL
 # 2: as 0, but full digi + std local reco in HCAL
-# 3: full digi + std local reco in ECAL and HCAL; planned to become default soon
-
-CaloMode = 3
-
-# This flag is to switch between GEN-level and SIM/RECO-level pileup mixing
-# 1: GEN-level <---- DEFAULT
-# 2: SIM/RECO-level; to be used only if CaloMode==3
-
-MixingMode = 1
+# 3: full digi + std local reco in ECAL and HCAL
+from FastSimulation.CaloRecHitsProducer.CaloRecHits_cff import *
+from FastSimulation.Calorimetry.Calorimetry_cff import *
+from FastSimulation.Calorimetry.HcalResponse_cfi import *
+if(CaloMode==0):
+    FamosCalorimetryBlock.Calorimetry.ECAL.Digitizer = False
+    FamosCalorimetryBlock.Calorimetry.HCAL.Digitizer = False
+    HCALResponseBlock.HCALResponse.useAdHocCorrections = True
+if(CaloMode==1):
+    FamosCalorimetryBlock.Calorimetry.ECAL.Digitizer = True
+    FamosCalorimetryBlock.Calorimetry.HCAL.Digitizer = False
+    HCALResponseBlock.HCALResponse.useAdHocCorrections = True
+if(CaloMode==2):
+    FamosCalorimetryBlock.Calorimetry.ECAL.Digitizer = False
+    FamosCalorimetryBlock.Calorimetry.HCAL.Digitizer = True
+    FamosCalorimetryBlock.Calorimetry.HCAL.smearTimeHF = True
+    HCALResponseBlock.HCALResponse.useAdHocCorrections = False
+if(CaloMode==3):
+    FamosCalorimetryBlock.Calorimetry.ECAL.Digitizer = True
+    FamosCalorimetryBlock.Calorimetry.HCAL.Digitizer = True
+    FamosCalorimetryBlock.Calorimetry.HCAL.smearTimeHF = True
+    HCALResponseBlock.HCALResponse.useAdHocCorrections = False

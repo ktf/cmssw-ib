@@ -11,8 +11,8 @@ class InterestingEcalDetIdProducer : public edm::EDProducer {
  public:
   explicit InterestingEcalDetIdProducer(const edm::ParameterSet&);
   ~InterestingEcalDetIdProducer();
-  void produce(edm::Event&, const edm::EventSetup&) override;
-  void beginRun(const edm::Run&, const edm::EventSetup&) override;
+  void produce(edm::Event&, const edm::EventSetup&);
+  void beginRun(edm::Run&, const edm::EventSetup&);
 
  private:
   edm::InputTag inputCollection_;

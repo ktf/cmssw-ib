@@ -6,8 +6,8 @@
  *
  * \author : Stefano Lacaprara - INFN Padova <stefano.lacaprara@pd.infn.it>
  * \porting author: Chang Liu - Purdue University 
- * $Date: 2012/12/25 14:24:26 $
- * $Revision: 1.8 $
+ * $Date: 2009/07/05 19:56:54 $
+ * $Revision: 1.7 $
  *
  * Modification:
  *
@@ -96,7 +96,7 @@ void SmartPropagator::initTkVolume(float epsilon) {
   Surface::PositionType pos(0,0,0); // centered at the global origin
   Surface::RotationType rot; // unit matrix - barrel cylinder orientation
 
-  theTkVolume() = Cylinder::build(radius, pos, rot, new SimpleCylinderBounds(r_in, r_out, z_min, z_max));
+  theTkVolume() = BoundCylinder::build(pos, rot, radius, SimpleCylinderBounds(r_in, r_out, z_min, z_max));
 
 }
 

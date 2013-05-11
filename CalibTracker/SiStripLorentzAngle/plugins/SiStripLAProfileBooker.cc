@@ -26,8 +26,10 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
@@ -70,10 +72,6 @@ SiStripLAProfileBooker::SiStripLAProfileBooker(edm::ParameterSet const& conf) :
 
 void SiStripLAProfileBooker::beginRun(const edm::EventSetup& c){
 
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  c.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
  
   //get magnetic field and geometry from ES
   edm::ESHandle<MagneticField> esmagfield;
@@ -201,7 +199,7 @@ void SiStripLAProfileBooker::beginRun(const edm::EventSetup& c){
       const StripTopology& topol=(const StripTopology&)stripdet->topology();
       float thickness=stripdet->specificSurface().bounds().thickness();
       
-      folder_organizer.setDetectorFolder(Iditer->rawId(), tTopo);
+      folder_organizer.setDetectorFolder(Iditer->rawId());
       hid = hidmanager.createHistoId(TkTag.label().c_str(),"det",Iditer->rawId());
       MonitorElement * profile=dbe_->bookProfile(hid,hid,module_bin,ModuleRangeMin,ModuleRangeMax,20,0,5,"");
       detparameters *param=new detparameters;
@@ -220,7 +218,7 @@ void SiStripLAProfileBooker::beginRun(const edm::EventSetup& c){
       // create a summary histo if it does not exist already
       std::string name;
       unsigned int layerid;
-      getlayer(subid,tTopo,name,layerid);
+      getlayer(subid,name,layerid);
       name+=TkTag.label().c_str();
       if(summaryhisto.find(layerid)==(summaryhisto.end())){
 	folder_organizer.setSiStripFolder();
@@ -269,10 +267,6 @@ SiStripLAProfileBooker::~SiStripLAProfileBooker() {
 
 void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
   
   RunNumber = e.id().run();
   EventNumber = e.id().event();
@@ -418,25 +412,25 @@ void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup&
 	    MonoStereo=detid.stereo();
 	    
 	    if(detid.subdetId() == int (StripSubdetector::TIB)){
-	      
-	      Layer = tTopo->tibLayer(detid);
-	      bw_fw = tTopo->tibStringInfo(detid)[0];
-	      Ext_Int = tTopo->tibStringInfo(detid)[1];
+	      TIBDetId TIBid=TIBDetId(detid);
+	      Layer = TIBid.layer();
+	      bw_fw = TIBid.string()[0];
+	      Ext_Int = TIBid.string()[1];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TOB)){
-	      
-	      Layer = tTopo->tobLayer(detid);
-	      bw_fw = tTopo->tobRodInfo(detid)[0];
+	      TOBDetId TOBid=TOBDetId(detid);
+	      Layer = TOBid.layer();
+	      bw_fw = TOBid.rod()[0];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TID)){
-	      
-	      Wheel = tTopo->tidWheel(detid);
-	      bw_fw = tTopo->tidModuleInfo(detid)[0];
+	      TIDDetId TIDid=TIDDetId(detid);
+	      Wheel = TIDid.wheel();
+	      bw_fw = TIDid.module()[0];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TEC)){
-	      
-	      Wheel = tTopo->tecWheel(detid);
-	      bw_fw = tTopo->tecPetalInfo(detid)[0];
+	      TECDetId TECid=TECDetId(detid);
+	      Wheel = TECid.wheel();
+	      bw_fw = TECid.petal()[0];
             }
 	    
 	    
@@ -514,25 +508,25 @@ void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup&
 	      MonoStereo=detid.stereo();
 	      
 	      if(detid.subdetId() == int (StripSubdetector::TIB)){
-		
-		Layer = tTopo->tibLayer(detid);
-		bw_fw = tTopo->tibStringInfo(detid)[0];
-		Ext_Int = tTopo->tibStringInfo(detid)[1];
+		TIBDetId TIBid=TIBDetId(detid);
+		Layer = TIBid.layer();
+		bw_fw = TIBid.string()[0];
+		Ext_Int = TIBid.string()[1];
 	      }
 	      if(detid.subdetId() == int (StripSubdetector::TOB)){
-		
-		Layer = tTopo->tobLayer(detid);
-		bw_fw = tTopo->tobRodInfo(detid)[0];
+		TOBDetId TOBid=TOBDetId(detid);
+		Layer = TOBid.layer();
+		bw_fw = TOBid.rod()[0];
 	      }
 	      if(detid.subdetId() == int (StripSubdetector::TID)){
-		
-		Wheel = tTopo->tidWheel(detid);
-		bw_fw = tTopo->tidModuleInfo(detid)[0];
+		TIDDetId TIDid=TIDDetId(detid);
+		Wheel = TIDid.wheel();
+		bw_fw = TIDid.module()[0];
 	      }
 	      if(detid.subdetId() == int (StripSubdetector::TEC)){
-		
-		Wheel = tTopo->tecWheel(detid);
-		bw_fw = tTopo->tecPetalInfo(detid)[0];
+		TECDetId TECid=TECDetId(detid);
+		Wheel = TECid.wheel();
+		bw_fw = TECid.petal()[0];
 	      }
 	      
 	      
@@ -611,25 +605,25 @@ void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup&
 	    MonoStereo=detid.stereo();
 	    
 	    if(detid.subdetId() == int (StripSubdetector::TIB)){
-	      
-	      Layer = tTopo->tibLayer(detid);
-	      bw_fw = tTopo->tibStringInfo(detid)[0];
-	      Ext_Int = tTopo->tibStringInfo(detid)[1];
+	      TIBDetId TIBid=TIBDetId(detid);
+	      Layer = TIBid.layer();
+	      bw_fw = TIBid.string()[0];
+	      Ext_Int = TIBid.string()[1];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TOB)){
-	      
-	      Layer = tTopo->tobLayer(detid);
-	      bw_fw = tTopo->tobRodInfo(detid)[0];
+	      TOBDetId TOBid=TOBDetId(detid);
+	      Layer = TOBid.layer();
+	      bw_fw = TOBid.rod()[0];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TID)){
-	      
-	      Wheel = tTopo->tidWheel(detid);
-	      bw_fw = tTopo->tidModuleInfo(detid)[0];
+	      TIDDetId TIDid=TIDDetId(detid);
+	      Wheel = TIDid.wheel();
+	      bw_fw = TIDid.module()[0];
             }
 	    if(detid.subdetId() == int (StripSubdetector::TEC)){
-	      
-	      Wheel = tTopo->tecWheel(detid);
-	      bw_fw = tTopo->tecPetalInfo(detid)[0];
+	      TECDetId TECid=TECDetId(detid);
+	      Wheel = TECid.wheel();
+	      bw_fw = TECid.petal()[0];
             }
 	    
 	    if(trackdirection.z()!=0){
@@ -716,7 +710,7 @@ void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup&
     //Summary histograms
     std::string name;
     unsigned int layerid;
-    getlayer(detid,tTopo,name,layerid);
+    getlayer(detid,name,layerid);
     histomap::iterator thesummaryhisto=summaryhisto.find(layerid);
     if(thesummaryhisto==summaryhisto.end())edm::LogError("SiStripLAProfileBooker::analyze")<<"Error: the profile associated to subdet "<<name<<"does not exist! ";   
     else thesummaryhisto->second->Fill(tangent,size);
@@ -729,33 +723,33 @@ void SiStripLAProfileBooker::analyze(const edm::Event& e, const edm::EventSetup&
 
 //Makename function
  
-void SiStripLAProfileBooker::getlayer(const DetId & detid, const TrackerTopology* tTopo, std::string &name,unsigned int &layerid){
+void SiStripLAProfileBooker::getlayer(const DetId & detid, std::string &name,unsigned int &layerid){
     int layer=0;
     std::stringstream layernum;
 
     if(detid.subdetId() == int (StripSubdetector::TIB)){
-      
+      TIBDetId TIBid=TIBDetId(detid);
       name+="TIB_Layer_";
-      layer = tTopo->tibLayer(detid);
+      layer = TIBid.layer();
     }
 
     else if(detid.subdetId() == int (StripSubdetector::TID)){
-      
+      TIDDetId TIDid=TIDDetId(detid);
       name+="TID_Ring_";
-      layer = tTopo->tidRing(detid);
+      layer = TIDid.ring();
     }
 
     else if(detid.subdetId() == int (StripSubdetector::TOB)){
-      
+      TOBDetId TOBid=TOBDetId(detid);
       name+="TOB_Layer_";
-      layer = tTopo->tobLayer(detid);
+      layer = TOBid.layer();
 
     }
 
     else if(detid.subdetId() == int (StripSubdetector::TEC)){
-      
+      TECDetId TECid=TECDetId(detid);
       name+="TEC_Ring_";
-      layer = tTopo->tecRing(detid);
+      layer = TECid.ring();
     }
     layernum<<layer;
     name+=layernum.str();

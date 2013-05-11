@@ -248,10 +248,6 @@ void  ElectronSeedGenerator::run
 //  if (duplicateTrajectorySeeds)
 //   { edm::LogWarning("ElectronSeedGenerator|DuplicateTrajectorySeeds")<<"We see several identical trajectory seeds." ; }
 
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHand;
-  setup.get<IdealGeometryRecord>().get(tTopoHand);
-  const TrackerTopology *tTopo=tTopoHand.product();
 
   theSetup= &setup;
   NavigationSetter theSetter(*theNavigationSchool);
@@ -274,7 +270,7 @@ void  ElectronSeedGenerator::run
     recHits_.clear();
 
     LogDebug ("run") << "new cluster, calling seedsFromThisCluster";
-    seedsFromThisCluster(sclRefs[i],hoe1s[i],hoe2s[i],out,tTopo);
+    seedsFromThisCluster(sclRefs[i],hoe1s[i],hoe2s[i],out);
   }
 
   LogDebug ("run") << ": For event "<<e.id();
@@ -285,7 +281,7 @@ void  ElectronSeedGenerator::run
 void ElectronSeedGenerator::seedsFromThisCluster
 ( edm::Ref<reco::SuperClusterCollection> seedCluster,
   float hoe1, float hoe2,
-  reco::ElectronSeedCollection & out, const TrackerTopology *tTopo )
+  reco::ElectronSeedCollection & out )
 {
   float clusterEnergy = seedCluster->energy() ;
   GlobalPoint clusterPos
@@ -346,13 +342,12 @@ void ElectronSeedGenerator::seedsFromThisCluster
      {
       // try electron
       std::vector<std::pair<RecHitWithDist,ConstRecHitPointer> > elePixelHits
-       = myMatchEle->compatibleHits(clusterPos,vertexPos,
-				    clusterEnergy,-1., tTopo) ;
+       = myMatchEle->compatibleHits(clusterPos,vertexPos,clusterEnergy,-1.) ;
       GlobalPoint eleVertex(theBeamSpot->position().x(),theBeamSpot->position().y(),myMatchEle->getVertex()) ;
       seedsFromRecHits(elePixelHits,dir,eleVertex,caloCluster,out,false) ;
       // try positron
       std::vector<std::pair<RecHitWithDist,ConstRecHitPointer> > posPixelHits
-	= myMatchPos->compatibleHits(clusterPos,vertexPos,clusterEnergy,1.,tTopo) ;
+       = myMatchPos->compatibleHits(clusterPos,vertexPos,clusterEnergy,1.) ;
       GlobalPoint posVertex(theBeamSpot->position().x(),theBeamSpot->position().y(),myMatchPos->getVertex()) ;
       seedsFromRecHits(posPixelHits,dir,posVertex,caloCluster,out,true) ;
      }
@@ -403,11 +398,11 @@ void ElectronSeedGenerator::seedsFromThisCluster
        {
         // try electron
         std::vector<std::pair<RecHitWithDist,ConstRecHitPointer> > elePixelHits
-	  = myMatchEle->compatibleHits(clusterPos,vertexPos,clusterEnergy,-1.,tTopo) ;
+         = myMatchEle->compatibleHits(clusterPos,vertexPos,clusterEnergy,-1.) ;
         seedsFromRecHits(elePixelHits,dir,vertexPos,caloCluster,out,false) ;
         // try positron
 	      std::vector<std::pair<RecHitWithDist,ConstRecHitPointer> > posPixelHits
-		= myMatchPos->compatibleHits(clusterPos,vertexPos,clusterEnergy,1.,tTopo) ;
+	       = myMatchPos->compatibleHits(clusterPos,vertexPos,clusterEnergy,1.) ;
         seedsFromRecHits(posPixelHits,dir,vertexPos,caloCluster,out,true) ;
        }
       else
@@ -603,17 +598,12 @@ bool ElectronSeedGenerator::prepareElTrackSeed
 
   typedef TrajectoryStateOnSurface     TSOS;
 
-  // FIXME to be optimized outside the loop
-  edm::ESHandle<MagneticField> bfield;
-  theSetup->get<IdealMagneticFieldRecord>().get(bfield);
-  float nomField = bfield->nominalValue();
-
   // make a spiral
-  FastHelix helix(outerhit->globalPosition(),innerhit->globalPosition(),vertexPos,nomField,&*bfield);
+  FastHelix helix(outerhit->globalPosition(),innerhit->globalPosition(),vertexPos,*theSetup);
   if ( !helix.isValid()) {
     return false;
   }
-  FreeTrajectoryState fts(helix.stateAtVertex());
+  FreeTrajectoryState fts = helix.stateAtVertex();
   TSOS propagatedState = thePropagator->propagate(fts,innerhit->det()->surface()) ;
   if (!propagatedState.isValid())
     return false;

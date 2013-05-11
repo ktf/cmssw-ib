@@ -47,7 +47,7 @@ public:
   ~EcalSkim();
   
 private:
-  virtual bool filter ( edm::Event &, const edm::EventSetup&) override;
+  virtual bool filter ( edm::Event &, const edm::EventSetup & );
   
   edm::InputTag BarrelClusterCollection;
   edm::InputTag EndcapClusterCollection;

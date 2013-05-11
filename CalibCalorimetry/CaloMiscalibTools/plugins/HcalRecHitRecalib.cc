@@ -51,7 +51,7 @@ HcalRecHitRecalib::~HcalRecHitRecalib()
 }
 
 void
-HcalRecHitRecalib::beginRun(const edm::Run&, const edm::EventSetup& iSetup)
+HcalRecHitRecalib::beginRun(edm::Run&, edm::EventSetup const& iSetup)
 {
   edm::ESHandle<HcalTopology> topology;
   iSetup.get<IdealGeometryRecord>().get( topology );

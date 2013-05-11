@@ -8,7 +8,8 @@ using namespace std;
 BoundDisk* 
 ForwardRingDiskBuilderFromDet::operator()( const vector<const GeomDet*>& dets) const
 {
-  auto bo = computeBounds( dets );
+  pair<SimpleDiskBounds,float> bo = 
+    computeBounds( dets );
 
 //   LogDebug("DetLayers") << "Creating disk at Z: " << bo.second << "\n"
 //        << "Bounds are (rmin/rmax/thick) " << bo.first.innerRadius()
@@ -30,7 +31,7 @@ ForwardRingDiskBuilderFromDet::operator()( const vector<const GeomDet*>& dets) c
   return new BoundDisk( pos, rot, bo.first);
 }
 
-pair<SimpleDiskBounds*, float>
+pair<SimpleDiskBounds, float>
 ForwardRingDiskBuilderFromDet::computeBounds( const vector<const GeomDet*>& dets) const
 {
   // go over all corners and compute maximum deviations from mean pos.
@@ -46,7 +47,7 @@ ForwardRingDiskBuilderFromDet::computeBounds( const vector<const GeomDet*>& dets
     for (vector<DetUnit*>::const_iterator detu=detUnits.begin();
     detu!=detUnits.end(); detu++) {
     vector<GlobalPoint> corners = BoundingBox().corners(
-    dynamic_cast<const Plane&>((**detu).surface()));
+    dynamic_cast<const BoundPlane&>((**detu).surface()));
     }
     ----- */
     vector<GlobalPoint> corners = BoundingBox().corners( (**idet).specificSurface() );
@@ -85,5 +86,5 @@ ForwardRingDiskBuilderFromDet::computeBounds( const vector<const GeomDet*>& dets
 
   
   float zPos = (zmax+zmin)/2.;
-  return make_pair(new SimpleDiskBounds(rmin,rmax,zmin-zPos,zmax-zPos), zPos);
+  return make_pair(SimpleDiskBounds(rmin,rmax,zmin-zPos,zmax-zPos), zPos);
 }

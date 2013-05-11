@@ -36,7 +36,7 @@ public:
   ~ECALActivity();
   
 private:
-  virtual bool filter ( edm::Event &, const edm::EventSetup&) override;
+  virtual bool filter ( edm::Event &, const edm::EventSetup & );
   
   edm::InputTag EBRecHitCollection_;
   edm::InputTag EERecHitCollection_;

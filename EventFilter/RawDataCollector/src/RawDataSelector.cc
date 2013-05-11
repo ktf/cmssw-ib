@@ -29,7 +29,8 @@ public:
 
 private:
 
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&);
+  void beginRun(const edm::Run&, const edm::EventSetup&);
 
   RawDataFEDSelector * selector; 
 

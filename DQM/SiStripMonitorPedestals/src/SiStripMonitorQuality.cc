@@ -13,7 +13,7 @@
 //
 // Original Author:  Suchandra Dutta
 //         Created:  Fri Dec  7 20:50 CET 2007
-// $Id: SiStripMonitorQuality.cc,v 1.8 2013/01/03 18:59:36 wmtan Exp $
+// $Id: SiStripMonitorQuality.cc,v 1.6 2012/01/08 09:13:38 eulisse Exp $
 //
 //
 
@@ -76,11 +76,6 @@ void SiStripMonitorQuality::analyze(edm::Event const& iEvent, edm::EventSetup co
   unsigned long long cacheID = eSetup.get<SiStripQualityRcd>().cacheIdentifier();  
   if (m_cacheID_ == cacheID) return;
   
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  eSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   m_cacheID_ = cacheID;       
 
   std::string quality_label = conf_.getParameter<std::string>("StripQualityLabel");
@@ -111,7 +106,7 @@ void SiStripMonitorQuality::analyze(edm::Event const& iEvent, edm::EventSetup co
 					   << " DetId " <<  detid << " not connected,  Neglecting !!!!!! ";
       continue;
     }
-    MonitorElement* me = getQualityME(detid, tTopo);
+    MonitorElement* me = getQualityME(detid);
     SiStripBadStrip::Range range = SiStripBadStrip::Range( stripQuality_->getDataVectorBegin()+rp->ibegin , 
 							   stripQuality_->getDataVectorBegin()+rp->iend );
     SiStripBadStrip::ContainerIterator it=range.first;
@@ -146,7 +141,7 @@ void SiStripMonitorQuality::endJob(void){
 //
 // -- End Job
 //
-MonitorElement* SiStripMonitorQuality::getQualityME(uint32_t idet, const TrackerTopology* tTopo){
+MonitorElement* SiStripMonitorQuality::getQualityME(uint32_t idet){
 
   std::map<uint32_t, MonitorElement* >::iterator pos = QualityMEs.find(idet);
   MonitorElement* det_me;
@@ -161,7 +156,7 @@ MonitorElement* SiStripMonitorQuality::getQualityME(uint32_t idet, const Tracker
     // create SiStripFolderOrganizer
     SiStripFolderOrganizer folder_organizer;
     // set appropriate folder using SiStripFolderOrganizer
-    folder_organizer.setDetectorFolder(idet, tTopo); // pass the detid to this method
+    folder_organizer.setDetectorFolder(idet); // pass the detid to this method
 
     std::string hid;
     hid = hidmanager.createHistoId("StripQualityFromCondDB","det", idet);

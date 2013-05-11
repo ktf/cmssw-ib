@@ -24,7 +24,7 @@ namespace reco {
       edm::InputTag src_;
       std::vector<edm::InputTag> matchMaps_;
       std::vector<int> pdgId_;
-      void produce( edm::Event & , const edm::EventSetup&) override;
+      void produce( edm::Event & , const edm::EventSetup & );
     };
     
     MCTruthCompositeMatcher::MCTruthCompositeMatcher( const edm::ParameterSet & cfg ) :
@@ -90,4 +90,3 @@ DEFINE_FWK_MODULE( MCTruthCompositeMatcherNew );
 
   }
 }
-

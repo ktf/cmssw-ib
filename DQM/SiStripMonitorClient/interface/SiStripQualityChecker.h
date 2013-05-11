@@ -3,7 +3,6 @@
 
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include <iostream>
@@ -30,10 +29,10 @@ class SiStripQualityChecker {
  void bookStatus(DQMStore* dqm_store);     
   void resetStatus();
   void fillDummyStatus();
-  void fillStatus(DQMStore* dqm_store, const edm::ESHandle< SiStripDetCabling >& cabling, const edm::EventSetup& eSetup);
+  void fillStatus(DQMStore* dqm_store, const edm::ESHandle< SiStripDetCabling >& cabling);
   void fillStatusAtLumi(DQMStore* dqm_store);
   void printStatusReport();
-  void fillFaultyModuleStatus(DQMStore* dqm_store, const edm::EventSetup& eSetup);
+  void fillFaultyModuleStatus(DQMStore* dqm_store);
   
  private:
 

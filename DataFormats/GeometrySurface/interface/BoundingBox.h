@@ -4,7 +4,7 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include <vector>
 
-class Plane;
+class BoundPlane;
 
 /** A helper class that returns the corners of a rectangle that
  *  fully contains a bound plane.
@@ -13,10 +13,10 @@ class BoundingBox {
 public:
 
   BoundingBox(){}
-  BoundingBox(const Plane& plane);
+  BoundingBox(const BoundPlane& plane);
   
   // old interface
-  static std::vector<GlobalPoint> corners( const Plane&);
+  static std::vector<GlobalPoint> corners( const BoundPlane&);
 
 
   GlobalPoint const & operator[](unsigned int i) const {

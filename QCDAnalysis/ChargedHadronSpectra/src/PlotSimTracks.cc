@@ -10,9 +10,15 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
+
+#include "SimDataFormats/CrossingFrame/interface/CrossingFrame.h"
+#include "SimDataFormats/CrossingFrame/interface/MixCollection.h"
 
 // Ecal
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
@@ -69,13 +75,8 @@ PlotSimTracks::~PlotSimTracks()
 }
 
 /*****************************************************************************/
-void PlotSimTracks::printSimTracks(const edm::Event& ev, const edm::EventSetup& es)
+void PlotSimTracks::printSimTracks(const edm::Event& ev)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   // Tracker
   edm::Handle<TrackingParticleCollection> simTrackHandle;
   ev.getByLabel("mergedtruth",            simTrackHandle);
@@ -153,7 +154,7 @@ void PlotSimTracks::printSimTracks(const edm::Event& ev, const edm::EventSetup& 
            << " GeV | parent: source="
            << simTrack->parentVertex()->nSourceTracks() 
            << " daughter=" << simTrack->parentVertex()->nDaughterTracks()
-           << HitInfo::getInfo(*simHit, tTopo) << "\"], {"
+           << HitInfo::getInfo(*simHit) << "\"], {"
            << p1.x() << "," << p1.y() << ",(" << p1.z() << "-zs)*mz}, {1,1}]"
            << std::endl;
 

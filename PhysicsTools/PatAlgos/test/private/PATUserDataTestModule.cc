@@ -14,7 +14,7 @@
 //
 // Original Author:  Freya Blekman
 //         Created:  Mon Apr 21 10:03:50 CEST 2008
-// $Id: PATUserDataTestModule.cc,v 1.5 2013/02/27 23:26:57 wmtan Exp $
+// $Id: PATUserDataTestModule.cc,v 1.4 2010/02/20 21:00:31 wmtan Exp $
 //
 //
 
@@ -71,7 +71,7 @@ class PATUserDataTestModule : public edm::EDProducer {
 
 
    private:
-      virtual void produce(edm::Event&, const edm::EventSetup&) override;
+      virtual void produce(edm::Event&, const edm::EventSetup&);
 
       // ----------member data ---------------------------
       edm::InputTag muons_;

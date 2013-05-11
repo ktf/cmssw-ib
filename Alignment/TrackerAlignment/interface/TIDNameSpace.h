@@ -7,59 +7,58 @@
  *
  *  A system to number a component within its parent; starts from 1.
  *
- *  $Date: 2013/01/07 19:44:30 $
- *  $Revision: 1.2 $
+ *  $Date: 2007/10/18 09:57:10 $
+ *  $Revision: 1.1 $
  *  \author Chung Khim Lae
  */
 
 #include "CondFormats/Alignment/interface/Definitions.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 
 namespace align
 {
   namespace tid
   {
      /// Module number increases with phi.
-    inline unsigned int moduleNumber(align::ID, const TrackerTopology*);
+    inline unsigned int moduleNumber( align::ID );
 
     /// Side number is 1 for back ring and 2 for front (towards IP).
-    inline unsigned int sideNumber(align::ID, const TrackerTopology*);
+    inline unsigned int sideNumber( align::ID );
 
     /// Ring number increases with rho from 1 to 3.
-    inline unsigned int ringNumber(align::ID, const TrackerTopology*);
+    inline unsigned int ringNumber( align::ID );
 
     /// Disk number increases with |z| from 1 to 3.
-    inline unsigned int diskNumber(align::ID, const TrackerTopology*);
+    inline unsigned int diskNumber( align::ID );
 
     /// Endcap number is 1 at -z side and 2 at +z side.
-    inline unsigned int endcapNumber(align::ID, const TrackerTopology*);
+    inline unsigned int endcapNumber( align::ID );
   }
 }
 
-unsigned int align::tid::moduleNumber(align::ID id, const TrackerTopology* tTopo)
+unsigned int align::tid::moduleNumber(align::ID id)
 {
-  return tTopo->tidModuleInfo(id)[1];
+  return TIDDetId(id).module()[1];
 }
 
-unsigned int align::tid::sideNumber(align::ID id, const TrackerTopology* tTopo)
+unsigned int align::tid::sideNumber(align::ID id)
 {
-  return tTopo->tidModuleInfo(id)[0];
+  return TIDDetId(id).module()[0];
 }
 
-unsigned int align::tid::ringNumber(align::ID id, const TrackerTopology* tTopo)
+unsigned int align::tid::ringNumber(align::ID id)
 {
-  return tTopo->tidRing(id);
+  return TIDDetId(id).ring();
 }
 
-unsigned int align::tid::diskNumber(align::ID id, const TrackerTopology* tTopo)
+unsigned int align::tid::diskNumber(align::ID id)
 {
-  return tTopo->tidWheel(id);
+  return TIDDetId(id).wheel();
 }
 
-unsigned int align::tid::endcapNumber(align::ID id, const TrackerTopology* tTopo)
+unsigned int align::tid::endcapNumber(align::ID id)
 {
-  return tTopo->tidSide(id);
+  return TIDDetId(id).side();
 }
 
 #endif

@@ -272,16 +272,7 @@ namespace edmtest
     assert(hproduct.isValid());
 
     Handle<view_t> hview;
-
-    InputTag tag(moduleLabel + "doesNotExist");
-    e.getByLabel(tag, hview);
-    assert(!hview.isValid());
-
-    e.getByLabel(moduleLabel + "doesNotExist", hview);
-    assert(!hview.isValid());
-
-    InputTag tag2(moduleLabel);
-    e.getByLabel(tag2, hview);
+    e.getByLabel(moduleLabel, hview);
     assert(hview.isValid());
     
     assert(hproduct.id() == hview.id());

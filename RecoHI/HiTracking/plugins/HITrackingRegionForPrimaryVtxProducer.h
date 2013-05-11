@@ -20,6 +20,7 @@
 
 #include "DataFormats/Common/interface/DetSetVector.h"    
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 
 #include "TMath.h"
 

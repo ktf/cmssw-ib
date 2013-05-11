@@ -1,7 +1,6 @@
-#ifndef Mixing_Base_PileUp_h
-#define Mixing_Base_PileUp_h
+#ifndef Base_PileUp_h
+#define Base_PileUp_h
 
-#include <memory>
 #include <string>
 #include <vector>
 #include <boost/bind.hpp>
@@ -82,12 +81,9 @@ namespace edm {
     int  intFixed_OOT_;
     int  intFixed_ITPU_;
 
-    std::unique_ptr<ProductRegistry> productRegistry_;
-    std::unique_ptr<VectorInputSource> const input_;
-    std::unique_ptr<ProcessConfiguration> processConfiguration_;
-    std::unique_ptr<EventPrincipal> eventPrincipal_;
-    std::unique_ptr<CLHEP::RandPoissonQ> poissonDistribution_;
-    std::unique_ptr<CLHEP::RandPoisson>  poissonDistr_OOT_;
+    VectorInputSource * const input_;
+    CLHEP::RandPoissonQ *poissonDistribution_;
+    CLHEP::RandPoisson  *poissonDistr_OOT_;
 
 
     TH1F *h1f;
@@ -148,23 +144,23 @@ namespace edm {
     if (samelumi_) {
       const edm::LuminosityBlockID lumi(signal.run(), signal.luminosityBlock());
       if (sequential_)
-        read = input_->loopSequentialWithID(*eventPrincipal_, lumi, pileEventCnt, recorder);
+        read = input_->loopSequentialWithID(lumi, pileEventCnt, recorder);
       else
-        read = input_->loopRandomWithID(*eventPrincipal_, lumi, pileEventCnt, recorder);
+        read = input_->loopRandomWithID(lumi, pileEventCnt, recorder);
     } else {
       if (sequential_) {
         // boost::bind creates a functor from recordEventForPlayback
         // so that recordEventForPlayback can insert itself before
         // the original eventOperator.
 
-        read = input_->loopSequential(*eventPrincipal_, pileEventCnt, recorder);
+        read = input_->loopSequential(pileEventCnt, recorder);
         //boost::bind(&PileUp::recordEventForPlayback<T>,
         //                    boost::ref(*this), _1, boost::ref(ids),
         //                             boost::ref(eventOperator))
         //  );
           
       } else  {
-        read = input_->loopRandom(*eventPrincipal_, pileEventCnt, recorder);
+        read = input_->loopRandom(pileEventCnt, recorder);
         //               boost::bind(&PileUp::recordEventForPlayback<T>,
         //                             boost::ref(*this), _1, boost::ref(ids),
         //                             boost::ref(eventOperator))
@@ -181,7 +177,7 @@ namespace edm {
   void
     PileUp::playPileUp(const std::vector<edm::EventID> &ids, T eventOperator) {
     //TrueNumInteractions.push_back( ids.size() ) ;
-    input_->loopSpecified(*eventPrincipal_,ids,eventOperator);
+    input_->loopSpecified(ids,eventOperator);
   }
 
 

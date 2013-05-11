@@ -1,11 +1,11 @@
-// $Id: QcdLowPtDQM.cc,v 1.21 2013/01/03 18:59:34 wmtan Exp $
+// $Id: QcdLowPtDQM.cc,v 1.19 2012/01/11 13:53:29 olzem Exp $
 
 #include "DQM/Physics/src/QcdLowPtDQM.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -122,7 +122,7 @@ void QcdLowPtDQM::analyze(const Event &iEvent, const EventSetup &iSetup)
   }
 
   fillHltBits(iEvent);
-  fillPixels(iEvent, iSetup);
+  fillPixels(iEvent);
   trackletVertexUnbinned(iEvent, pixLayers_);
   fillTracklets(iEvent, pixLayers_);
   fillPixelClusterInfos(iEvent, clusLayers_);
@@ -804,7 +804,7 @@ void QcdLowPtDQM::fillHltBits(const Event &iEvent)
 }
 
 //--------------------------------------------------------------------------------------------------
-void QcdLowPtDQM::fillPixels(const Event &iEvent, const edm::EventSetup& iSetup) 
+void QcdLowPtDQM::fillPixels(const Event &iEvent) 
 {
   // Fill pixel hit collections.
 
@@ -817,11 +817,6 @@ void QcdLowPtDQM::fillPixels(const Event &iEvent, const edm::EventSetup& iSetup)
     CP(2) print(2,Form("Can not obtain pixel hit collection with name %s", pixelName_.c_str()));
     return;
   }
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   const SiPixelRecHitCollection *hits = hRecHits.product();
   for(SiPixelRecHitCollection::DataContainer::const_iterator hit = hits->data().begin(), 
@@ -868,8 +863,8 @@ void QcdLowPtDQM::fillPixels(const Event &iEvent, const edm::EventSetup& iSetup)
 
     Pixel pix(gpos, adc, sizex, sizey);
 
-    
-    int layer = tTopo->pxbLayer(id);
+    PXBDetId pid(id);
+    int layer = pid.layer();
 
     if (layer==1) {
       bpix1_.push_back(pix);     

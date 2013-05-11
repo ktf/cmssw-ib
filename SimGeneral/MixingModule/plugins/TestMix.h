@@ -10,7 +10,7 @@
 //
 // Original Author:  Ursula Berthon
 //         Created:  Fri Sep 23 11:38:38 CEST 2005
-// $Id: TestMix.h,v 1.2 2013/03/01 00:13:36 wmtan Exp $
+// $Id: TestMix.h,v 1.1 2007/04/19 14:51:54 uberthon Exp $
 //
 //
 
@@ -40,7 +40,7 @@ namespace edm
     ~TestMix();
 
 
-    virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   private:
     int level_;

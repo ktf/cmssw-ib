@@ -12,8 +12,6 @@
 #include <vector>
 
 
-class TrackerTopology;
-
 class PixelTrackCleanerBySharedHits : public PixelTrackCleaner {
 
 public:
@@ -22,7 +20,7 @@ public:
   virtual ~PixelTrackCleanerBySharedHits();
 
   typedef pixeltrackfitting::TracksWithRecHits TracksWithRecHits;
-  virtual TracksWithRecHits cleanTracks(const TracksWithRecHits & tracksWithRecHits, const TrackerTopology *tTopo);
+  virtual TracksWithRecHits cleanTracks(const TracksWithRecHits & tracksWithRecHits);
 
 private:
 

@@ -20,7 +20,6 @@
 
 #include "RecoMuon/TrackingTools/interface/MuonServiceProxy.h"
 #include "RecoMuon/TrackingTools/interface/MuonErrorMatrix.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include <TrackingTools/KalmanUpdators/interface/KFUpdator.h>
 #include "TrackingTools/GeomPropagators/interface/StateOnTrackerBound.h"
@@ -72,8 +71,7 @@ void TSGForRoadSearch::setEvent(const edm::Event &event){
 
 
 
-void  TSGForRoadSearch::trackerSeeds(const TrackCand & muonTrackCand, const TrackingRegion& region, const TrackerTopology *tTopo,
-				     std::vector<TrajectorySeed> & result){
+void  TSGForRoadSearch::trackerSeeds(const TrackCand & muonTrackCand, const TrackingRegion& region, std::vector<TrajectorySeed> & result){
   switch (theOption){
   case 0:
     makeSeeds_0(*muonTrackCand.second,result);break;

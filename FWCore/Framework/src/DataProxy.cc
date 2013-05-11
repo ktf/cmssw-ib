@@ -38,7 +38,7 @@ dummyDescription()
 // constructors and destructor
 //
 DataProxy::DataProxy() :
-   cache_(nullptr),
+   cache_(0),
    cacheIsValid_(false),
    nonTransientAccessRequested_(false),
    description_(dummyDescription())

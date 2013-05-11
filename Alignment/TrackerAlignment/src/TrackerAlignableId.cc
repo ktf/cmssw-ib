@@ -1,22 +1,24 @@
 /// \file TrackerAlignableId.cc
 ///
-///  $Revision: 1.13 $
-///  $Date: 2013/01/07 19:44:30 $
-///  (last update by $Author: wmtan $)
+///  $Revision: 1.12 $
+///  $Date: 2007/10/08 13:49:07 $
+///  (last update by $Author: cklae $)
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
 #include "Alignment/TrackerAlignment/interface/TrackerAlignableId.h"
 
 
 //__________________________________________________________________________________________________
 // Returns alignable object id and layer (or wheel, or disk) number from a DetId
-std::pair<int,int> TrackerAlignableId::typeAndLayerFromDetId( const DetId& detId , const TrackerTopology* tTopo) const
+std::pair<int,int> TrackerAlignableId::typeAndLayerFromDetId( const DetId& detId ) const
 {
 
   int layerNumber = 0;
@@ -25,33 +27,33 @@ std::pair<int,int> TrackerAlignableId::typeAndLayerFromDetId( const DetId& detId
 
   if ( subdetId == StripSubdetector::TIB) 
 	{ 
-	   
-	  layerNumber = tTopo->tibLayer(detId.rawId());
+	  TIBDetId tibid(detId.rawId()); 
+	  layerNumber = tibid.layer();
 	}
   else if ( subdetId ==  StripSubdetector::TOB )
 	{ 
-	   
-	  layerNumber = tTopo->tobLayer(detId.rawId());
+	  TOBDetId tobid(detId.rawId()); 
+	  layerNumber = tobid.layer();
 	}
   else if ( subdetId ==  StripSubdetector::TID) 
 	{ 
-	  
-	  layerNumber = tTopo->tidWheel(detId.rawId());
+	  TIDDetId tidid(detId.rawId());
+	  layerNumber = tidid.wheel();
 	}
   else if ( subdetId ==  StripSubdetector::TEC )
 	{ 
-	   
-	  layerNumber = tTopo->tecWheel(detId.rawId()); 
+	  TECDetId tecid(detId.rawId()); 
+	  layerNumber = tecid.wheel(); 
 	}
   else if ( subdetId ==  PixelSubdetector::PixelBarrel ) 
 	{ 
-	   
-	  layerNumber = tTopo->pxbLayer(detId.rawId());  
+	  PXBDetId pxbid(detId.rawId()); 
+	  layerNumber = pxbid.layer();  
 	}
   else if ( subdetId ==  PixelSubdetector::PixelEndcap ) 
 	{ 
-	   
-	  layerNumber = tTopo->pxfDisk(detId.rawId());  
+	  PXFDetId pxfid(detId.rawId()); 
+	  layerNumber = pxfid.disk();  
 	}
   else
 	edm::LogWarning("LogicError") << "Unknown subdetid: " <<  subdetId;

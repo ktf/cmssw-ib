@@ -28,7 +28,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/Algorithms.h"
 #include "FWCore/Utilities/interface/FunctionWithDict.h"
-#include "FWCore/Utilities/interface/MemberWithDict.h"
 #include "FWCore/Utilities/interface/ObjectWithDict.h"
 #include "FWCore/Utilities/interface/TypeWithDict.h"
 
@@ -99,7 +98,7 @@ namespace edm {
           addToMap<double>(s_map);
           isFirst = false;
        }
-       TypeToPrintMap::iterator itFound = s_map.find(iObject.typeOf().name());
+       TypeToPrintMap::iterator itFound = s_map.find(iObject.typeName());
        if(itFound == s_map.end()) {
 
           return false;
@@ -120,9 +119,9 @@ namespace edm {
        std::string printName = iName;
        ObjectWithDict objectToPrint = iObject;
        std::string indent(iIndent);
-       if(iObject.typeOf().isPointer()) {
+       if(iObject.isPointer()) {
          LogAbsolute("EventContent") << iIndent << iName << kNameValueSep << formatClassName(iObject.typeOf().name()) << std::hex << iObject.address() << std::dec;// << "\n";
-          TypeWithDict pointedType = iObject.typeOf().toType(); // for Pointers, I get the real type this way
+          TypeWithDict pointedType = iObject.toType();
           if(TypeWithDict::byName("void") == pointedType ||
              pointedType.isPointer() ||
              iObject.address() == 0) {
@@ -143,6 +142,10 @@ namespace edm {
           typeName = "<unknown>";
        }
 
+       //see if we are dealing with a typedef
+       if(objectToPrint.isTypedef()) {
+         objectToPrint = ObjectWithDict(objectToPrint.toType(), objectToPrint.address());
+       }
        if(printAsBuiltin(printName, objectToPrint, indent)) {
           return;
        }
@@ -176,10 +179,10 @@ namespace edm {
        try {
           size_t temp; //used to hold the memory for the return value
           sizeObj = ObjectWithDict(TypeWithDict(typeid(size_t)), &temp);
-          iObject.typeOf().functionMemberByName("size").invoke(iObject, &sizeObj);
+          iObject.invoke("size", &sizeObj);
           assert(iObject.typeOf().functionMemberByName("size").returnType().typeInfo() == typeid(size_t));
           //std::cout << "size of type '" << sizeObj.name() << "' " << sizeObj.typeName() << std::endl;
-          assert(sizeObj.typeOf().typeInfo() == typeid(size_t));
+          assert(sizeObj.finalType().typeInfo() == typeid(size_t));
           size_t size = *reinterpret_cast<size_t*>(sizeObj.address());
           FunctionWithDict atMember;
           try {
@@ -227,7 +230,7 @@ namespace edm {
                       << iEx.what() << ")>\n";
              }
              if(!isRef) {
-                atReturnType.destruct(contained.address(), true);
+                contained.destruct();
              }
           }
           return true;

@@ -9,8 +9,8 @@
 #include "RecoPixelVertexing/PixelLowPtUtilities/interface/ClusterShape.h"
 #include "RecoPixelVertexing/PixelLowPtUtilities/interface/ClusterData.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
@@ -44,13 +44,12 @@ ClusterShapeHitFilter::ClusterShapeHitFilter
   (const TrackerGeometry * theTracker_,
    const MagneticField          * theMagneticField_,
    const SiPixelLorentzAngle    * theSiPixelLorentzAngle_,
-   const SiStripLorentzAngle    * theSiStripLorentzAngle_,
-   const std::string            * use_PixelShapeFile_)
+   const SiStripLorentzAngle    * theSiStripLorentzAngle_)
    : theTracker(theTracker_),
      theMagneticField(theMagneticField_),
      theSiPixelLorentzAngle(theSiPixelLorentzAngle_),
-     theSiStripLorentzAngle(theSiStripLorentzAngle_),
-     PixelShapeFile(use_PixelShapeFile_)
+     theSiStripLorentzAngle(theSiStripLorentzAngle_)
+
 {
   // Load pixel limits
   loadPixelLimits();
@@ -69,9 +68,7 @@ ClusterShapeHitFilter::~ClusterShapeHitFilter()
 void ClusterShapeHitFilter::loadPixelLimits()
 {
   edm::FileInPath
-  fileInPath(PixelShapeFile->c_str());
-  //fileInPath("RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape.par");
-  //fileInPath("RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape_Phase1Tk.par");
+    fileInPath("RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape.par");
   ifstream inFile(fileInPath.fullPath().c_str());
 
 

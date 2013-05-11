@@ -210,11 +210,11 @@ void MultiTrackValidator::analyze(const edm::Event& event, const edm::EventSetup
 	LogTrace("TrackValidator") << "Calling associateRecoToSim method" << "\n";
 	recSimColl=associator[ww]->associateRecoToSim(trackCollection,
 						      TPCollectionHfake,
-						      &event,&setup);
+						      &event);
 	LogTrace("TrackValidator") << "Calling associateSimToReco method" << "\n";
 	simRecColl=associator[ww]->associateSimToReco(trackCollection,
 						      TPCollectionHeff, 
-						      &event,&setup);
+						      &event);
       }
       else{
 	edm::LogVerbatim("TrackValidator") << "Analyzing " 

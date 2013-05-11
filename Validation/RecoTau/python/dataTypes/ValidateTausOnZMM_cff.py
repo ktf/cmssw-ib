@@ -55,7 +55,7 @@ produceDenominatorZMM = cms.Sequence(
       +kinematicSelectedTauValDenominatorZMM
       )
 
-produceDenominator = cms.Sequence(produceDenominatorZMM)
+produceDenominator = produceDenominatorZMM
 
 runTauValidationBatchMode = cms.Sequence(
       produceDenominatorZMM

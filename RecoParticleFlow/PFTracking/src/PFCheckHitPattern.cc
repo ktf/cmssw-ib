@@ -2,7 +2,6 @@
 
 // To get Tracker Geometry
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Utilities/interface/Exception.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
@@ -16,6 +15,8 @@
 #include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+
+#include "Utilities/General/interface/CMSexception.h"
 
 #include <map>
 
@@ -92,7 +93,7 @@ PFCheckHitPattern::DetInfo PFCheckHitPattern::interpretDetId(DetId detId) {
   } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
     return DetInfo( detId.subdetId() , PXFDetId(detId).disk() );
   } else {
-    throw cms::Exception("RecoParticleFlow", "Found DetId that is not in Tracker");
+    throw Genexception("Found DetId that is not in Tracker");
   }   
 }
 

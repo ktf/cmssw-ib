@@ -54,8 +54,9 @@ class FEDBadModuleFilter : public edm::EDFilter {
 
 private:
   virtual void beginJob() ;
-  virtual bool filter(edm::Event&, const edm::EventSetup&) override;
-  virtual void beginRun(const edm::Run&, const edm::EventSetup&) override;
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
+  virtual bool beginRun(edm::Run&, const edm::EventSetup&);
+  virtual bool endRun(edm::Run&, const edm::EventSetup&);
   virtual void endJob() ;
   
       // ----------member data ---------------------------
@@ -65,7 +66,6 @@ private:
   std::set<unsigned int> m_modules;
   DetIdSelector m_modsel;
   bool m_wantedhist;
-  bool m_printlist;
   const unsigned int m_maxLS;
   const unsigned int m_LSfrac;
   RunHistogramManager m_rhm;
@@ -90,7 +90,6 @@ FEDBadModuleFilter::FEDBadModuleFilter(const edm::ParameterSet& iConfig):
   m_modulethr(iConfig.getParameter<unsigned int>("badModThr")),
   m_modsel(),
   m_wantedhist(iConfig.getUntrackedParameter<bool>("wantedHisto",false)),
-  m_printlist(iConfig.getUntrackedParameter<bool>("printList",false)),
   m_maxLS(iConfig.getUntrackedParameter<unsigned int>("maxLSBeforeRebin",100)),
   m_LSfrac(iConfig.getUntrackedParameter<unsigned int>("startingLSFraction",4)),
   m_rhm()
@@ -135,12 +134,9 @@ FEDBadModuleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByLabel(m_digibadmodulecollection,badmodules);
 
    unsigned int nbad = 0;
-   if(m_printlist || m_modules.size()!=0 || m_modsel.isValid() ) {
+   if(m_modules.size()!=0 || m_modsel.isValid() ) {
      for(DetIdCollection::const_iterator mod = badmodules->begin(); mod!=badmodules->end(); ++mod) {
-       if((m_modules.size() == 0 || m_modules.find(*mod) != m_modules.end() ) && (!m_modsel.isValid() || m_modsel.isSelected(*mod))) {
-	 ++nbad; 
-	 if(m_printlist) edm::LogInfo("FEDBadModule") << *mod;
-       }
+       if((m_modules.size() == 0 || m_modules.find(*mod) != m_modules.end() ) && (!m_modsel.isValid() || m_modsel.isSelected(*mod))) ++nbad; 
      }
    }
    else {
@@ -167,8 +163,8 @@ void
 FEDBadModuleFilter::endJob() {
 }
 
-void
-FEDBadModuleFilter::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) 
+bool
+FEDBadModuleFilter::beginRun(edm::Run& iRun, const edm::EventSetup& iSetup) 
 {
 
   if(m_wantedhist) {
@@ -181,7 +177,15 @@ FEDBadModuleFilter::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
     }
 
   }
+
+  return false;
+
 }
 
+bool
+FEDBadModuleFilter::endRun(edm::Run& iRun, const edm::EventSetup& iSetup) 
+{
+  return false;
+}
 //define this as a plug-in
 DEFINE_FWK_MODULE(FEDBadModuleFilter);

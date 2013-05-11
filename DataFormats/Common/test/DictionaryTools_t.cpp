@@ -9,8 +9,6 @@
 
 #include "cppunit/extensions/HelperMacros.h"
 
-#include "Cintex/Cintex.h"
-
 #include <typeinfo>
 #include <map>
 #include <vector>
@@ -24,6 +22,7 @@ class TestDictionaries: public CppUnit::TestFixture {
   CPPUNIT_TEST(burrowing_failure);
   CPPUNIT_TEST(wrapper_type);
   CPPUNIT_TEST(wrapper_type_failure);
+  CPPUNIT_TEST(primary_template_id);
   CPPUNIT_TEST(not_a_template_instance);
   CPPUNIT_TEST(demangling);
   CPPUNIT_TEST_SUITE_END();
@@ -31,7 +30,7 @@ class TestDictionaries: public CppUnit::TestFixture {
  public:
   TestDictionaries() {}
   ~TestDictionaries() {}
-  void setUp() {ROOT::Cintex::Cintex::Enable();}
+  void setUp() {}
   void tearDown() {}
 
   void default_is_invalid();
@@ -41,6 +40,7 @@ class TestDictionaries: public CppUnit::TestFixture {
   void burrowing_failure();
   void wrapper_type();
   void wrapper_type_failure();
+  void primary_template_id();
   void not_a_template_instance();
   void demangling();
 
@@ -120,11 +120,28 @@ void TestDictionaries::wrapper_type_failure() {
   CPPUNIT_ASSERT(!no_such_wrapped_type);
 }
 
+void TestDictionaries::primary_template_id() {
+  edm::TypeWithDict intvec(edm::TypeWithDict::byName("std::vector<int>"));
+  edm::TypeTemplateWithDict vec(intvec);
+
+  // The template std::vector has two template parameters, thus the
+  // '2' in the following line.
+  edm::TypeTemplateWithDict standard_vec(edm::TypeTemplateWithDict::byName("std::vector",2));
+  CPPUNIT_ASSERT(!standard_vec);
+  CPPUNIT_ASSERT(!(vec == standard_vec));
+
+  // reflex in use by CMS as of 26 Feb 2007 understands vector to have
+  // one template parameter; this is not standard.
+  edm::TypeTemplateWithDict nonstandard_vec(edm::TypeTemplateWithDict::byName("std::vector",1));
+  CPPUNIT_ASSERT(nonstandard_vec);
+  CPPUNIT_ASSERT(vec == nonstandard_vec);
+}
+
 void TestDictionaries::not_a_template_instance() {
   edm::TypeWithDict not_a_template(edm::TypeWithDict::byName("double"));
   CPPUNIT_ASSERT(not_a_template);
-  std::string nonesuch(not_a_template.templateName());
-  CPPUNIT_ASSERT(nonesuch.empty());
+  edm::TypeTemplateWithDict nonesuch(not_a_template);
+  CPPUNIT_ASSERT(!nonesuch);
 }
 
 namespace {
@@ -133,7 +150,8 @@ namespace {
     edm::TypeWithDict type(typeid(T));
     // Test only if class has dictionary
     if(bool(type)) {
-      std::string demangledName(edm::typeDemangle(typeid(T).name()));
+      std::string demangledName;
+      edm::typeDemangle(typeid(T).name(), demangledName); 
       CPPUNIT_ASSERT(type.name() == demangledName);
     }
   }

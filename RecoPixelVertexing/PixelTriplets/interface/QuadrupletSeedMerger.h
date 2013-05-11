@@ -40,8 +40,6 @@
 
 #include "RecoPixelVertexing/PixelTriplets/interface/OrderedHitSeeds.h"
 
-class TrackerTopology;
-
 ///
 /// helper class for extracting info
 /// from layer bare names
@@ -56,7 +54,7 @@ class SeedMergerPixelLayer {
   Side getSide( void ) const { return side_;}
   PixelSubdetector::SubDetector getSubdet( void ) const { return subdet_; }
   std::string getName( void ) const { return name_; }
-  bool isContainsDetector( const DetId&, const TrackerTopology *tTopo ) const;
+  bool isContainsDetector( const DetId& ) const;
 
  private:
   bool isValidName( const std::string& );
@@ -102,15 +100,13 @@ class QuadrupletSeedMerger {
 								  TransientTrackingRecHit::ConstRecHitPointer &h4);
     
 
-  bool isValidQuadruplet( std::vector<TransientTrackingRecHit::ConstRecHitPointer> &quadruplet, const std::vector<SeedMergerPixelLayer>& layers,
-			  const TrackerTopology *tTopo) const; 
+  bool isValidQuadruplet( std::vector<TransientTrackingRecHit::ConstRecHitPointer> &quadruplet, const std::vector<SeedMergerPixelLayer>& layers ) const; 
 
     // bool isValidQuadruplet( const SeedingHitSet&, const std::vector<SeedMergerPixelLayer>& ) const;
 
 bool isTripletsShareHitsOnLayers( const SeedingHitSet& firstTriplet, const SeedingHitSet& secondTriplet, 
 				  const SeedMergerPixelLayer &share1, const SeedMergerPixelLayer &share2,
-				  std::pair<TransientTrackingRecHit::ConstRecHitPointer,TransientTrackingRecHit::ConstRecHitPointer>& hits,
-				  const TrackerTopology *tTopo) const;
+				  std::pair<TransientTrackingRecHit::ConstRecHitPointer,TransientTrackingRecHit::ConstRecHitPointer>& hits ) const;
 
 //bool isTripletsShareHitsOnLayers( const SeedingHitSet&, const SeedingHitSet&, 
 //   const std::pair<SeedMergerPixelLayer, SeedMergerPixelLayer>&,
@@ -122,8 +118,7 @@ bool isTripletsShareHitsOnLayers( const SeedingHitSet& firstTriplet, const Seedi
 
 bool isMergeableHitsInTriplets( const SeedingHitSet& firstTriplet, const SeedingHitSet& secondTriplet, 
 				const SeedMergerPixelLayer &nonShared1, const SeedMergerPixelLayer &nonShared2,
-				std::pair<TransientTrackingRecHit::ConstRecHitPointer,TransientTrackingRecHit::ConstRecHitPointer>& hits,
-				const TrackerTopology *tTopo) const;
+				std::pair<TransientTrackingRecHit::ConstRecHitPointer,TransientTrackingRecHit::ConstRecHitPointer>& hits ) const;
 
 
 

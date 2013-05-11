@@ -63,7 +63,9 @@ public:
 
 private:
   virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+  virtual void beginRun(const edm::Run&, const edm::EventSetup&) ;
+  virtual void endRun(const edm::Run&, const edm::EventSetup&) ;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 
       // ----------member data ---------------------------
@@ -198,6 +200,16 @@ DetIdSelectorTest::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
    */   
 }
 
+void 
+DetIdSelectorTest::beginRun(const edm::Run& iRun, const edm::EventSetup&)
+{}
+
+void 
+DetIdSelectorTest::endRun(const edm::Run& iRun, const edm::EventSetup&)
+{
+}
+
+
 // ------------ method called once each job just before starting event loop  ------------
 void 
 DetIdSelectorTest::beginJob()
@@ -212,7 +224,7 @@ DetIdSelectorTest::endJob() {
 
   //  tkhisto_->dumpInTkMap(&tkmap);
   std::string mapname = "SelectorTest.png";
-  tkmap_.save(true,0,0,mapname,5700,2400);
+  tkmap_.save(true,0,0,mapname);
 
   std::string rootmapname = "TKMap_Selectortest.root";
   tkhisto_->save(rootmapname);

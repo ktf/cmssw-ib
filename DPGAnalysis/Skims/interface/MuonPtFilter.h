@@ -5,8 +5,8 @@
  *
  * EDFilter to select muons above certain Pt
  *
- * $Date: 2013/02/27 20:17:13 $
- * $Revision: 1.4 $
+ * $Date: 2012/01/21 17:11:58 $
+ * $Revision: 1.3 $
  * \author Silvia Goy Lopez - CERN <silvia.goy.lopez@cern.ch>
  *
  */
@@ -38,7 +38,7 @@ class MuonPtFilter : public edm::EDFilter {
     ~MuonPtFilter() ;
 
 /* Operations */ 
-    virtual bool filter(edm::Event &, const edm::EventSetup&) override;
+    virtual bool filter(edm::Event &, const edm::EventSetup &);
 
   private:
     std::string theSTAMuonLabel; // label of muons 

@@ -19,8 +19,10 @@ class CastorFastTowerProducer : public edm::EDProducer {
       ~CastorFastTowerProducer();
 
    private:
-      virtual void produce(edm::Event&, const edm::EventSetup&) override;
+      virtual void beginRun(edm::Run&, edm::EventSetup const&) ;
+      virtual void produce(edm::Event&, const edm::EventSetup&);
       double make_noise();
+      virtual void endRun() ;
       
       // ----------member data ---------------------------
       typedef math::XYZPointD Point;

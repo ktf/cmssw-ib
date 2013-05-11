@@ -17,8 +17,6 @@
 
 #include <vector>
 
-class TrackerTopology;
-
 class SiStripQualityHotStripIdentifier : public ConditionDBWriter<SiStripBadStrip> {
 
 public:
@@ -58,7 +56,6 @@ private:
   edm::InputTag Cluster_src_;
   edm::InputTag Track_src_;
   bool tracksCollection_in_EventTree;
-  const TrackerTopology* tTopo;
 
   unsigned short MinClusterWidth_, MaxClusterWidth_;
 

@@ -2,6 +2,8 @@
 #define SiStripMonitorSummary_SiStripNoisesDQM_h
 
 
+#include "FWCore/Framework/interface/ESHandle.h"
+
 #include "DQM/SiStripMonitorSummary/interface/SiStripBaseCondObjDQM.h"
 
 #include "CondFormats/SiStripObjects/interface/SiStripNoises.h"
@@ -21,8 +23,8 @@ class SiStripNoisesDQM : public SiStripBaseCondObjDQM{
   
   void getActiveDetIds(const edm::EventSetup & eSetup);
 
-  void fillMEsForDet(ModMEs selModME_,uint32_t selDetId_, const TrackerTopology* tTopo);
-  void fillMEsForLayer( /*std::map<uint32_t, ModMEs> selModMEsMap_, */ uint32_t selDetId_, const TrackerTopology* tTopo);
+  void fillMEsForDet(ModMEs selModME_,uint32_t selDetId_);
+  void fillMEsForLayer( /*std::map<uint32_t, ModMEs> selModMEsMap_,*/ uint32_t selDetId_);
 
   unsigned long long getCache(const edm::EventSetup & eSetup){ return eSetup.get<SiStripNoisesRcd>().cacheIdentifier();}
   

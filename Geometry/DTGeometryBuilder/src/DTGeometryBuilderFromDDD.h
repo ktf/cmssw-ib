@@ -5,13 +5,13 @@
  *
  *  Build the DTGeometry from the DDD description.  
  *
- *  $Date: 2012/12/24 14:35:11 $
- *  $Revision: 1.5 $
+ *  $Date: 2009/01/16 11:11:46 $
+ *  $Revision: 1.4 $
  *  \author N. Amapane - CERN. 
  *  \author Port of: MuBarDDDGeomBuilder, MuBarDetBuilder (ORCA) by S. Lacaprara, M. Case
  */
 
-#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/GeometrySurface/interface/BoundPlane.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -58,10 +58,10 @@ class DTGeometryBuilderFromDDD {
     /// get parameter also for boolean solid.
     std::vector<double> extractParameters(DDFilteredView& fv) const ;
 
-    typedef ReferenceCountingPointer<Plane> RCPPlane;
+    typedef ReferenceCountingPointer<BoundPlane> RCPPlane;
 
     RCPPlane plane(const DDFilteredView& fv, 
-                   Bounds * bounds) const ;
+                   const Bounds& bounds) const ;
 
     void buildGeometry(boost::shared_ptr<DTGeometry> theGeometry,
                        DDFilteredView& fv,

@@ -14,6 +14,8 @@
 #include "TrackingTools/DetLayers/src/DetLessZ.h"
 #include "TrackingTools/DetLayers/interface/NavigationSetter.h"
 
+#include "Utilities/General/interface/CMSexception.h"
+
 #include <functional>
 #include <algorithm>
 #include <map>

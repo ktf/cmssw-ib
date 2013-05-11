@@ -2,9 +2,6 @@
 #include "CondFormats/DataRecord/interface/SiStripBadStripRcd.h"
 
 #include "DQMOffline/CalibTracker/plugins/SiStripBadComponentsDQMServiceReader.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -21,11 +18,6 @@ SiStripBadComponentsDQMServiceReader::~SiStripBadComponentsDQMServiceReader(){}
 
 void SiStripBadComponentsDQMServiceReader::analyze( const edm::Event& e, const edm::EventSetup& iSetup)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   uint32_t FedErrorMask = 1;     // bit 0
   uint32_t DigiErrorMask = 2;    // bit 1
   uint32_t ClusterErrorMask = 4; // bit 2
@@ -48,7 +40,7 @@ void SiStripBadComponentsDQMServiceReader::analyze( const edm::Event& e, const e
 
     for(int it=0;it<range.second-range.first;it++){
       unsigned int value=(*(range.first+it));
-      ss << detIdToString(detid[id], tTopo) << "\t" << detid[id] << "\t";
+      ss << detIdToString(detid[id]) << "\t" << detid[id] << "\t";
 
       uint32_t flag = boost::lexical_cast<uint32_t>(SiStripBadStrip_->decode(value).flag);
 
@@ -79,7 +71,7 @@ void SiStripBadComponentsDQMServiceReader::printError( std::stringstream & ss, c
   }
 }
 
-string SiStripBadComponentsDQMServiceReader::detIdToString(const DetId & detid, const TrackerTopology* tTopo)
+string SiStripBadComponentsDQMServiceReader::detIdToString(const DetId & detid)
 {
   std::string detector;
   int layer = 0;
@@ -90,38 +82,38 @@ string SiStripBadComponentsDQMServiceReader::detIdToString(const DetId & detid, 
   switch (detid.subdetId()) {
   case StripSubdetector::TIB:
     {
-      
+      TIBDetId theTIBDetId(detid.rawId());
       detector = "TIB";
-      layer = tTopo->tibLayer(detid.rawId());
-      stereo = tTopo->tibStereo(detid.rawId());
+      layer = theTIBDetId.layer();
+      stereo = theTIBDetId.stereo();
       break;
     }
   case StripSubdetector::TOB:
     {
-      
+      TOBDetId theTOBDetId(detid.rawId());
       detector = "TOB";
-      layer = tTopo->tobLayer(detid.rawId());
-      stereo = tTopo->tobStereo(detid.rawId());
+      layer = theTOBDetId.layer();
+      stereo = theTOBDetId.stereo();
       break;
     }
   case StripSubdetector::TEC:
     {
-      
+      TECDetId theTECDetId(detid.rawId());
       // is this module in TEC+ or TEC-?
-      side = tTopo->tecSide(detid.rawId());
+      side = theTECDetId.side();
       detector = "TEC";
-      layer = tTopo->tecWheel(detid.rawId());
-      stereo = tTopo->tecStereo(detid.rawId());
+      layer = theTECDetId.wheel();
+      stereo = theTECDetId.stereo();
       break;
     }
   case StripSubdetector::TID:
     {
-      
+      TIDDetId theTIDDetId(detid.rawId());
       // is this module in TID+ or TID-?
-      side = tTopo->tidSide(detid.rawId());
+      side = theTIDDetId.side();
       detector = "TID";
-      layer = tTopo->tidWheel(detid.rawId());
-      stereo = tTopo->tidStereo(detid.rawId());
+      layer = theTIDDetId.wheel();
+      stereo = theTIDDetId.stereo();
       break;
     }
   }
