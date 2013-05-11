@@ -6,8 +6,10 @@
 #include "RecoLocalTracker/SiStripClusterizer/interface/SiStripClusterInfo.h"
 #include "DataFormats/SiStripDigi/interface/SiStripProcessedRawDigi.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 #include "boost/foreach.hpp"
 
 ShallowClustersProducer::ShallowClustersProducer(const edm::ParameterSet& iConfig) 
@@ -55,11 +57,6 @@ ShallowClustersProducer::ShallowClustersProducer(const edm::ParameterSet& iConfi
 
 void ShallowClustersProducer::
 produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
- 
   std::auto_ptr<std::vector<unsigned> >       number       ( new std::vector<unsigned>(7,0) );
   std::auto_ptr<std::vector<unsigned> >       width        ( new std::vector<unsigned>() );
   std::auto_ptr<std::vector<float> >          variance     ( new std::vector<float>() );
@@ -106,7 +103,7 @@ produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   edmNew::DetSetVector<SiStripCluster>::const_iterator itClusters=clusters->begin();
   for(;itClusters!=clusters->end();++itClusters){
     uint32_t id = itClusters->id();
-    const moduleVars moduleV(id, tTopo);
+    const moduleVars moduleV(id);
     for(edmNew::DetSet<SiStripCluster>::const_iterator cluster=itClusters->begin(); cluster!=itClusters->end();++cluster){
       
       const SiStripClusterInfo info(*cluster, iSetup, id);
@@ -218,41 +215,41 @@ NearDigis(const SiStripClusterInfo& info, const edm::DetSetVector<SiStripProcess
 }
 
 ShallowClustersProducer::moduleVars::
-moduleVars(uint32_t detid, const TrackerTopology* tTopo) {
+moduleVars(uint32_t detid) {
   SiStripDetId subdet(detid);
   subdetid = subdet.subDetector();
   if( SiStripDetId::TIB == subdetid ) {
-    
-    module        = tTopo->tibModule(detid); 
-    side          = tTopo->tibIsZMinusSide(detid)?-1:1;  
-    layerwheel    = tTopo->tibLayer(detid); 
-    stringringrod = tTopo->tibString(detid); 
-    stereo        = tTopo->tibIsStereo(detid) ? 1 : 0;
+    TIBDetId tib(detid);
+    module        = tib.module(); 
+    side          = (tib.isZMinusSide())?-1:1;  
+    layerwheel    = tib.layer(); 
+    stringringrod = tib.stringNumber(); 
+    stereo        = tib.isStereo() ? 1 : 0;
   } else
   if( SiStripDetId::TID == subdetid ) {
-    
-    module        = tTopo->tidModule(detid); 
-    side          = tTopo->tidIsZMinusSide(detid)?-1:1;  
-    layerwheel    = tTopo->tidWheel(detid); 
-    stringringrod = tTopo->tidRing(detid); 
-    stereo        = tTopo->tidIsStereo(detid) ? 1 : 0;
+    TIDDetId tid(detid);
+    module        = tid.moduleNumber(); 
+    side          = (tid.isZMinusSide())?-1:1;  
+    layerwheel    = tid.wheel(); 
+    stringringrod = tid.ringNumber(); 
+    stereo        = tid.isStereo() ? 1 : 0;
   } else
   if( SiStripDetId::TOB == subdetid ) {
-    
-    module        = tTopo->tobModule(detid); 
-    side          = tTopo->tobIsZMinusSide(detid)?-1:1;  
-    layerwheel    = tTopo->tobLayer(detid); 
-    stringringrod = tTopo->tobRod(detid); 
-    stereo        = tTopo->tobIsStereo(detid) ? 1 : 0;
+    TOBDetId tob(detid);
+    module        = tob.module(); 
+    side          = (tob.isZMinusSide())?-1:1;  
+    layerwheel    = tob.layer(); 
+    stringringrod = tob.rodNumber(); 
+    stereo        = tob.isStereo() ? 1 : 0;
   } else
   if( SiStripDetId::TEC == subdetid ) {
-    
-    module        = tTopo->tecModule(detid); 
-    side          = tTopo->tecIsZMinusSide(detid)?-1:1;  
-    layerwheel    = tTopo->tecWheel(detid); 
-    stringringrod = tTopo->tecRing(detid); 
-    petal         = tTopo->tecPetalNumber(detid); 
-    stereo        = tTopo->tecIsStereo(detid) ? 1 : 0;
+    TECDetId tec(detid);
+    module        = tec.module(); 
+    side          = (tec.isZMinusSide())?-1:1;  
+    layerwheel    = tec.wheel(); 
+    stringringrod = tec.ringNumber(); 
+    petal         = tec.petalNumber(); 
+    stereo        = tec.isStereo() ? 1 : 0;
   } else {
     module = 0;
     side = 0;

@@ -1,8 +1,8 @@
 #ifndef IOMC_BaseEvtVtxGenerator_H
 #define IOMC_BaseEvtVtxGenerator_H
 /*
-*   $Date: 2013/02/27 18:41:06 $
-*   $Revision: 1.10 $
+*   $Date: 2012/01/17 11:58:52 $
+*   $Revision: 1.9 $
 */
 
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -33,7 +33,8 @@ class BaseEvtVtxGenerator : public edm::EDProducer
    explicit BaseEvtVtxGenerator( const edm::ParameterSet& );
    virtual ~BaseEvtVtxGenerator();
       
-   virtual void produce( edm::Event&, const edm::EventSetup&) override;
+   virtual void produce( edm::Event&, const edm::EventSetup& );
+   virtual void beginRun( edm::Run & , const edm::EventSetup&) {};
 
    //virtual CLHEP::Hep3Vector* newVertex() = 0;
    virtual HepMC::FourVector* newVertex() = 0 ;

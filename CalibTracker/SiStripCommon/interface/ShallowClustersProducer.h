@@ -7,7 +7,6 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 class SiStripClusterInfo;
 class SiStripProcessedRawDigi;
-class TrackerTopology;
 
 class ShallowClustersProducer : public edm::EDProducer {
   
@@ -22,7 +21,7 @@ class ShallowClustersProducer : public edm::EDProducer {
   void produce( edm::Event &, const edm::EventSetup & );
 
   struct moduleVars {
-    moduleVars(uint32_t, const TrackerTopology*);
+    moduleVars(uint32_t);
     int subdetid, side, layerwheel, stringringrod, petal, stereo;
     uint32_t module;
   };

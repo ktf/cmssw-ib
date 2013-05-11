@@ -36,7 +36,7 @@ bool PropagateToCal::propagate(const GlobalPoint& vertex,
 
   /// target cylinder, around z-axis
   Cylinder::ConstCylinderPointer theTargetCylinder = 
-    Cylinder::build(radius_, Surface::PositionType(0.,0.,0.), dummyRot);
+    Cylinder::build(Surface::PositionType(0.,0.,0.), dummyRot, radius_);
 
   /// plane closing cylinder at 'negative' side  
   Plane::ConstPlanePointer theTargetPlaneMin = 

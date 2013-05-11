@@ -20,6 +20,7 @@ is the DataBlock.
 #include "DataFormats/Provenance/interface/EventSelectionID.h"
 #include "FWCore/Framework/interface/Principal.h"
 
+#include "boost/scoped_ptr.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include <map>
@@ -42,14 +43,14 @@ namespace edm {
     typedef EventAuxiliary Auxiliary;
     typedef Principal Base;
 
-    typedef Base::ConstProductPtr ConstProductPtr;
+    typedef Base::ConstGroupPtr ConstGroupPtr;
     static int const invalidBunchXing = EventAuxiliary::invalidBunchXing;
     static int const invalidStoreNumber = EventAuxiliary::invalidStoreNumber;
     EventPrincipal(
         boost::shared_ptr<ProductRegistry const> reg,
         boost::shared_ptr<BranchIDListHelper const> branchIDListHelper,
         ProcessConfiguration const& pc,
-        HistoryAppender* historyAppender);
+        HistoryAppender* historyAppender = 0);
     ~EventPrincipal() {}
 
     void fillEventPrincipal(EventAuxiliary const& aux,
@@ -151,9 +152,9 @@ namespace edm {
 
     BranchID pidToBid(ProductID const& pid) const;
 
-    virtual bool unscheduledFill(std::string const& moduleLabel) const override;
+    virtual bool unscheduledFill(std::string const& moduleLabel) const;
 
-    virtual void resolveProduct_(ProductHolderBase const& phb, bool fillOnDemand) const override;
+    virtual void resolveProduct_(Group const& g, bool fillOnDemand) const;
 
   private:
 

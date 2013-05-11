@@ -9,7 +9,6 @@
 #include <cmath>
 #include<sstream>
 
-// void bPoint(){}
 
 void FreeTrajectoryState::missingError() const {
   std::stringstream form;
@@ -17,8 +16,7 @@ void FreeTrajectoryState::missingError() const {
     "\nCurvilinear error valid/values :"<< theCurvilinearError.valid() << "\n" 
       <<  theCurvilinearError.matrix();
     edm::LogWarning("FreeTrajectoryState") << "(was exception) " << form.str();
-    //  throw TrajectoryStateException(form.str());
-    // bPoint();
+//  throw TrajectoryStateException(form.str());
 }
 
 // implementation of non-trivial methods of FreeTrajectoryState
@@ -52,6 +50,21 @@ void FreeTrajectoryState::rescaleError(double factor) {
   bool zeroField = (parameters().magneticField().nominalValue()==0);  
   if unlikely(zeroField)  theCurvilinearError.zeroFieldScaling(factor*factor);
   else theCurvilinearError *= (factor*factor);
+}
+
+// check if trajectory can reach given radius
+
+bool FreeTrajectoryState::canReach(double radius) const {
+  GlobalPoint x = position();
+  GlobalVector p = momentum().unit();
+  double rho = transverseCurvature()*p.perp();
+  double rx = rho*x.x();
+  double ry = rho*x.y();
+  double rr = rho*radius;
+  double ax = p.x()*rx + p.y()*ry;
+  double ay = p.x()*ry - p.y()*rx + p.perp2();
+  double cospsi = (.5*(rx*rx + ry*ry - rr*rr) + ay)/sqrt(ax*ax + ay*ay);
+  return fabs(cospsi) <= 1.;
 }
 
 

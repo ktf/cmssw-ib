@@ -5,7 +5,7 @@
  */
 // Original Author:  Dorian Kcira
 //         Created:  Wed Feb  1 16:42:34 CET 2006
-// $Id: SiStripMonitorCluster.cc,v 1.87 2013/01/03 18:59:36 wmtan Exp $
+// $Id: SiStripMonitorCluster.cc,v 1.84 2012/11/20 14:45:33 eulisse Exp $
 #include <vector>
 #include <numeric>
 #include <fstream>
@@ -31,6 +31,10 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/SiStripSubStructure.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 #include "CalibTracker/SiStripCommon/interface/SiStripDCSStatus.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
@@ -231,12 +235,6 @@ void SiStripMonitorCluster::beginRun(const edm::Run& run, const edm::EventSetup&
 void SiStripMonitorCluster::createMEs(const edm::EventSetup& es){
 
   if ( show_mechanical_structure_view ){
-
-    //Retrieve tracker topology from geometry
-    edm::ESHandle<TrackerTopology> tTopoHandle;
-    es.get<IdealGeometryRecord>().get(tTopoHandle);
-    const TrackerTopology* const tTopo = tTopoHandle.product();
-
     // take from eventSetup the SiStripDetCabling object - here will use SiStripDetControl later on
     es.get<SiStripDetCablingRcd>().get(SiStripDetCabling_);
     
@@ -270,7 +268,7 @@ void SiStripMonitorCluster::createMEs(const edm::EventSetup& es){
       if (Mod_On_) {
 	ModMEs mod_single;
 	// set appropriate folder using SiStripFolderOrganizer
-	folder_organizer.setDetectorFolder(detid, tTopo); // pass the detid to this method
+	folder_organizer.setDetectorFolder(detid); // pass the detid to this method
 	if (reset_each_run) ResetModuleMEs(detid);
 	createModuleMEs(mod_single, detid);
 	// append to ModuleMEsMap
@@ -278,9 +276,9 @@ void SiStripMonitorCluster::createMEs(const edm::EventSetup& es){
       }
       
       // Create Layer Level MEs if they are not created already
-      std::pair<std::string,int32_t> det_layer_pair = folder_organizer.GetSubDetAndLayer(detid, tTopo);
+      std::pair<std::string,int32_t> det_layer_pair = folder_organizer.GetSubDetAndLayer(detid);
       SiStripHistoId hidmanager;
-      std::string label = hidmanager.getSubdetid(detid,tTopo,false);
+      std::string label = hidmanager.getSubdetid(detid,false);
       
       std::map<std::string, LayerMEs>::iterator iLayerME  = LayerMEsMap.find(label);
       if(iLayerME==LayerMEsMap.end()) {
@@ -304,11 +302,11 @@ void SiStripMonitorCluster::createMEs(const edm::EventSetup& es){
 	LayerDetMap[label] = layerDetIds;
 
 	// book Layer MEs 
-	folder_organizer.setLayerFolder(detid,tTopo,det_layer_pair.second);
+	folder_organizer.setLayerFolder(detid,det_layer_pair.second);
 	createLayerMEs(label, layerDetIds.size());
       }
       // book sub-detector plots
-      std::pair<std::string,std::string> sdet_pair = folder_organizer.getSubDetFolderAndTag(detid, tTopo);
+      std::pair<std::string,std::string> sdet_pair = folder_organizer.getSubDetFolderAndTag(detid);
       if (SubDetMEsMap.find(sdet_pair.second) == SubDetMEsMap.end()){
 	dqmStore_->setCurrentFolder(sdet_pair.first);
 	createSubDetMEs(sdet_pair.second);        
@@ -435,10 +433,6 @@ void SiStripMonitorCluster::createMEs(const edm::EventSetup& es){
 //--------------------------------------------------------------------------------------------
 void SiStripMonitorCluster::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   // Filter out events if Trigger Filtering is requested
   passBPTXfilter_     = ( iEvent.isRealData() and genTriggerEventFlagBPTXfilter_->on()     ) ? genTriggerEventFlagBPTXfilter_->accept( iEvent, iSetup)     : true;
@@ -533,7 +527,7 @@ void SiStripMonitorCluster::analyze(const edm::Event& iEvent, const edm::EventSe
       uint32_t detid = (*iterDets);
 
       // Get SubDet label once
-      if (subdet_label.size() == 0) subdet_label = folder_organizer.getSubDetFolderAndTag(detid, tTopo).second;
+      if (subdet_label.size() == 0) subdet_label = folder_organizer.getSubDetFolderAndTag(detid).second;
 
       // DetId and corresponding set of MEs
       ModMEs mod_single;

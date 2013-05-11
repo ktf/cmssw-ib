@@ -3,10 +3,14 @@
 
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "RecoCaloTools/Navigation/interface/CaloNavigator.h"
-#include "Geometry/CaloTopology/interface/EcalBarrelHardcodedTopology.h"
 
-using EcalBarrelNavigator = CaloNavigator<EBDetId>; 
-
-using EcalBarrelNavigatorHT = CaloNavigator<EBDetId, EcalBarrelHardcodedTopology>; 
+class EcalBarrelNavigator : public CaloNavigator<EBDetId> 
+{
+ public:
+  EcalBarrelNavigator(const EBDetId& home,const CaloSubdetectorTopology* ebTopology) :
+    CaloNavigator<EBDetId>(home,ebTopology)
+    {
+    };
+};
 
 #endif

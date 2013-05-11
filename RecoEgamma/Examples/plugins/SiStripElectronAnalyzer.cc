@@ -8,7 +8,7 @@
 //
 // Original Author:  Jim Pivarski
 //         Created:  Fri May 26 16:49:38 EDT 2006
-// $Id: SiStripElectronAnalyzer.cc,v 1.14 2013/01/02 20:41:37 dlange Exp $
+// $Id: SiStripElectronAnalyzer.cc,v 1.13 2010/10/19 17:34:56 wmtan Exp $
 //
 
 // system include files
@@ -48,8 +48,10 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
 
@@ -325,11 +327,6 @@ void SiStripElectronAnalyzer::initNtuple(){
 void
 SiStripElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  iSetup.get<IdealGeometryRecord>().get(tTopo);
-
-
   using namespace std;  // so you can say "cout" and "endl"
 
   initNtuple();
@@ -934,22 +931,22 @@ SiStripElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	Int_t siDetNum = 0 ;
 	string siDetName = "" ;
 	if( (hit->geographicalId()).subdetId() == StripSubdetector::TIB ){
-	  //	   siLayerNum = tTopo->tibLayer(rechit->geographicalID());
-	  siLayerNum = tTopo->tibLayer(id);
+	  //	   siLayerNum = TIBDetId(rechit->geographicalID()).layer();
+	  siLayerNum = TIBDetId(id).layer();
 	  siDetNum = 1 ;
 	  siDetName = "TIB" ;
 	} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TOB ){
-	  siLayerNum = tTopo->tobLayer(id);
+	  siLayerNum = TOBDetId(id).layer();
 	  siDetNum = 2 ;
 	  siDetName = "TOB" ;
 	  // 		} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TID ){
 	  // 	  // should we use side/wheel/ring/module/stereo() ?
-	  // 	  siLayerNum = tTopo->tidWheel(id);
+	  // 	  siLayerNum = TIDDetId(id).wheel();
 	  // 	  siDetNum = 3 ;
 	  // 	  siDetName = "TID" ;
 	  // 	}else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TEC ){
 	  // 	  //choices are side/petal/wheel/ring/module/glued/stereo
-	  // 	  siLayerNum = tTopo->tecWheel(id);
+	  // 	  siLayerNum = TECDetId(id).wheel();
 	  // 	  siDetNum = 4 ;
 	  // 	  siDetName = "TEC" ;
 	}else {
@@ -1042,22 +1039,22 @@ SiStripElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	Int_t siDetNum = 0 ;
 	string siDetName = "" ;
 	if( (hit->geographicalId()).subdetId() == StripSubdetector::TIB ){
-	  //	   siLayerNum = tTopo->tibLayer(rechit->geographicalID());
-	  siLayerNum = tTopo->tibLayer(id);
+	  //	   siLayerNum = TIBDetId(rechit->geographicalID()).layer();
+	  siLayerNum = TIBDetId(id).layer();
 	  siDetNum = 1 ;
 	  siDetName = "TIB" ;
 	} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TOB ){
-	  siLayerNum = tTopo->tobLayer(id);
+	  siLayerNum = TOBDetId(id).layer();
 	  siDetNum = 2 ;
 	  siDetName = "TOB" ;
 	  // 	} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TID ){
 	  // 	  // should we use side/wheel/ring/module/stereo() ?
-	  // 	  siLayerNum = tTopo->tidWheel(id);
+	  // 	  siLayerNum = TIDDetId(id).wheel();
 	  // 	  siDetNum = 3 ;
 	  // 	  siDetName = "TID" ;
 	  // 	}else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TEC ){
 	  // 	  //choices are side/petal/wheel/ring/module/glued/stereo
-	  // 	  siLayerNum = tTopo->tecWheel(id);
+	  // 	  siLayerNum = TECDetId(id).wheel();
 	  // 	  siDetNum = 4 ;
 	  // 	  siDetName = "TEC"
 	  ;
@@ -1152,21 +1149,21 @@ SiStripElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup
    	Int_t siDetNum = 0 ;
    	string siDetName = "" ;
    	if( (hit->geographicalId()).subdetId() == StripSubdetector::TIB ){
-   	  siLayerNum = tTopo->tibLayer(id);
+   	  siLayerNum = TIBDetId(id).layer();
    	  siDetNum = 1 ;
    	  siDetName = "TIB" ;
    	} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TOB ){
-   	  siLayerNum = tTopo->tobLayer(id);
+   	  siLayerNum = TOBDetId(id).layer();
    	  siDetNum = 2 ;
    	  siDetName = "TOB" ;
 	  //    	} else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TID ){
 	  //    	  // should we use side/wheel/ring/module/stereo() ?
-	  //    	  siLayerNum = tTopo->tidWheel(id);
+	  //    	  siLayerNum = TIDDetId(id).wheel();
 	  //    	  siDetNum = 3 ;
 	  //    	  siDetName = "TID" ;
 	  //    	}else if ( (hit->geographicalId()).subdetId() == StripSubdetector::TEC ){
 	  //    	  //choices are side/petal/wheel/ring/module/glued/stereo
-	  //    	  siLayerNum = tTopo->tecWheel(id);
+	  //    	  siLayerNum = TECDetId(id).wheel();
 	  //    	  siDetNum = 4 ;
 	  //    	  siDetName = "TEC" ;
    	}else {

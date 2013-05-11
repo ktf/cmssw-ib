@@ -3,8 +3,8 @@
 
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h" 
 
 #include "EventFilter/SiStripRawToDigi/interface/PipeAddrToTimeLookupTable.h"
 
@@ -98,7 +98,6 @@ void FEDErrors::initialiseEvent() {
 
 void FEDErrors::initialiseFED(const unsigned int aFedID,
 			      const SiStripFedCabling* aCabling,
-                              const TrackerTopology* tTopo,
 			      const bool initVars)
 {
   fedID_ = aFedID;
@@ -138,8 +137,8 @@ void FEDErrors::initialiseFED(const unsigned int aFedID,
 
 	case 4:
 	  {
-	    
-	    if (tTopo->tidSide(lDetid) == 2) lSubid = 4; //TIDF
+	    TIDDetId lTidId(lDetid);
+	    if (lTidId.side() == 2) lSubid = 4; //TIDF
 	    else lSubid = 3; //TIDB
 	    break;
 	  }
@@ -150,8 +149,8 @@ void FEDErrors::initialiseFED(const unsigned int aFedID,
 
 	case 6:
 	  {
-	    
-	    if (tTopo->tecSide(lDetid) == 2) lSubid = 1; //TECF
+	    TECDetId lTecId(lDetid);
+	    if (lTecId.side() == 2) lSubid = 1; //TECF
 	    else lSubid = 0; //TECB
 	    break;
 	  }

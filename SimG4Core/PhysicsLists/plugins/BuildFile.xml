@@ -1,3 +1,7 @@
+<library   file="*.cc" name="SimG4CorePhysicsListsPlugins">
+  <use   name="SimG4Core/PhysicsLists"/>
+  <flags   EDM_PLUGIN="1"/>
+</library>
 <use   name="FWCore/ParameterSet"/>
 <use   name="FWCore/MessageLogger"/>
 <use   name="FWCore/PluginManager"/>
@@ -6,7 +10,3 @@
 <use   name="clhep"/>
 <use   name="heppdt"/>
 <use   name="boost"/>
-<library   file="*.cc" name="SimG4CorePhysicsListsPlugins">
-  <use   name="SimG4Core/PhysicsLists"/>
-  <flags   EDM_PLUGIN="1"/>
-</library>

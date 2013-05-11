@@ -7,7 +7,7 @@
 #pragma GCC visibility push(hidden)
 
 class GeomDet;
-class Plane;
+class BoundPlane;
 class TrajectoryStateOnSurface;
 
 namespace tkDetUtil {
@@ -22,7 +22,7 @@ namespace tkDetUtil {
   float 
   calculatePhiWindow( const MeasurementEstimator::Local2DVector& maxDistance, 
 		      const TrajectoryStateOnSurface& ts, 
-		      const Plane& plane);
+		      const BoundPlane& plane);
 
 
 }

@@ -1,7 +1,7 @@
 /** \file
  *
- *  $Date: 2013/02/26 10:49:13 $
- *  $Revision: 1.11 $
+ *  $Date: 2009/03/29 20:01:45 $
+ *  $Revision: 1.10 $
  *  \author M. Maggi -- INFN Bari
 */
 
@@ -103,7 +103,7 @@ RPCRecHitProducer::~RPCRecHitProducer(){
 
 
 
-void RPCRecHitProducer::beginRun(const edm::Run& r, const edm::EventSetup& setup){
+void RPCRecHitProducer::beginRun( edm::Run& r, const edm::EventSetup& setup){
 
   // Getting the masked-strip information
 

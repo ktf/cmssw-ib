@@ -30,8 +30,10 @@
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h" 
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "CalibTracker/SiStripHitEfficiency/interface/TrajectoryAtInvalidHit.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
 #include "TrackingTools/GeomPropagators/interface/AnalyticalPropagator.h"
 #include "DataFormats/TrackReco/interface/DeDxData.h"
@@ -162,11 +164,6 @@ void SiStripHitEffFromCalibTree::algoEndJob() {
 }
 
 void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::EventSetup& c) {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  c.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   //Open the ROOT Calib Tree
   CalibTreeFile = TFile::Open(CalibTreeFilename,"READ");
   CalibTreeFile->cd("anEff"); 
@@ -357,7 +354,7 @@ void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::Eve
       //TIB
       //&&&&&&&&&&&&&&&&&
        
-      component=tTopo->tibLayer(BC[i].detid);
+      component=TIBDetId(BC[i].detid).layer();
       SetBadComponents(0, component, BC[i], ssV, NBadComponent);	      
  
     } else if ( a.subdetId() == SiStripDetId::TID ) {
@@ -365,7 +362,7 @@ void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::Eve
       //TID
       //&&&&&&&&&&&&&&&&&
  
-      component=tTopo->tidSide(BC[i].detid)==2?tTopo->tidWheel(BC[i].detid):tTopo->tidWheel(BC[i].detid)+3;
+      component=TIDDetId(BC[i].detid).side()==2?TIDDetId(BC[i].detid).wheel():TIDDetId(BC[i].detid).wheel()+3;
       SetBadComponents(1, component, BC[i], ssV, NBadComponent);	      
  
     } else if ( a.subdetId() == SiStripDetId::TOB ) {
@@ -373,7 +370,7 @@ void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::Eve
       //TOB
       //&&&&&&&&&&&&&&&&&
  
-      component=tTopo->tobLayer(BC[i].detid);
+      component=TOBDetId(BC[i].detid).layer();
       SetBadComponents(2, component, BC[i], ssV, NBadComponent);	      
  
     } else if ( a.subdetId() == SiStripDetId::TEC ) {
@@ -381,7 +378,7 @@ void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::Eve
       //TEC
       //&&&&&&&&&&&&&&&&&
  
-      component=tTopo->tecSide(BC[i].detid)==2?tTopo->tecWheel(BC[i].detid):tTopo->tecWheel(BC[i].detid)+9;
+      component=TECDetId(BC[i].detid).side()==2?TECDetId(BC[i].detid).wheel():TECDetId(BC[i].detid).wheel()+9;
       SetBadComponents(3, component, BC[i], ssV, NBadComponent);	      
  
     }    
@@ -402,16 +399,16 @@ void SiStripHitEffFromCalibTree::algoAnalyze(const edm::Event& e, const edm::Eve
     SiStripDetId a(detid);
     if ( a.subdetId() == 3 ){
       subdet=0;
-      component=tTopo->tibLayer(detid);
+      component=TIBDetId(detid).layer();
     } else if ( a.subdetId() == 4 ) {
       subdet=1;
-      component=tTopo->tidSide(detid)==2?tTopo->tidWheel(detid):tTopo->tidWheel(detid)+3;
+      component=TIDDetId(detid).side()==2?TIDDetId(detid).wheel():TIDDetId(detid).wheel()+3;
     } else if ( a.subdetId() == 5 ) {
       subdet=2;
-      component=tTopo->tobLayer(detid);
+      component=TOBDetId(detid).layer();
     } else if ( a.subdetId() == 6 ) {
       subdet=3;
-      component=tTopo->tecSide(detid)==2?tTopo->tecWheel(detid):tTopo->tecWheel(detid)+9;
+      component=TECDetId(detid).side()==2?TECDetId(detid).wheel():TECDetId(detid).wheel()+9;
     } 
  
     SiStripQuality::Range sqrange = SiStripQuality::Range( quality_->getDataVectorBegin()+rp->ibegin , quality_->getDataVectorBegin()+rp->iend );

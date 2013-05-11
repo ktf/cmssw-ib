@@ -46,6 +46,11 @@
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
 
+
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h" 
+
+
 #include <string>
 
 #include <TROOT.h>

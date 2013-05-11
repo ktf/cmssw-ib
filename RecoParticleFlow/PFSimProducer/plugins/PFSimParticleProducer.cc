@@ -113,7 +113,7 @@ PFSimParticleProducer::~PFSimParticleProducer()
 
 
 void 
-PFSimParticleProducer::beginRun(const edm::Run& run,
+PFSimParticleProducer::beginRun(edm::Run& run,
 				const edm::EventSetup & es)
 {
   

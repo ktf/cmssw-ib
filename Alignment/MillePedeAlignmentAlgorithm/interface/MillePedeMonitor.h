@@ -7,9 +7,9 @@
 ///
 ///  \author    : Gero Flucke
 ///  date       : October 2006
-///  $Revision: 1.15 $
-///  $Date: 2013/01/07 20:21:32 $
-///  (last update by $Author: wmtan $)
+///  $Revision: 1.14 $
+///  $Date: 2010/10/26 20:52:23 $
+///  (last update by $Author: flucke $)
 
 #include "DataFormats/CLHEP/interface/AlgebraicObjects.h"
 
@@ -29,8 +29,6 @@ class TH2;
 class TDirectory;
 class Trajectory;
 
-class TrackerTopology;
-
 namespace reco {
   class Track;
 }
@@ -45,8 +43,8 @@ class MillePedeMonitor
 {
  public:
   // book histograms in constructor
-  MillePedeMonitor(const TrackerTopology* tTopo,const char *rootFile = "trackMonitor.root");
-  MillePedeMonitor(TDirectory *rootDir, const TrackerTopology* tTopo);
+  MillePedeMonitor(const char *rootFile = "trackMonitor.root");
+  MillePedeMonitor(TDirectory *rootDir);
   // writes histograms in destructor
   ~MillePedeMonitor(); // non-virtual destructor: not intended to be parent class
 
@@ -103,7 +101,6 @@ class MillePedeMonitor
   std::vector<TH1*> myCorrHists; // correlations
   std::vector<TH1*> myPxbSurveyHists; // correlations
 
-  const TrackerTopology* trackerTopology;
 };
 
 template <class OBJECT_TYPE>  

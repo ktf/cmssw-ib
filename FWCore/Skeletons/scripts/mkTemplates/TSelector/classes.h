@@ -1,4 +1,4 @@
-#include "__subsys__/__class__/src/__class__.h"
+#include "skelsubsys/tselname/src/tselname.h"
 
 namespace {
   struct dictionary {

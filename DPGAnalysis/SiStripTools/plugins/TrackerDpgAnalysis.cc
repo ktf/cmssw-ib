@@ -17,7 +17,7 @@
 // part of the code was inspired by http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/YGao/LhcTrackAnalyzer/
 // part of the code was inspired by 
 // other inputs from Andrea Giammanco, Gaelle Boudoul, Andrea Venturi, Steven Lowette, Gavril Giurgiu
-// $Id: TrackerDpgAnalysis.cc,v 1.14 2013/02/27 19:49:47 wmtan Exp $
+// $Id: TrackerDpgAnalysis.cc,v 1.12 2011/07/21 21:15:03 venturia Exp $
 //
 //
 
@@ -68,8 +68,10 @@
 #include "DataFormats/SiStripCommon/interface/SiStripEventSummary.h"
 #include <DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h>
 #include <DataFormats/SiStripDetId/interface/SiStripDetId.h>
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include <DataFormats/SiStripDetId/interface/TIBDetId.h>
+#include <DataFormats/SiStripDetId/interface/TIDDetId.h>
+#include <DataFormats/SiStripDetId/interface/TOBDetId.h>
+#include <DataFormats/SiStripDetId/interface/TECDetId.h>
 #include <DataFormats/SiPixelCluster/interface/SiPixelCluster.h>
 #include <DataFormats/TrackReco/interface/TrackFwd.h>
 #include <DataFormats/TrackReco/interface/Track.h>
@@ -121,15 +123,15 @@ class TrackerDpgAnalysis : public edm::EDAnalyzer {
       void insertMeasurement(std::multimap<const uint32_t,std::pair<LocalPoint,std::pair<double,double> > >&, const TransientTrackingRecHit*,double,double);
       std::vector<int> onTrack(edm::Handle<edmNew::DetSetVector<SiPixelCluster> >&,const reco::TrackCollection&, uint32_t );
       void insertMeasurement(std::multimap<const uint32_t,std::pair<std::pair<float, float>,int> >&, const TrackingRecHit*,int);
-      std::string toStringName(uint32_t, const TrackerTopology*);
+      std::string toStringName(uint32_t);
       std::string toStringId(uint32_t);
       double sumPtSquared(const reco::Vertex&);
       float delay(const SiStripEventSummary&);
       std::map<uint32_t,float> delay(const std::vector<std::string>&);
 
    private:
-      virtual void beginRun(const edm::Run&, const edm::EventSetup&) override;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+      virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
 
       // ----------member data ---------------------------
@@ -938,11 +940,6 @@ void
 TrackerDpgAnalysis::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 
-   //Retrieve tracker topology from geometry
-   edm::ESHandle<TrackerTopology> tTopoHandle;
-   iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-   const TrackerTopology* const tTopo = tTopoHandle.product();
- 
    //geometry
    iSetup.get<TrackerDigiGeometryRecord>().get(tracker_);
 
@@ -975,7 +972,7 @@ TrackerDpgAnalysis::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
        // Fill the standalone tree (once for all)
        if(conn->isConnected()) {
          detid_ = conn->detId();
-         strncpy(moduleName_,toStringName(detid_,tTopo).c_str(),256);
+         strncpy(moduleName_,toStringName(detid_).c_str(),256);
          strncpy(moduleId_,toStringId(detid_).c_str(),256);
          lldChannel_ = conn->lldChannel();
          dcuId_ = conn->dcuId();
@@ -1260,7 +1257,7 @@ void TrackerDpgAnalysis::insertMeasurement(std::multimap<const uint32_t,std::pai
 	}
 }
 
-std::string TrackerDpgAnalysis::toStringName(uint32_t rawid, const TrackerTopology* tTopo) {
+std::string TrackerDpgAnalysis::toStringName(uint32_t rawid) {
    SiStripDetId detid(rawid);
    std::string out;
    std::stringstream output;
@@ -1268,76 +1265,76 @@ std::string TrackerDpgAnalysis::toStringName(uint32_t rawid, const TrackerTopolo
      case 3:
      {
        output << "TIB";
-       
-       output << (tTopo->tibIsZPlusSide(rawid) ? "+" : "-");
+       TIBDetId tib(rawid);
+       output << (tib.isZPlusSide() ? "+" : "-");
        output << " layer ";
-       output << tTopo->tibLayer(rawid);
+       output << tib.layerNumber();
        output << ", string ";
-       output << tTopo->tibString(rawid);
-       output << (tTopo->tibIsExternalString(rawid) ? " external" : " internal");
+       output << tib.stringNumber();
+       output << (tib.isExternalString() ? " external" : " internal");
        output << ", module ";
-       output << tTopo->tibModule(rawid);
-       if(tTopo->tibIsDoubleSide(rawid)) {
+       output << tib.moduleNumber();
+       if(tib.isDoubleSide()) {
          output << " (double)";
        } else {
-         output << (tTopo->tibIsRPhi(rawid) ? " (rphi)" : " (stereo)");
+         output << (tib.isRPhi() ? " (rphi)" : " (stereo)");
        }
        break;
      }
      case 4:
      {
        output << "TID";
-       
-       output << (tTopo->tidIsZPlusSide(rawid) ? "+" : "-");
+       TIDDetId tid(rawid);
+       output << (tid.isZPlusSide() ? "+" : "-");
        output << " disk ";
-       output << tTopo->tidWheel(rawid);
+       output << tid.diskNumber();
        output << ", ring ";
-       output << tTopo->tidRing(rawid);
-       output << (tTopo->tidIsFrontRing(rawid) ? " front" : " back");
+       output << tid.ringNumber();
+       output << (tid.isFrontRing() ? " front" : " back");
        output << ", module ";
-       output << tTopo->tidModule(rawid);
-       if(tTopo->tidIsDoubleSide(rawid)) {
+       output << tid.moduleNumber();
+       if(tid.isDoubleSide()) {
          output << " (double)";
        } else {
-         output << (tTopo->tidIsRPhi(rawid) ? " (rphi)" : " (stereo)");
+         output << (tid.isRPhi() ? " (rphi)" : " (stereo)");
        }
        break;
      }
      case 5:
      {
        output << "TOB";
-       
-       output << (tTopo->tobIsZPlusSide(rawid) ? "+" : "-");
+       TOBDetId tob(rawid);
+       output << (tob.isZPlusSide() ? "+" : "-");
        output << " layer ";
-       output << tTopo->tobLayer(rawid);
+       output << tob.layerNumber();
        output << ", rod ";
-       output << tTopo->tobRod(rawid);
+       output << tob.rodNumber();
        output << ", module ";
-       output << tTopo->tobModule(rawid);
-       if(tTopo->tobIsDoubleSide(rawid)) {
+       output << tob.moduleNumber();
+       if(tob.isDoubleSide()) {
          output << " (double)";
        } else {
-         output << (tTopo->tobIsRPhi(rawid) ? " (rphi)" : " (stereo)");
+         output << (tob.isRPhi() ? " (rphi)" : " (stereo)");
        }
        break;
      }
      case 6:
      {
        output << "TEC";
-       
-       output << (tTopo->tecIsZPlusSide(rawid) ? "+" : "-");
+       TECDetId tec(rawid);
+       output << (tec.isZPlusSide() ? "+" : "-");
        output << " disk ";
-       output << tTopo->tecWheel(rawid);
+       output << tec.wheelNumber();
        output << " sector ";
-       output << tTopo->tecPetalNumber(rawid);
-       output << (tTopo->tecIsFrontPetal(rawid) ? " Front Petal" : " Back Petal");
+       output << tec.petalNumber();
+       output << (tec.isFrontPetal() ? " Front Petal" : " Back Petal");
        output << ", module ";
-       output << tTopo->tecRing(rawid);
-       output << tTopo->tecModule(rawid);
-       if(tTopo->tecIsDoubleSide(rawid)) {
+       output << tec.ringNumber();
+       output << tec.moduleNumber();
+       if(tec.isDoubleSide()) {
          output << " (double)";
        } else {
-         output << (tTopo->tecIsRPhi(rawid) ? " (rphi)" : " (stereo)");
+         output << (tec.isRPhi() ? " (rphi)" : " (stereo)");
        }
        break;
      }

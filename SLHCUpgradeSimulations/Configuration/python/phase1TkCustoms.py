@@ -40,13 +40,13 @@ def customise_Digi(process):
     process.mix.digitizers.pixel.DeadModules_DB = False
     process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
     process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
+    process.mix.digitizers.pixel.AddPixelInefficiency = -1
     process.mix.digitizers.pixel.ThresholdInElectrons_FPix = cms.double(2000.0)
     process.mix.digitizers.pixel.ThresholdInElectrons_BPix = cms.double(2000.0)
     process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(2000.0)
     process.mix.digitizers.pixel.thePixelColEfficiency_BPix4 = cms.double(0.999)
     process.mix.digitizers.pixel.thePixelEfficiency_BPix4 = cms.double(0.999)
     process.mix.digitizers.pixel.thePixelChipEfficiency_BPix4 = cms.double(0.999)
-    process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 
     return process
 
@@ -97,7 +97,7 @@ def customise_Reco(process):
                                             'BPix1+FPix1_pos+FPix3_pos', 
 					    'BPix1+FPix1_neg+FPix3_neg' )
 						 
-    process.lowPtTripletStepSeedLayers.layerList = cms.vstring( 'BPix1+BPix2+BPix3',
+    lowPtTripletStepSeedLayers.layerList = cms.vstring( 'BPix1+BPix2+BPix3',
 	    						'BPix2+BPix3+BPix4',
 	    						'BPix1+BPix3+BPix4',
 	    						'BPix1+BPix2+BPix4',
@@ -142,27 +142,6 @@ def customise_Reco(process):
     ## increased the max track candidates
     process.mixedTripletStepTrackCandidates.maxNSeeds = cms.uint32(150000)
     process.pixelPairStepTrackCandidates.maxNSeeds    = cms.uint32(150000)
-
-    ######### FOR initialStepSeeds SeedMergerPSet ---->  mergeTriplets must be true  
-    global RecoTracker
-    from RecoTracker.TkTrackingRegions.GlobalTrackingRegionFromBeamSpot_cfi import RegionPsetFomBeamSpotBlock
-    process.initialStepSeeds = RecoTracker.TkSeedGenerator.GlobalSeedsFromTriplets_cff.globalSeedsFromTriplets.clone(
-      RegionFactoryPSet = RegionPsetFomBeamSpotBlock.clone(
-        ComponentName = cms.string('GlobalRegionProducerFromBeamSpot'),
-        RegionPSet = RegionPsetFomBeamSpotBlock.RegionPSet.clone(
-          ptMin = 0.6,
-          originRadius = 0.02,
-          nSigmaZ = 4.0
-        )
-      ),
-      SeedMergerPSet = cms.PSet(
-	layerListName = cms.string('PixelSeedMergerQuadruplets'),
-	addRemainingTriplets = cms.bool(False),
-	mergeTriplets = cms.bool(True),
-	ttrhBuilderLabel = cms.string('PixelTTRHBuilderWithoutAngle')
-      )
-    )
-    process.initialStepSeeds.OrderedHitsFactoryPSet.GeneratorPSet.SeedComparitorPSet.ComponentName = 'LowPtClusterShapeSeedComparitor'
     
     # quadruplets in step0
     #process.initialStepSeeds.SeedMergerPSet.mergeTriplets       = cms.bool(True)
@@ -414,8 +393,6 @@ def customise_DQM(process):
     #
     process.dqmoffline_step.remove(process.muonAnalyzer)
     process.dqmoffline_step.remove(process.jetMETAnalyzer)
-    process.dqmoffline_step.remove(process.TrackMonStep9)
-    process.dqmoffline_step.remove(process.TrackMonStep10)
 #    process.dqmoffline_step.remove(process.PixelTrackingRecHitsValid)
     return process
 
@@ -436,6 +413,4 @@ def customise_harvesting(process):
 
 def customise_condOverRides(process):
     process.load('SLHCUpgradeSimulations.Geometry.fakeConditions_Phase1_R30F12_cff')
-    process.trackerTopologyConstants.pxb_layerStartBit = cms.uint32(18)
-    process.trackerTopologyConstants.pxb_ladderMask = cms.uint32(1023)
     return process

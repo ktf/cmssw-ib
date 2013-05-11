@@ -1,7 +1,6 @@
 /*----------------------------------------------------------------------
 ----------------------------------------------------------------------*/
 #include "FWCore/Sources/interface/VectorInputSource.h"
-#include "FWCore/Framework/interface/EventPrincipal.h"
 
 namespace edm {
 
@@ -13,10 +12,5 @@ namespace edm {
   void
   VectorInputSource::dropUnwantedBranches(std::vector<std::string> const& wantedBranches) {
     this->dropUnwantedBranches_(wantedBranches);
-  }
-
-  void
-  VectorInputSource::clearEventPrincipal(EventPrincipal& cache) {
-    cache.clearEventPrincipal();
   }
 }

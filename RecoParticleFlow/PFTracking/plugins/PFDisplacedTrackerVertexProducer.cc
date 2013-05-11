@@ -98,7 +98,7 @@ PFDisplacedTrackerVertexProducer::produce(Event& iEvent, const EventSetup& iSetu
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-PFDisplacedTrackerVertexProducer::beginRun(const edm::Run& run,
+PFDisplacedTrackerVertexProducer::beginRun(edm::Run& run,
 					   const EventSetup& iSetup)
 {
   ESHandle<MagneticField> magneticField;
@@ -109,8 +109,6 @@ PFDisplacedTrackerVertexProducer::beginRun(const edm::Run& run,
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-PFDisplacedTrackerVertexProducer::endRun(const edm::Run& run,
-					 const EventSetup& iSetup) {
+PFDisplacedTrackerVertexProducer::endRun() {
   delete pfTransformer_;
-  pfTransformer_=nullptr;
 }

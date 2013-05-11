@@ -17,7 +17,7 @@
 //
 // Original Author:  Loic QUERTENMONT, Vincent ROBERFROID
 //         Created:  Tue Sep 18 14:22:48 CEST 2007
-// $Id: NuclearTrackCorrector.h,v 1.8 2013/02/27 13:28:32 muzaffar Exp $
+// $Id: NuclearTrackCorrector.h,v 1.7 2009/03/04 13:34:27 vlimant Exp $
 //
 //
 
@@ -87,7 +87,8 @@ class NuclearTrackCorrector :  public edm::EDProducer {
       ~NuclearTrackCorrector();
 
    private:
-      virtual void produce(edm::Event&, const edm::EventSetup&) override;
+      virtual void beginRun(edm::Run & run, const edm::EventSetup&) ;
+      virtual void produce(edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
 
       /// check if the trajectory has to be refitted and get the new trajectory

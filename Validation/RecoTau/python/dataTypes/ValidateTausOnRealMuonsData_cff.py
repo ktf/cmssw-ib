@@ -121,10 +121,10 @@ produceDenominatorRealMuonsData = cms.Sequence(
                             MuZLegs 
                             )
 
-produceDenominator = cms.Sequence(produceDenominatorRealMuonsData)
+produceDenominator = produceDenominatorRealMuonsData
 
 runTauValidationBatchMode = cms.Sequence(
-      produceDenominatorRealMuonsData
+      produceDenominator
       +TauValNumeratorAndDenominatorRealMuonsData
       )
 

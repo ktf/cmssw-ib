@@ -35,7 +35,8 @@ namespace sistrip {
     public:
       SpyEventSummaryProducer(const edm::ParameterSet& config);
       virtual ~SpyEventSummaryProducer();
-      virtual void produce(edm::Event& event, const edm::EventSetup&) override;
+      virtual void beginRun(edm::Run&, const edm::EventSetup&);
+      virtual void produce(edm::Event& event, const edm::EventSetup&);
     private:
       void warnAboutUnsupportedRunType();
       static const char* messageLabel_;
@@ -58,6 +59,9 @@ namespace sistrip {
   }
   
   SpyEventSummaryProducer::~SpyEventSummaryProducer() {}
+  
+  void SpyEventSummaryProducer::beginRun(edm::Run&, const edm::EventSetup&)
+  {}
   
   void SpyEventSummaryProducer::produce(edm::Event& event, const edm::EventSetup&)
   {

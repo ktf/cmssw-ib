@@ -4,8 +4,12 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h" 
+#include "DataFormats/SiStripDetId/interface/TECDetId.h" 
 #include "DataFormats/TrackerRecHit2D/interface/SiTrackerGSRecHit2D.h" 
 #include "DataFormats/TrackerRecHit2D/interface/SiTrackerGSMatchedRecHit2D.h" 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
@@ -14,8 +18,6 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 
 #include <vector>
-
-class TrackerTopology;
 
 /** A class that gives some properties of the Tracker Layers in FAMOS
  */
@@ -52,16 +54,13 @@ public:
 
   /// Constructor from a GSRecHit and the Geometry
   TrackerRecHit(const SiTrackerGSRecHit2D* theHit, 
-		const TrackerGeometry* theGeometry,
-		const TrackerTopology* tTopo);
+		const TrackerGeometry* theGeometry);
   
   TrackerRecHit(const SiTrackerGSMatchedRecHit2D* theHit, 
-		const TrackerGeometry* theGeometry,
-		const TrackerTopology *tTopo);
+		const TrackerGeometry* theGeometry);
 
   /// Initialization at construction time
-  void init(const TrackerGeometry* theGeometry,
-	    const TrackerTopology *tTopo);
+  void init(const TrackerGeometry* theGeometry);
   
   // TrackerRecHit(const SiTrackerGSMatchedRecHit2D* theHit, 
   //		const TrackerGeometry* theGeometry);

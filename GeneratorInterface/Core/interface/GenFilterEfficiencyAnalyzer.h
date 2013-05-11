@@ -2,7 +2,7 @@
 #define GENFILTEREFFICIENCYANALYZER_H
 
 // F. Cossutti
-// $Date: 2013/03/01 19:06:14 $
+// $Date: 2012/08/23 21:51:20 $
 // $Revision://
 
 // analyzer of a summary information product on filter efficiency for a user specified path
@@ -35,9 +35,9 @@ public:
   
   
 private:
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-  virtual void endJob() override;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void endJob();
 
   int nTota_;
   int nPass_;

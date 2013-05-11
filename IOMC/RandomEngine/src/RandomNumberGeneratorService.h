@@ -147,6 +147,8 @@ namespace edm {
 
       void startNewSequencesForEvents();
 
+      void oldStyleConfig(ParameterSet const& pset);
+
       // ---------- member data --------------------------------
 
       // We store the engines using the corresponding module label

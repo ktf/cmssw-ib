@@ -288,10 +288,6 @@ expertSettings.add_option("--inputCommands",
                           help="specify the input commands; i.e dropping products",
                           default=None,
                           dest="inputCommands")
-expertSettings.add_option("--outputCommands",
-                          help="specify the extra output commands;",
-                          default=None,
-                          dest="outputCommands")
 
 expertSettings.add_option("--inputEventContent",
                           help="specify the input event content",

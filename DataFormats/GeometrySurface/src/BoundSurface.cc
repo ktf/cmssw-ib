@@ -1,1 +1,6 @@
-#include "DataFormats/GeometrySurface/interface/Surface.h"
+#include "DataFormats/GeometrySurface/interface/BoundSurface.h"
+
+
+void BoundSurface::computeSpan() {
+  boundSpan::computeSpan(*this);
+}

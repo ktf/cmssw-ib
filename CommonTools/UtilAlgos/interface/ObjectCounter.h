@@ -10,9 +10,9 @@
  *
  * \author Luca Lista, INFN
  *
- * \version $Revision: 1.2 $
+ * \version $Revision: 1.1 $
  *
- * $Id: ObjectCounter.h,v 1.2 2013/02/28 00:34:12 wmtan Exp $
+ * $Id: ObjectCounter.h,v 1.1 2009/03/03 13:07:27 llista Exp $
  *
  */
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -32,7 +32,7 @@ public:
 
 private:
   /// event processing
-  virtual void analyze( const edm::Event&, const edm::EventSetup&) override;
+  virtual void analyze( const edm::Event&, const edm::EventSetup& );
   /// label of source collection
   std::string src_;
   /// verbosity flag
@@ -79,4 +79,3 @@ void ObjectCounter<C>::analyze( const edm::Event& evt, const edm::EventSetup& ) 
 }
 
 #endif
-

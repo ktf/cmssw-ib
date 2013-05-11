@@ -106,10 +106,6 @@ void TrackerSystematicMisalignments::beginJob()
 
 void TrackerSystematicMisalignments::analyze(const edm::Event& event, const edm::EventSetup& setup){
 	
-	//Retrieve tracker topology from geometry
-	edm::ESHandle<TrackerTopology> tTopoHandle;
-	setup.get<IdealGeometryRecord>().get(tTopoHandle);
-	const TrackerTopology* const tTopo = tTopoHandle.product();
 	
 	edm::ESHandle<GeometricDet>  geom;
 	setup.get<IdealGeometryRecord>().get(geom);	 
@@ -130,7 +126,7 @@ void TrackerSystematicMisalignments::analyze(const edm::Event& event, const edm:
 		
 	}
 	
-	theAlignableTracker = new AlignableTracker(&(*tracker), tTopo);
+	theAlignableTracker = new AlignableTracker(&(*tracker));
 	
 	applySystematicMisalignment( &(*theAlignableTracker) );
 	

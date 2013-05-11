@@ -3,7 +3,7 @@
 
 namespace edm{class EventSetup;}
 class SiStripDigi;
-#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+class SiStripCluster;
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "FWCore/Framework/interface/ESHandle.h"

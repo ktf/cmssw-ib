@@ -2,14 +2,13 @@
 #define RecHit2DLocalPos_H
 
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "DataFormats/GeometrySurface/interface/LocalError.h"
-#include "DataFormats/GeometrySurface/interface/GloballyPositioned.h"
-
 
 class RecHit2DLocalPos : public TrackingRecHit {
 public:
 
-  typedef GloballyPositioned<float>::LocalPoint LocalPoint;
+  typedef Surface::LocalPoint LocalPoint;
   
   RecHit2DLocalPos(DetId id) : TrackingRecHit(id) {}
   RecHit2DLocalPos(TrackingRecHit::id_type id=0) : TrackingRecHit(id) {}

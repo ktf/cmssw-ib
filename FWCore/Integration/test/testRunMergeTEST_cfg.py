@@ -363,8 +363,7 @@ process.test = cms.EDAnalyzer("TestMergeResults",
         'm2', 'm2', 'm2', 'm2', 'm2',
         'm3', 'm3', 'm3', 'm3', 'm3',
         'm3', 'm3', 'm3', 'm3', 'm3'
-   ),
-   testAlias = cms.untracked.bool(True)
+   )
 )
 
 process.test2 = cms.EDAnalyzer('RunLumiEventAnalyzer',

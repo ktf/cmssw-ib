@@ -19,7 +19,7 @@ namespace edm {
 
   class OutputWorker : public WorkerT<OutputModule> {
   public:
-    OutputWorker(std::unique_ptr<OutputModule>&& mod,
+    OutputWorker(std::auto_ptr<OutputModule> mod, 
 		 ModuleDescription const&,
 		 WorkerParams const&);
 
@@ -46,8 +46,6 @@ namespace edm {
     void configure(OutputModuleDescription const& desc);
     
     SelectionsArray const& keptProducts() const;
-
-    void selectProducts(ProductRegistry const& preg);
   };
 
 }

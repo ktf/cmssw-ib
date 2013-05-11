@@ -1,6 +1,6 @@
 
 //
-// $Id: MuonReSeeder.cc,v 1.3 2013/02/27 14:58:17 muzaffar Exp $
+// $Id: MuonReSeeder.cc,v 1.1 2012/09/12 15:58:08 gpetrucc Exp $
 //
 
 /**
@@ -8,7 +8,7 @@
   \brief    Matcher of reconstructed objects to other reconstructed objects using the tracks inside them 
             
   \author   Giovanni Petrucciani
-  \version  $Id: MuonReSeeder.cc,v 1.3 2013/02/27 14:58:17 muzaffar Exp $
+  \version  $Id: MuonReSeeder.cc,v 1.1 2012/09/12 15:58:08 gpetrucc Exp $
 */
 
 
@@ -26,8 +26,13 @@
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
 #include "TrackingTools/PatternTools/interface/TrajectoryMeasurement.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 
 
 class MuonReSeeder : public edm::EDProducer {
@@ -35,7 +40,7 @@ class MuonReSeeder : public edm::EDProducer {
       explicit MuonReSeeder(const edm::ParameterSet & iConfig);
       virtual ~MuonReSeeder() { }
 
-      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup) override;
+      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
 
     private:
       /// Labels for input collections
@@ -56,6 +61,8 @@ class MuonReSeeder : public edm::EDProducer {
       /// Track Transformer
       TrackTransformer refitter_;
 
+      // utility
+      int layer(DetId detid) const ;
 };
 
 MuonReSeeder::MuonReSeeder(const edm::ParameterSet & iConfig) :
@@ -79,9 +86,6 @@ MuonReSeeder::produce(edm::Event & iEvent, const edm::EventSetup & iSetup) {
     Handle<View<reco::Muon> > src;
     iEvent.getByLabel(src_, src);
 
-    //Retrieve tracker topology from geometry
-    edm::ESHandle<TrackerTopology> tTopo;
-    iSetup.get<IdealGeometryRecord>().get(tTopo);
 
     auto_ptr<vector<TrajectorySeed> > out(new vector<TrajectorySeed>());
     unsigned int nsrc = src->size();
@@ -117,8 +121,7 @@ MuonReSeeder::produce(edm::Event & iEvent, const edm::EventSetup & iSetup) {
             hit = tms[i].recHit()->hit();
             if (debug_) std::cout << "  considering hit " << i << ": rechit on " << (hit ? hit->geographicalId().rawId() : -1) << std::endl;
             if (!hit) continue;
-            int subdet = hit->geographicalId().subdetId();
-	    int lay = tTopo->layer(hit->geographicalId());
+            int subdet = hit->geographicalId().subdetId(), lay = layer(hit->geographicalId());
             if (subdet != lastSubdet || lay != lastLayer) {
                 // I'm on a new layer
                 if (lastHit != 0 && taken == layersToKeep_) {
@@ -149,6 +152,19 @@ MuonReSeeder::produce(edm::Event & iEvent, const edm::EventSetup & iSetup) {
     }
 
     iEvent.put(out);
+}
+
+int 
+MuonReSeeder::layer(DetId detid) const {
+    switch (detid.subdetId()) {
+        case PixelSubdetector::PixelBarrel: return PXBDetId(detid).layer();
+        case PixelSubdetector::PixelEndcap: return PXFDetId(detid).disk();
+        case StripSubdetector::TIB:         return TIBDetId(detid).layer();
+        case StripSubdetector::TID:         return TIDDetId(detid).wheel();
+        case StripSubdetector::TOB:         return TOBDetId(detid).layer();
+        case StripSubdetector::TEC:         return TECDetId(detid).wheel();
+    }
+    return -1; // never match
 }
 
 

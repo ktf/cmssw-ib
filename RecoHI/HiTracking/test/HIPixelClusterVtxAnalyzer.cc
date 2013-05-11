@@ -19,6 +19,8 @@
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
 #include <fstream>

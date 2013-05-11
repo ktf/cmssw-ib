@@ -1,20 +1,15 @@
 #include "CalibTracker/SiStripQuality/interface/SiStripHotStripAlgorithmFromClusterOccupancy.h"
-#include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
-#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 
 
 
-SiStripHotStripAlgorithmFromClusterOccupancy::SiStripHotStripAlgorithmFromClusterOccupancy(const edm::ParameterSet& iConfig, const TrackerTopology* theTopo):
+SiStripHotStripAlgorithmFromClusterOccupancy::SiStripHotStripAlgorithmFromClusterOccupancy(const edm::ParameterSet& iConfig):
     prob_(1.E-7),
     MinNumEntries_(0),
     MinNumEntriesPerStrip_(0),
     Nevents_(0),
     occupancy_(0),
     OutFileName_("Occupancy.root"),
-    tTopo(theTopo),
     UseInputDB_(iConfig.getUntrackedParameter<bool>("UseInputDB",false))
   {  
     minNevents_=Nevents_*occupancy_;
@@ -88,50 +83,50 @@ void SiStripHotStripAlgorithmFromClusterOccupancy::extractBadStrips(SiStripQuali
     switch (detectorId.subdetId())
       {
       case StripSubdetector::TIB :
-	layer_ring = tTopo->tibLayer(detrawid);
+	layer_ring = TIBDetId(detrawid).layer();
 	disc       = -1;
 	isback     = -1;
-	if (tTopo->tibIsExternalString(detrawid)) isexternalstring = 1;
+	if (TIBDetId(detrawid).isExternalString()) isexternalstring = 1;
 	else                                       isexternalstring = 0;
-	if (tTopo->tibIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TIBDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
-	rodstringpetal  = tTopo->tibString(detrawid);
-	module_position = tTopo->tibModule(detrawid);
+	rodstringpetal  = TIBDetId(detrawid).stringNumber();
+	module_position = TIBDetId(detrawid).moduleNumber();
 	break;
 
       case StripSubdetector::TID :
-	layer_ring = tTopo->tidRing(detrawid);
-	disc       = tTopo->tidWheel(detrawid);
-	if (tTopo->tidIsBackRing(detrawid)) isback = 1;
+	layer_ring = TIDDetId(detrawid).ring();
+	disc       = TIDDetId(detrawid).wheel();
+	if (TIDDetId(detrawid).isBackRing()) isback = 1;
 	else                                 isback = 0;
-	if (tTopo->tidIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TIDDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring = -1;
 	rodstringpetal   = -1;
-	module_position  = tTopo->tidModule(detrawid);
+	module_position  = TIDDetId(detrawid).moduleNumber();
 	break;
 
       case StripSubdetector::TOB :
-	layer_ring = tTopo->tobLayer(detrawid);
+	layer_ring = TOBDetId(detrawid).layer();
 	disc       = -1;
 	isback     = -1;
-	if (tTopo->tobIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TOBDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring = -1;
-	rodstringpetal   = tTopo->tobRod(detrawid);
-	module_position  = tTopo->tobModule(detrawid);
+	rodstringpetal   = TOBDetId(detrawid).rodNumber();
+	module_position  = TOBDetId(detrawid).moduleNumber();
 	break;
 
       case StripSubdetector::TEC :
-	layer_ring = tTopo->tecRing(detrawid);
-	disc       = tTopo->tecWheel(detrawid);
-	if (tTopo->tecIsBackPetal(detrawid)) isback = 1;
+	layer_ring = TECDetId(detrawid).ring();
+	disc       = TECDetId(detrawid).wheel();
+	if (TECDetId(detrawid).isBackPetal()) isback = 1;
 	else                                  isback = 0;
-	if (tTopo->tecIsZMinusSide(detrawid)) iszminusside = 1;
+	if (TECDetId(detrawid).isZMinusSide()) iszminusside = 1;
 	else                                   iszminusside = 0;
 	isexternalstring = -1;
-	rodstringpetal   = tTopo->tecPetalNumber(detrawid);
-	module_position  = tTopo->tecModule(detrawid);
+	rodstringpetal   = TECDetId(detrawid).petalNumber();
+	module_position  = TECDetId(detrawid).moduleNumber();
 	break;
 
       default :
@@ -239,16 +234,16 @@ void SiStripHotStripAlgorithmFromClusterOccupancy::iterativeSearch(pHisto& histo
   size_t startingSize=vect.size();
   long double diff=1.-prob_; 
   
-  size_t Nbins     = histo._th1f->GetNbinsX();
-  size_t ibinStart = 1; 
-  size_t ibinStop  = Nbins+1; 
+  int Nbins     = histo._th1f->GetNbinsX();
+  int ibinStart = 1; 
+  int ibinStop  = Nbins+1; 
   int MaxEntry  = (int)histo._th1f->GetMaximum();
 
   std::vector<long double> vPoissonProbs(MaxEntry+1,0);
   long double meanVal=1.*histo._NEntries/(1.*Nbins-histo._NEmptyBins); 
   evaluatePoissonian(vPoissonProbs,meanVal);
 
-  for (size_t i=ibinStart; i<ibinStop; ++i){
+  for (Int_t i=ibinStart; i<ibinStop; ++i){
     unsigned int entries= (unsigned int)histo._th1f->GetBinContent(i);
 
     if (ishot[(apv*128)+i-1]==0){

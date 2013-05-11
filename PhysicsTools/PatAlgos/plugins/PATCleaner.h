@@ -1,7 +1,7 @@
 #ifndef PhysicsTools_PatAlgos_plugins_PATCleaner_h
 #define PhysicsTools_PatAlgos_plugins_PATCleaner_h
 //
-// $Id: PATCleaner.h,v 1.4 2013/02/27 23:26:56 wmtan Exp $
+// $Id: PATCleaner.h,v 1.3 2010/10/20 23:08:30 wmtan Exp $
 //
 
 /**
@@ -11,7 +11,7 @@
             The same module is used for all collections.
 
   \author   Giovanni Petrucciani
-  \version  $Id: PATCleaner.h,v 1.4 2013/02/27 23:26:56 wmtan Exp $
+  \version  $Id: PATCleaner.h,v 1.3 2010/10/20 23:08:30 wmtan Exp $
 */
 
 
@@ -43,7 +43,7 @@ namespace pat {
       explicit PATCleaner(const edm::ParameterSet & iConfig);
       virtual ~PATCleaner() {}
 
-      virtual void produce(edm::Event & iEvent, const edm::EventSetup& iSetup) override;
+      virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
 
     private:
       typedef StringCutObjectSelector<PATObjType> Selector;

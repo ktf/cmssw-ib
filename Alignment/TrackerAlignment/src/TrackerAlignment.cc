@@ -21,14 +21,9 @@ TrackerAlignment::TrackerAlignment( const edm::EventSetup& setup ):
   theErrorRecordName( "TrackerAlignmentErrorRcd" )
 {
 
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  setup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   edm::ESHandle<TrackerGeometry> trackerGeometry;
   setup.get<TrackerDigiGeometryRecord>().get( trackerGeometry );
-  theAlignableTracker = new AlignableTracker( &(*trackerGeometry), tTopo );
+  theAlignableTracker = new AlignableTracker( &(*trackerGeometry) );
 
 }
 

@@ -43,7 +43,6 @@
 class SiStripHotStripAlgorithmFromClusterOccupancy;
 class SiStripBadAPVAlgorithmFromClusterOccupancy;
 class SiStripBadAPVandHotStripAlgorithmFromClusterOccupancy;
-class TrackerTopology;
 
 class SiStripQualityHotStripIdentifierRoot : public ConditionDBWriter<SiStripBadStrip> {
 
@@ -80,7 +79,6 @@ private:
 
   edm::ESHandle<TrackerGeometry> theTrackerGeom;
   const TrackerGeometry* _tracker;
-  const TrackerTopology* tTopo;
 
   DQMStore* dqmStore_;
 

@@ -43,7 +43,7 @@ class SimpleCosmicBONSeeder : public edm::EDProducer
 
   virtual ~SimpleCosmicBONSeeder() {}
 
-  virtual void produce(edm::Event& e, const edm::EventSetup& c) override;
+  virtual void produce(edm::Event& e, const edm::EventSetup& c);
 
   void init(const edm::EventSetup& c);
   bool triplets(const edm::Event &e , const edm::EventSetup& c);

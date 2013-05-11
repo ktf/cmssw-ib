@@ -8,11 +8,10 @@
 #include "RecoTracker/TkTrackingRegions/interface/RectangularEtaPhiTrackingRegion.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/ESHandle.h"
+
 #include "DataFormats/Common/interface/DetSetVector.h"    
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 
 #include "TMath.h"
 
@@ -48,10 +47,6 @@ class HITrackingRegionProducer : public TrackingRegionProducer {
     edm::Handle<SiPixelRecHitCollection> recHitColl;
     ev.getByLabel(theSiPixelRecHits, recHitColl);
     
-    //Retrieve tracker topology from geometry
-    edm::ESHandle<TrackerTopology> tTopo;
-    es.get<IdealGeometryRecord>().get(tTopo);
-    
     int numRecHits = 0;
     //FIXME: this can be optimized quite a bit by looping only on the per-det 'items' of DetSetVector
     for(SiPixelRecHitCollection::const_iterator recHitIdIterator = recHitColl->begin(), recHitIdIteratorEnd = recHitColl->end();
@@ -60,9 +55,9 @@ class HITrackingRegionProducer : public TrackingRegionProducer {
       DetId detId = DetId(hits.detId());   // Get the Detid object
       unsigned int detType=detId.det();    // det type, tracker=1
       unsigned int subid=detId.subdetId(); //subdetector type, barrel=1, fpix=2
-      
+      PXBDetId pdetId = PXBDetId(detId);
       unsigned int layer=0;
-      layer=tTopo->pxbLayer(detId);
+      layer=pdetId.layer();
       if(detType==1 && subid==1 && layer==1) {
 	numRecHits += hits.size();
       }

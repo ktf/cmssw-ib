@@ -4,8 +4,8 @@
 /** \class RPCDigiReader
  *  Analyse the RPC digitizer (derived from R. Bellan DTDigiReader. 
  *  
- *  $Date: 2013/02/28 21:16:28 $
- *  $Revision: 1.10 $
+ *  $Date: 2008/02/29 16:57:34 $
+ *  $Revision: 1.9 $
  *  \authors: M. Maggi -- INFN Bari
  */
 
@@ -41,7 +41,7 @@ public:
   virtual ~RPCDigiReader(){
   }
   
-  void analyze(const edm::Event & event, const edm::EventSetup& eventSetup) override {
+  void analyze(const edm::Event & event, const edm::EventSetup& eventSetup){
    std:: cout << "--- Run: " << event.id().run()
 	      << " Event: " << event.id().event() << std::endl;
 

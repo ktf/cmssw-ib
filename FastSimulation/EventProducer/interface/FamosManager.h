@@ -22,7 +22,6 @@ class PileUpSimulator;
 class MagneticField;
 class CalorimetryManager;
 class RandomEngine;
-class TrackerTopology;
 
 // using trailing _ for private data members, m_p prefix for PSet variables (MSt)
 
@@ -38,7 +37,7 @@ class FamosManager
   ~FamosManager();
 
   /// Get information from the Event Setup
-  void setupGeometryAndField(edm::Run const& run, const edm::EventSetup & es);
+  void setupGeometryAndField(edm::Run & run, const edm::EventSetup & es);
 
   /// The generated event
   //  const HepMC::GenEvent* genEvent() const { return myGenEvent; };
@@ -50,11 +49,9 @@ class FamosManager
   /// The real thing is done here
   void reconstruct(const HepMC::GenEvent* evt, 
 		   const reco::GenParticleCollection* particles,
-		   const HepMC::GenEvent* pu,
-		   const TrackerTopology *tTopo);
+		   const HepMC::GenEvent* pu);
   
-  void reconstruct(const reco::GenParticleCollection* particles,
-		   const TrackerTopology *tTopo);
+  void reconstruct(const reco::GenParticleCollection* particles);
 
   /// The tracker 
   TrajectoryManager * trackerManager() const {return myTrajectoryManager;}

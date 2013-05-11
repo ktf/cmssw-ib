@@ -16,6 +16,7 @@
  * History:
  *   
  *
+ * Copyright (C) 2010 FNAL 
  *****************************************************************************/
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
@@ -55,7 +56,7 @@ public:
   virtual ~ObjectViewMatcher();
   
   // member functions
-  void produce(edm::Event& iEvent,const edm::EventSetup& iSetup) override;
+  void produce(edm::Event& iEvent,const edm::EventSetup& iSetup);
   void endJob();
 
 private:  

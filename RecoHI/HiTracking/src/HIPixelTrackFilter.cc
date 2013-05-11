@@ -8,7 +8,6 @@
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackBase.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 using namespace std;
 using namespace edm;
@@ -33,8 +32,7 @@ HIPixelTrackFilter::~HIPixelTrackFilter()
 { }
 
 /*****************************************************************************/
-bool HIPixelTrackFilter::operator() (const reco::Track* track,const PixelTrackFilter::Hits & recHits, 
-				     const TrackerTopology *tTopo) const
+bool HIPixelTrackFilter::operator() (const reco::Track* track,const PixelTrackFilter::Hits & recHits) const
 {
 
   if (!track) return false; 
@@ -65,7 +63,7 @@ bool HIPixelTrackFilter::operator() (const reco::Track* track,const PixelTrackFi
   if (theNSigmaLipMaxTolerance>0 && (fabs(dz)/dzsigma)>theNSigmaLipMaxTolerance) return false;
   
   bool ok = true;
-  if(useClusterShape) ok = ClusterShapeTrackFilter::operator() (track,recHits,tTopo);
+  if(useClusterShape) ok = ClusterShapeTrackFilter::operator() (track,recHits);
   
   return ok;
 }

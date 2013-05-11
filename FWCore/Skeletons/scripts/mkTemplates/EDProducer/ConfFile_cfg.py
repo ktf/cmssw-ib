@@ -13,7 +13,7 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.myProducerLabel = cms.EDProducer('__class__'
+process.myProducerLabel = cms.EDProducer('prodname'
 @example_myparticle     , muons = cms.InputTag('muons')
 @example_myparticle     , electrons = cms.InputTag('pixelMatchGsfElectrons')
 )
