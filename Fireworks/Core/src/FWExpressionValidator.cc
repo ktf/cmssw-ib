@@ -8,7 +8,7 @@
 //
 // Original Author:  Chris Jones
 //         Created:  Fri Aug 22 20:42:51 EDT 2008
-// $Id: FWExpressionValidator.cc,v 1.10 2012/08/28 22:25:42 wmtan Exp $
+// $Id: FWExpressionValidator.cc,v 1.12 2013/02/10 22:12:04 wmtan Exp $
 //
 
 // system include files
@@ -129,14 +129,14 @@ private:
    {
       edm::TypeWithDict type = iType;
       if(type.isPointer()) {
-         type = type.toType();
+         type = type.toType(); // for Pointers, I get the real type this way
       }
       // first look in base scope
       edm::TypeFunctionMembers functions(type);
       oOptions.reserve(oOptions.size()+functions.size());
       for(auto const& function : functions) {
          edm::FunctionWithDict m(function); 
-         if(!m.typeOf().isConst() ||
+         if(!m.isConst() ||
             m.isConstructor() ||
             m.isDestructor() ||
             m.isOperator() ||
@@ -147,7 +147,7 @@ private:
 
       edm::TypeBases bases(type);
       for(auto const& base : bases) {
-         fillOptionForType(edm::BaseWithDict(base).toType(),oOptions);
+         fillOptionForType(edm::BaseWithDict(base).typeOf(),oOptions);
       }
    }
 

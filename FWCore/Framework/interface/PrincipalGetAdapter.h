@@ -1,5 +1,5 @@
-#ifndef Framework_PrincipalGetAdapter_h
-#define Framework_PrincipalGetAdapter_h
+#ifndef FWCore_Framework_PrincipalGetAdapter_h
+#define FWCore_Framework_PrincipalGetAdapter_h
 
 // -*- C++ -*-
 //
@@ -99,7 +99,12 @@ edm::Ref<AppleCollection> ref(refApples, index);
 
 #include "DataFormats/Common/interface/Handle.h"
 
+#include "DataFormats/Common/interface/Wrapper.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+#include "FWCore/Utilities/interface/ProductKindOfType.h"
+
 
 namespace edm {
 
@@ -109,6 +114,14 @@ namespace edm {
     };
     void
     throwOnPutOfNullProduct(char const* principalType, TypeID const& productType, std::string const& productInstanceName);
+    void
+    throwOnPrematureRead(char const* principalType, TypeID const& productType, std::string const& moduleLabel, std::string const& productInstanceName);
+    void
+    throwOnPrematureRead(char const* principalType, TypeID const& productType);
+
+    void
+    throwOnPrematureRead(char const* principalType, TypeID const& productType, EDGetToken);
+
   }
   class PrincipalGetAdapter {
   public:
@@ -117,22 +130,20 @@ namespace edm {
 
     ~PrincipalGetAdapter();
 
+    PrincipalGetAdapter(PrincipalGetAdapter const&) = delete; // Disallow copying and moving
+    PrincipalGetAdapter& operator=(PrincipalGetAdapter const&) = delete; // Disallow copying and moving
+
     //size_t size() const;
+    
+    void setConsumer(EDConsumerBase const* iConsumer) {
+      consumer_ = iConsumer;
+    }
+
+    bool isComplete() const;
 
     template <typename PROD>
     bool 
-    getByLabel(std::string const& label, Handle<PROD>& result) const;
-
-    template <typename PROD>
-    bool 
-    getByLabel(std::string const& label,
-	       std::string const& productInstanceName, 
-	       Handle<PROD>& result) const;
-
-    /// same as above, but using the InputTag class 	 
-    template <typename PROD> 	 
-    bool 	 
-    getByLabel(InputTag const& tag, Handle<PROD>& result) const; 	 
+    checkIfComplete() const;
 
     template <typename PROD>
     void 
@@ -157,38 +168,41 @@ namespace edm {
     // from the Principal class.
 
     BasicHandle 
-    getByLabel_(TypeID const& tid,
-		std::string const& label,
-		std::string const& productInstanceName,
-		std::string const& processName) const;
-
-    BasicHandle 
     getByLabel_(TypeID const& tid, InputTag const& tag) const;
 
+    BasicHandle 
+    getByLabel_(TypeID const& tid,
+		std::string const& label,
+		std::string const& instance,
+		std::string const& process) const;
+
+    BasicHandle
+    getByToken_(TypeID const& id, KindOfType kindOfType, EDGetToken token) const;
+    
+    BasicHandle
+    getMatchingSequenceByLabel_(TypeID const& typeID,
+                                InputTag const& tag) const;
+
+    BasicHandle
+    getMatchingSequenceByLabel_(TypeID const& typeID,
+                                std::string const& label,
+                                std::string const& instance,
+                                std::string const& process) const;
+    
     void 
     getManyByType_(TypeID const& tid, 
 		   BasicHandleVec& results) const;
 
-    int 
-    getMatchingSequenceByLabel_(TypeID const& typeID,
-                                std::string const& label,
-                                std::string const& productInstanceName,
-                                std::string const& processName,
-                                BasicHandle& result) const;
-    
     // Also isolates the PrincipalGetAdapter class
     // from the Principal class.
     EDProductGetter const* prodGetter() const;
-  private:
-    //------------------------------------------------------------
-    // Copying and assignment of PrincipalGetAdapters is disallowed
-    //
-    PrincipalGetAdapter(PrincipalGetAdapter const&);                  // not implemented
-    PrincipalGetAdapter const& operator=(PrincipalGetAdapter const&);   // not implemented
 
+  private:
     // Is this an Event, a LuminosityBlock, or a Run.
     BranchType const& branchType() const;
 
+    BasicHandle
+    makeFailToGetException(KindOfType,TypeID const&,EDGetToken) const;
   private:
     //------------------------------------------------------------
     // Data members
@@ -201,6 +215,8 @@ namespace edm {
     // Each PrincipalGetAdapter must have a description of the module executing the
     // "transaction" which the PrincipalGetAdapter represents.
     ModuleDescription const& md_;
+    
+    EDConsumerBase const* consumer_;
 
   };
 
@@ -241,7 +257,7 @@ namespace edm {
     template<typename T>
     struct has_postinsert {
       static bool const value = 
-	sizeof(has_postinsert_helper<T>(0)) == sizeof(yes_tag) &&
+	sizeof(has_postinsert_helper<T>(nullptr)) == sizeof(yes_tag) &&
 	!boost::is_base_of<DoNotSortUponInsertion, T>::value;
     };
 
@@ -279,39 +295,9 @@ namespace edm {
 
   template <typename PROD>
   inline
-  bool
-  PrincipalGetAdapter::getByLabel(std::string const& label,
-			   Handle<PROD>& result) const {
-    result.clear();
-    return getByLabel(label, std::string(), result);
-  }
-
-  template <typename PROD>
-  inline
-  bool
-  PrincipalGetAdapter::getByLabel(InputTag const& tag, Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = this->getByLabel_(TypeID(typeid(PROD)), tag);
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
-  }
-
-  template <typename PROD>
-  inline
-  bool
-  PrincipalGetAdapter::getByLabel(std::string const& label,
-			   std::string const& productInstanceName,
-			   Handle<PROD>& result) const {
-    result.clear();
-    BasicHandle bh = this->getByLabel_(TypeID(typeid(PROD)), label, productInstanceName, std::string());
-    convert_handle(bh, result);  // throws on conversion error
-    if (bh.failedToGet()) {
-      return false;
-    }
-    return true;
+  bool 
+  PrincipalGetAdapter::checkIfComplete() const { 
+    return isComplete() || !detail::has_mergeProduct_function<PROD>::value;
   }
 
   template <typename PROD>

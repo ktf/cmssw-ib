@@ -1,7 +1,7 @@
 //
 // Original Author:  Stefano Magni
 //         Created:  Fri Mar  9 10:52:11 CET 2007
-// $Id: TrackAssociatorEDProducer.cc,v 1.7 2009/11/13 14:15:53 fambrogl Exp $
+// $Id: TrackAssociatorEDProducer.cc,v 1.8 2013/01/09 03:49:01 dlange Exp $
 //
 //
 
@@ -94,11 +94,11 @@ TrackAssociatorEDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iS
      LogTrace("TrackValidator") << "Calling associateRecoToSim method" << "\n";
      reco::RecoToSimCollection recSimColl=theAssociator->associateRecoToSim(trackCollection,
 									    TPCollection,
-									    &iEvent);
+									    &iEvent, &iSetup);
      LogTrace("TrackValidator") << "Calling associateSimToReco method" << "\n";
      reco::SimToRecoCollection simRecColl=theAssociator->associateSimToReco(trackCollection,
 									    TPCollection, 
-									    &iEvent);
+									    &iEvent, &iSetup);
      
      rts.reset(new reco::RecoToSimCollection(recSimColl));
      str.reset(new reco::SimToRecoCollection(simRecColl));

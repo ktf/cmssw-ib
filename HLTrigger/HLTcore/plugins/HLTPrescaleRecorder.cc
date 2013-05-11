@@ -2,8 +2,8 @@
  *
  * See header file for documentation
  *
- *  $Date: 2012/02/29 14:39:34 $
- *  $Revision: 1.6 $
+ *  $Date: 2013/02/28 09:07:08 $
+ *  $Revision: 1.7 $
  *
  *  \author Martin Grunewald
  *
@@ -82,7 +82,7 @@ HLTPrescaleRecorder::~HLTPrescaleRecorder()
 // member functions
 //
 
-void HLTPrescaleRecorder::beginRun(edm::Run& iRun, const edm::EventSetup& iSetup) {
+void HLTPrescaleRecorder::beginRun(edm::Run const& iRun, const edm::EventSetup& iSetup) {
 
   hlt_=HLTPrescaleTable();
 
@@ -135,7 +135,7 @@ void HLTPrescaleRecorder::beginRun(edm::Run& iRun, const edm::EventSetup& iSetup
   return;
 }
 
-void HLTPrescaleRecorder::beginLuminosityBlock(edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup) {
+void HLTPrescaleRecorder::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, const edm::EventSetup& iSetup) {
 
   if (src_==0) {
     /// From PrescaleService

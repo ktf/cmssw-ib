@@ -28,7 +28,7 @@
 //
 // Original Author:  Nov 16 16:12 (lxplus231.cern.ch)
 //         Created:  Sun Nov 16 16:14:09 CET 2008
-// $Id: MuonMCClassifier.cc,v 1.7 2011/01/24 11:24:32 gpetrucc Exp $
+// $Id: MuonMCClassifier.cc,v 1.8 2013/02/27 20:42:45 wmtan Exp $
 //
 //
 
@@ -73,7 +73,7 @@ class MuonMCClassifier : public edm::EDProducer {
         ~MuonMCClassifier();
 
     private:
-        virtual void produce(edm::Event&, const edm::EventSetup&);
+        virtual void produce(edm::Event&, const edm::EventSetup&) override;
         /// The RECO objects
         edm::InputTag muons_;
 

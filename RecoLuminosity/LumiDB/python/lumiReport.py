@@ -22,8 +22,9 @@ def dumptocsv(fieldnames,result,filename):
         r=csvReporter.csvReporter(filename)
         r.writeRow(fieldnames)
         r.writeRows(result)
+        r.close()
         
-def toScreenHeader(commandname,datatagname,normtag,worktag,updatetag,lumitype):
+def toScreenHeader(commandname,datatagname,normtag,worktag,updatetag,lumitype,toFile=None):
     '''
     input:
        commandname: commandname
@@ -45,8 +46,16 @@ def toScreenHeader(commandname,datatagname,normtag,worktag,updatetag,lumitype):
     header+='* \n'
     header+='* update: '+updatetag+'\n'
     header+=''.join(['*']*80)+'\n'
-    sys.stdout.write(header)
-    
+    if not toFile:
+        sys.stdout.write(header)
+    else:
+        assert(toFile)
+        if toFile.upper()=='STDOUT':
+            r=sys.stdout
+        else:
+            r=open(toFile,'wb')
+        r.write(header)
+        
 def toScreenNormSummary(allnorms):
     '''
     list all known norms summary
@@ -322,7 +331,7 @@ def toScreenOverview(lumidata,resultlines,scalefactor,irunlsdict=None,noWarning=
                     existdata.append(cmslsnum)
             if irunlsdict and irunlsdict[run]:
                 if lumilsnum and lumilsnum in irunlsdict[run]:
-                    if perlsdata[5]:
+                    if perlsdata[5] is not None:
                         deliveredData.append(perlsdata[5])
                     if perlsdata[6]:
                         recordedData.append(perlsdata[6])
@@ -930,9 +939,9 @@ def toCSVLumiByLSXing(lumidata,scalefactor,filename,irunlsdict=None,noWarning=Tr
         r.writeRow(fieldnames)
         r.writeRows(result)
     
-def toScreenLSTrg(trgdata,iresults=[],irunlsdict=None,noWarning=True,toFile=None):
+def toScreenLSTrg(trgdata,iresults=[],irunlsdict=None,noWarning=True,toFile=None,withoutmask=False):
     '''
-    input:{run:[[cmslsnum,deadfrac,deadtimecount,bitzero_count,bitzero_prescale,[(name,count,presc),]],..]
+    input:{run:[[cmslsnum,deadfrac,deadtimecount,bitzero_count,bitzero_prescale,[(name,count,presc,mask),]],..]
     '''
     result=[]
     datarunlsdict={}#{run:[ls,...]}from data. construct it only if there is irunlsdict to compare with
@@ -964,8 +973,13 @@ def toScreenLSTrg(trgdata,iresults=[],irunlsdict=None,noWarning=True,toFile=None
             deadcount=lsdata[2]
             bitdata=lsdata[5]# already sorted by name
             if bitdata:
-              flatbitdata=["("+x[0]+',%d'%x[1]+',%d'%x[2]+")" for x in bitdata if x[0]!='False']
-              bitdataStr=' '.join(flatbitdata)
+              if withoutmask:
+                  flatbitdata=["("+x[0]+',%d'%x[1]+',%d'%x[2]+")" for x in bitdata if x[0]!='False']
+                  bitdataStr=' '.join(flatbitdata)
+              else:
+                  #consider trg mask by default
+                  flatbitdata=["("+x[0]+',%d'%x[1]+',%d'%x[2]+")" for x in bitdata if x[0]!='False' and x[3]]
+                  bitdataStr=' '.join(flatbitdata)
             if irunlsdict and irunlsdict[run]:
                 if run in irunlsdict and cmslsnum in irunlsdict[run]:
                     result.append([str(run),str(cmslsnum),'%.4f'%(deadfrac),bitdataStr])

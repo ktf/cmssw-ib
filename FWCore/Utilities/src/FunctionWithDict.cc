@@ -7,6 +7,9 @@
 #include "FWCore/Utilities/interface/TypeWithDict.h"
 
 namespace edm {
+
+  FunctionWithDict::FunctionWithDict(Reflex::Member const& function) : function_(function) {}
+
   std::string
   FunctionWithDict::name() const {
     return function_.Name();
@@ -23,6 +26,11 @@ namespace edm {
   TypeWithDict
   FunctionWithDict::returnType() const {
     return (TypeWithDict(function_.TypeOf().ReturnType()));
+  }
+
+  TypeWithDict
+  FunctionWithDict::finalReturnType() const {
+    return (TypeWithDict(function_.TypeOf().ReturnType().FinalType()));
   }
 
   TypeWithDict
@@ -66,7 +74,8 @@ namespace edm {
 
   void
   FunctionWithDict::invoke(ObjectWithDict const& obj, ObjectWithDict* ret, std::vector<void*> const& values) const {
-    function_.Invoke(obj.object_, &ret->object_, values);
+    Reflex::Object reflexReturn(ret->typeOf().type_, ret->address());
+    function_.Invoke(Reflex::Object(obj.typeOf().type_, obj.address()), &reflexReturn, values);
   }
 
   Reflex::Type_Iterator
