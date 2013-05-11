@@ -45,32 +45,20 @@ class Handle<GenericObject> {
 public:
     ///Throws exception if iName is not a known C++ class type
     Handle(std::string const& iName) : 
-       type_(TypeWithDict::byName(iName)), prod_(), prov_(0) {
+       type_(TypeWithDict::byName(iName)), prod_(), prov_(nullptr) {
           if(!bool(type_)) {
              Exception::throwThis(errors::NotFound,
              "Handle<GenericObject> told to use uknown type '",
              iName.c_str(),
              "'.\n Please check spelling or that a module uses this type in the job.");
            }
-           if(type_.isTypedef()){
-              //For a 'Typedef' the 'toType' method returns the actual type
-              // this is needed since you are not allowed to 'invoke' methods of a 'Typedef'
-              // only for a 'real' class
-              type_ = type_.toType();
-           }
         }
    
    ///Throws exception if iType is invalid
    Handle(TypeWithDict const& iType) :
-      type_(iType), prod_(), prov_(0) {
+      type_(iType), prod_(), prov_(nullptr) {
          if(!bool(iType)) {
             Exception::throwThis(errors::NotFound, "Handle<GenericObject> given an invalid type");
-         }
-         if(type_.isTypedef()){
-            //For a 'Typedef' the 'toType' method returns the actual type
-            // this is needed since you are now allowed to 'invoke' methods of a 'Typedef'
-            // only for a 'real' class
-            type_ = type_.toType();
          }
       }
    

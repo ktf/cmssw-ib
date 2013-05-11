@@ -13,7 +13,7 @@
 //
 // Original Author:  Kenneth Case Rossato
 //         Created:  Tue Aug 19 16:13:10 CEST 2008
-// $Id: HCALHighEnergyFilter.cc,v 1.4 2010/02/17 22:40:55 wdd Exp $
+// $Id: HCALHighEnergyFilter.cc,v 1.5 2013/02/27 20:17:14 wmtan Exp $
 //
 //
 
@@ -53,7 +53,7 @@ class HCALHighEnergyFilter : public edm::EDFilter {
 
    private:
       virtual void beginJob() ;
-      virtual bool filter(edm::Event&, const edm::EventSetup&);
+      virtual bool filter(edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() ;
   //  bool jetGood(L1JetParticleCollection::const_iterator &);
   bool jetGood(reco::CaloJetCollection::const_iterator &);

@@ -1,7 +1,7 @@
 /** \file
  *
- *  $Date: 2012/05/29 08:23:54 $
- *  $Revision: 1.5 $
+ *  $Date: 2012/12/25 17:54:29 $
+ *  $Revision: 1.6 $
  *  \author Rick Wilkinson
  */
 
@@ -74,8 +74,8 @@ BoundDisk * MuRingForwardDoubleLayer::computeSurface()
   RotationType rot;
 
   return new BoundDisk( pos, rot,
-                        SimpleDiskBounds( rmin, rmax,
-                                          zmin-zPos, zmax-zPos));
+                        new SimpleDiskBounds( rmin, rmax,
+                                              zmin-zPos, zmax-zPos));
 }
 
 

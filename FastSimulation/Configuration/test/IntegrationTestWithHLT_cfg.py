@@ -76,7 +76,7 @@ process.famosSimHits.SimulateTracking = True
 process.VolumeBasedMagneticFieldESProducer.useParametrizedTrackerField = True
 # Number of pileup events per crossing
 process.load('FastSimulation.PileUpProducer.PileUpSimulator_2012_Startup_inTimeOnly_cff')
-#process.load('FastSimulation.PileUpProducer.mix_2012_Startup_inTimeOnly_cff')
+#process.load('FastSimulation.PileUpProducer.mix_2012_Summer_inTimeOnly_cff')
 #process.famosPileUp.PileUpSimulator.averageNumber = 0.0
 
 # Get frontier conditions   - not applied in the HCAL, see below

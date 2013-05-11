@@ -10,7 +10,7 @@
 //
 // Original Author:  Nicholas Cripps
 //         Created:  2008/09/16
-// $Id: SiStripFEDDataCheck.cc,v 1.1 2012/10/15 09:02:47 threus Exp $
+// $Id: SiStripFEDDataCheck.cc,v 1.3 2013/01/03 18:59:36 wmtan Exp $
 //
 //
 #include <memory>
@@ -30,6 +30,8 @@
 #include "DataFormats/FEDRawData/interface/FEDRawData.h"
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/SiStripCommon/interface/ConstantsForHardwareSystems.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include "CondFormats/DataRecord/interface/SiStripFedCablingRcd.h"
 #include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
@@ -40,6 +42,7 @@
 #include "EventFilter/SiStripRawToDigi/interface/SiStripFEDBuffer.h"
 
 #include "DQM/SiStripMonitorHardware/interface/FEDErrors.hh"
+
 
 //
 // Class declaration
@@ -141,6 +144,11 @@ SiStripFEDCheckPlugin::~SiStripFEDCheckPlugin()
 void
 SiStripFEDCheckPlugin::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopoHandle;
+  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
+  const TrackerTopology* const tTopo = tTopoHandle.product();
+
   //update cabling
   updateCabling(iSetup);
   
@@ -166,7 +174,7 @@ SiStripFEDCheckPlugin::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 
     //create an object to fill all errors
     //third param to false:save time by not initialising anything not used here
-    lFedErrors.initialiseFED(fedId,cabling_,false);
+    lFedErrors.initialiseFED(fedId,cabling_,tTopo,false);
 
 
     //check data exists

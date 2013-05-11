@@ -91,7 +91,16 @@ RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
         engineName = cms.untracked.string('TRandom3')
     ),
     
+    mixSimCaloHits = cms.PSet(
+         initialSeed = cms.untracked.uint32(918273), 
+         engineName = cms.untracked.string('TRandom3')
+    ),     
 
+    mixRecoTracks = cms.PSet(
+         initialSeed = cms.untracked.uint32(918273), 
+         engineName = cms.untracked.string('TRandom3')
+    ),
+                                           
     famosSimHits = cms.PSet(
         initialSeed = cms.untracked.uint32(13579),
         engineName = cms.untracked.string('TRandom3')
@@ -154,7 +163,7 @@ RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
     # comment the line above and decomment the following one
     #   ,restoreFileName = cms.untracked.string('RandomEngineState.log')  
     # to reproduce events using the RandomEngineStateProducer (source excluded),
-    # comment the sourceSeed definition, decomment the following one
+    # decomment the following one
     #   ,restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
 )
 

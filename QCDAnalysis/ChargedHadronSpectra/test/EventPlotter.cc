@@ -33,9 +33,9 @@ class EventPlotter : public edm::EDAnalyzer
   public:
     explicit EventPlotter(const edm::ParameterSet& ps);
     ~EventPlotter();
-    virtual void beginRun(edm::Run & run,       const edm::EventSetup& es);
+    virtual void beginRun(const edm::Run & run,       const edm::EventSetup& es) override;
     virtual void endJob();
-    virtual void analyze (const edm::Event& ev, const edm::EventSetup& es);
+    virtual void analyze (const edm::Event& ev, const edm::EventSetup& es) override;
 
   private:
     // void printVZeros  (const edm::Event& ev, ofstream& file);
@@ -57,7 +57,7 @@ EventPlotter::~EventPlotter()
 }
 
 /*****************************************************************************/
-void EventPlotter::beginRun(edm::Run & run, const edm::EventSetup& es)
+void EventPlotter::beginRun(const edm::Run & run, const edm::EventSetup& es)
 {
   // Get magnetic field
   edm::ESHandle<MagneticField> magField;
@@ -157,10 +157,10 @@ void EventPlotter::analyze(const edm::Event& ev, const edm::EventSetup& es)
 
 //  PlotRecTracks theRecTracks(es,trackCollections,file);
   PlotRecTracks theRecTracks(es,trackProducer,file);
-  theRecTracks.printRecTracks(ev);
+  theRecTracks.printRecTracks(ev, es);
 
   PlotSimTracks theSimTracks(es,file);
-  theSimTracks.printSimTracks(ev);
+  theSimTracks.printSimTracks(ev, es);
 
   PlotEcalRecHits theEcalRecHits(es,file);
   theEcalRecHits.printEcalRecHits(ev);

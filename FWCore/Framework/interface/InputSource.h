@@ -51,9 +51,9 @@ Some examples of InputSource subclasses may be:
 #include "FWCore/Framework/interface/ProductRegistryHelper.h"
 
 #include "boost/shared_ptr.hpp"
-#include "boost/utility.hpp"
-#include "sigc++/signal.h"
+#include "FWCore/Utilities/interface/Signal.h"
 
+#include <memory>
 #include <string>
 
 namespace edm {
@@ -67,7 +67,7 @@ namespace edm {
     class MessageReceiverForSource;
   }
 
-  class InputSource : private ProductRegistryHelper, private boost::noncopyable {
+  class InputSource : private ProductRegistryHelper {
   public:
     enum ItemType {
       IsInvalid,
@@ -92,13 +92,14 @@ namespace edm {
     /// Destructor
     virtual ~InputSource();
 
+    InputSource(InputSource const&) = delete; // Disallow copying and moving
+    InputSource& operator=(InputSource const&) = delete; // Disallow copying and moving
+
     static void fillDescriptions(ConfigurationDescriptions& descriptions);
     static const std::string& baseType();
     static void fillDescription(ParameterSetDescription& desc);
     static void prevalidate(ConfigurationDescriptions& );
     
-
-
     ItemType nextItemType();
 
     /// Read next event
@@ -127,10 +128,10 @@ namespace edm {
     void readAndMergeLumi(boost::shared_ptr<LuminosityBlockPrincipal> lbp);
 
     /// Read next file
-    boost::shared_ptr<FileBlock> readFile();
+    std::unique_ptr<FileBlock> readFile();
 
     /// close current file
-    void closeFile(boost::shared_ptr<FileBlock>, bool cleaningUpAfterException);
+    void closeFile(FileBlock*, bool cleaningUpAfterException);
 
     /// Skip the number of events specified.
     /// Offset may be negative.
@@ -252,11 +253,15 @@ namespace edm {
     using ProductRegistryHelper::produces;
     using ProductRegistryHelper::typeLabelList;
 
-    class SourceSentry : private boost::noncopyable {
+    class SourceSentry {
     public:
-      typedef sigc::signal<void> Sig;
+      typedef signalslot::Signal<void()> Sig;
       SourceSentry(Sig& pre, Sig& post);
       ~SourceSentry();
+
+      SourceSentry(SourceSentry const&) = delete; // Disallow copying and moving
+      SourceSentry& operator=(SourceSentry const&) = delete; // Disallow copying and moving
+
     private:
       Sig& post_;
     };
@@ -289,13 +294,16 @@ namespace edm {
       SourceSentry sentry_;
     };
 
-    class FileCloseSentry : private boost::noncopyable {
+    class FileCloseSentry {
     public:
-      typedef sigc::signal<void> Sig;
+      typedef signalslot::Signal<void()> Sig;
       explicit FileCloseSentry(InputSource const& source);
       explicit FileCloseSentry(InputSource const& source, std::string const& lfn, bool primary);
       ~FileCloseSentry();
-    private:
+
+      FileCloseSentry(FileCloseSentry const&) = delete; // Disallow copying and moving
+      FileCloseSentry& operator=(FileCloseSentry const&) = delete; // Disallow copying and moving
+
       Sig& post_;
     };
 
@@ -358,7 +366,7 @@ namespace edm {
         boost::shared_ptr<LuminosityBlockPrincipal> lumiPrincipal);
     virtual EventPrincipal* readEvent_(EventPrincipal& eventPrincipal) = 0;
     virtual EventPrincipal* readIt(EventID const&, EventPrincipal& eventPrincipal);
-    virtual boost::shared_ptr<FileBlock> readFile_();
+    virtual std::unique_ptr<FileBlock> readFile_();
     virtual void closeFile_() {}
     virtual bool goToEvent_(EventID const& eventID);
     virtual void setRun(RunNumber_t r);
