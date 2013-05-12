@@ -479,23 +479,9 @@ void
 MessageLogger::preModule(const ModuleDescription& desc)
 {
   establishModule (desc,"");					// ChangeLog 13
-  moduleStack_.emplace_back(&desc);
 }
-
 void MessageLogger::postModule(const ModuleDescription& iDescription)
-{ 
-  // The moduleStack_ should never be empty, but lets check to be safe ...
-  if(moduleStack_.empty()) {
-    unEstablishModule (iDescription, "PostModule");
-  } else {
-    moduleStack_.pop_back();
-    if(moduleStack_.empty()) {
-      unEstablishModule (iDescription, "PostModule");
-    } else {
-      establishModule(*moduleStack_.back(), "");
-    }
-  }
-}
+{ unEstablishModule (iDescription, "PostModule"); }
 
 void
 MessageLogger::preModuleEndLumi(const ModuleDescription& desc)

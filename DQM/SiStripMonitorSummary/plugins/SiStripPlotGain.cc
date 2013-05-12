@@ -1,7 +1,9 @@
 #include "DQM/SiStripMonitorSummary/plugins/SiStripPlotGain.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 
 
 
@@ -38,20 +40,15 @@ SiStripPlotGain::beginRun(const edm::Run& run, const edm::EventSetup& es){
   edm::LogInfo("") << "[SiStripPlotGain::beginRun] cacheID " << cacheID << std::endl; 
   
   es.get<SiStripApvGainRcd>().get(Handle_);
-  DoAnalysis(es, *Handle_.product());
+  DoAnalysis(*Handle_.product());
 
 
 }
 
 void 
-SiStripPlotGain::DoAnalysis(const edm::EventSetup& es, const SiStripApvGain& gain){
+SiStripPlotGain::DoAnalysis(const SiStripApvGain& gain){
 
   edm::LogInfo("") << "[Doanalysis]";
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   std::vector<TH1F *>histos;
 
@@ -64,7 +61,7 @@ SiStripPlotGain::DoAnalysis(const edm::EventSetup& es, const SiStripApvGain& gai
 
   //Divide result by d
   for(;iter!=iterE;++iter){
-    getHistos(*iter,tTopo,histos);
+    getHistos(*iter,histos);
     SiStripApvGain::Range range=SiStripApvGain::Range(p.getFirstElement(iter),p.getLastElement(iter));
 
     edm::LogInfo("") << "[Doanalysis] detid " << *iter << " range " << range.second-range.first;
@@ -81,7 +78,7 @@ SiStripPlotGain::DoAnalysis(const edm::EventSetup& es, const SiStripApvGain& gai
 
 
 void
-SiStripPlotGain::getHistos(const uint32_t& detid, const TrackerTopology* tTopo, std::vector<TH1F*>& histos){
+SiStripPlotGain::getHistos(const uint32_t& detid,std::vector<TH1F*>& histos){
   
   histos.clear();
   
@@ -89,16 +86,16 @@ SiStripPlotGain::getHistos(const uint32_t& detid, const TrackerTopology* tTopo, 
   SiStripDetId a(detid);
   if ( a.subdetId() == 3 ){
     subdet=0;
-    component=tTopo->tibLayer(detid);
+    component=TIBDetId(detid).layer();
   } else if ( a.subdetId() == 4 ) {
     subdet=1;
-    component=tTopo->tidSide(detid)==2?tTopo->tidWheel(detid):tTopo->tidWheel(detid)+3;
+    component=TIDDetId(detid).side()==2?TIDDetId(detid).wheel():TIDDetId(detid).wheel()+3;
   } else if ( a.subdetId() == 5 ) {
     subdet=2;
-    component=tTopo->tobLayer(detid);
+    component=TOBDetId(detid).layer();
   } else if ( a.subdetId() == 6 ) {
     subdet=3;
-    component=tTopo->tecSide(detid)==2?tTopo->tecWheel(detid):tTopo->tecWheel(detid)+9;
+    component=TECDetId(detid).side()==2?TECDetId(detid).wheel():TECDetId(detid).wheel()+9;
   } 
   
   int index=100+subdet*100+component;

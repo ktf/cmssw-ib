@@ -23,13 +23,9 @@ using namespace std;
 /* ====================================================================== */
 
 /* static member definition */
-static AlgebraicMatrix initMatrix()  {
-  AlgebraicMatrix m( 2, 5, 0);
-  m[0][1]=1; 
-  return m;
-}
+bool DTSLRecCluster::isInitialized(false);
 
-const AlgebraicMatrix DTSLRecCluster::theProjectionMatrix = initMatrix();
+AlgebraicMatrix DTSLRecCluster::theProjectionMatrix;
 
 /* Constructor */ 
 DTSLRecCluster::DTSLRecCluster(const DTSuperLayerId id, const std::vector<DTRecHit1DPair>& pairs) :

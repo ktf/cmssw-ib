@@ -92,7 +92,10 @@ DTChamber* DTGeometryBuilderFromCondDB::buildChamber(const DetId& id,
   // width is along local X
   // length is along local Y
   // thickness is long local Z
-  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), new RectangularPlaneBounds(width, length, thickness) ));
+  RectangularPlaneBounds bound(width, length, thickness);
+  //  std::vector<double> tran(rig.tranStart(idt), rig.tranEnd(idt));
+  //  std::vector<double> rot(rig.rotStart(idt), rig.rotEnd(idt));
+  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), bound));
 
   DTChamber* chamber = new DTChamber(detId, surf);
 
@@ -111,8 +114,10 @@ DTGeometryBuilderFromCondDB::buildSuperLayer(DTChamber* chamber,
   float length = (*(rig.shapeStart(idt) + 2))/cm;    // z      dimension - constant 126.8 cm
   float thickness = (*(rig.shapeStart(idt) + 3))/cm; // radial thickness - almost constant about 5 cm
 
+  RectangularPlaneBounds bound(width, length, thickness);
+
   // Ok this is the slayer position...
-  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), new RectangularPlaneBounds(width, length, thickness) ));
+  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), bound));
 
   DTSuperLayer* slayer = new DTSuperLayer(slId, surf, chamber);
 
@@ -134,8 +139,10 @@ DTGeometryBuilderFromCondDB::buildLayer(DTSuperLayer* sl,
   float length = (*(rig.shapeStart(idt) + 2))/cm;    // z      dimension - constant 126.8 cm
   float thickness = (*(rig.shapeStart(idt) + 3))/cm; // radial thickness - almost constant about 20 cm
 
+  // define Bounds
+  RectangularPlaneBounds bound(width, length, thickness);
 
-  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), new RectangularPlaneBounds(width, length, thickness) ));
+  RCPPlane surf(plane(rig.tranStart(idt), rig.rotStart(idt), bound));//tran, rot, bound));
 
   // Loop on wires
   int firstWire=int(*(rig.shapeStart(idt) + 4 ));//par[4]);
@@ -155,7 +162,7 @@ DTGeometryBuilderFromCondDB::buildLayer(DTSuperLayer* sl,
 DTGeometryBuilderFromCondDB::RCPPlane 
 DTGeometryBuilderFromCondDB::plane(const vector<double>::const_iterator tranStart,
                                    const vector<double>::const_iterator rotStart,
-                                   Bounds * bounds) const {
+                                   const Bounds& bounds) const {
   // extract the position
   const Surface::PositionType posResult(*(tranStart), *(tranStart+1), *(tranStart+2));
   // now the rotation
@@ -163,5 +170,5 @@ DTGeometryBuilderFromCondDB::plane(const vector<double>::const_iterator tranStar
                                    *(rotStart+3), *(rotStart+4), *(rotStart+5),
                                    *(rotStart+6), *(rotStart+7), *(rotStart+8) );
 
-  return RCPPlane( new Plane( posResult, rotResult, bounds));
+  return RCPPlane( new BoundPlane( posResult, rotResult, bounds));
 }

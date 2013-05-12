@@ -31,15 +31,10 @@ SurveyInputDummy::SurveyInputDummy(const edm::ParameterSet& cfg):
 void SurveyInputDummy::analyze(const edm::Event&, const edm::EventSetup& setup)
 {
   if (theFirstEvent) {
-    //Retrieve tracker topology from geometry
-    edm::ESHandle<TrackerTopology> tTopoHandle;
-    setup.get<IdealGeometryRecord>().get(tTopoHandle);
-    const TrackerTopology* const tTopo = tTopoHandle.product();
-
     edm::ESHandle<TrackerGeometry> tracker;
     setup.get<TrackerDigiGeometryRecord>().get( tracker );
     
-    Alignable* ali = new AlignableTracker( &*tracker, tTopo );
+    Alignable* ali = new AlignableTracker( &*tracker );
     
     addSurveyInfo(ali);
     addComponent(ali);

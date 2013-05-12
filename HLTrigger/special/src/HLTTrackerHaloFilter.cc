@@ -10,9 +10,6 @@
 ///////////////////////////////////////////////////////
 
 #include "HLTrigger/special/interface/HLTTrackerHaloFilter.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
-
 
 //
 // constructors and destructor
@@ -40,12 +37,6 @@ HLTTrackerHaloFilter::~HLTTrackerHaloFilter()
 // ------------ method called to produce the data  ------------
 bool HLTTrackerHaloFilter::hltFilter(edm::Event& event, const edm::EventSetup& iSetup, trigger::TriggerFilterObjectWithRefs & filterproduct)
 {
-
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
   // All HLT filters must create and fill an HLT filter object,
   // recording any reconstructed physics objects satisfying (or not)
   // this HLT filter, and place it in the Event.
@@ -83,6 +74,11 @@ bool HLTTrackerHaloFilter::hltFilter(edm::Event& event, const edm::EventSetup& i
 
   int npeakm        = 0;
   int npeakp        = 0;
+
+  int w_id;
+  int p_id;
+  int r_id;
+  TECDetId id;
 
   edm::RefGetter<SiStripCluster>::const_iterator iregion = refgetter->begin();
 
@@ -123,19 +119,21 @@ bool HLTTrackerHaloFilter::hltFilter(edm::Event& event, const edm::EventSetup& i
     {
       if (iclus->geographicalId()%2 == 1) continue;
 
+      id = TECDetId(iclus->geographicalId());
+
       // We skip a a part of the clusters, to restore 
       // some symmetry between rings  
-      if (tTopo->tecRing(iclus->geographicalId())<3 ||tTopo->tecIsStereo(iclus->geographicalId())) continue;
+      if (id.ringNumber()<3 || id.isStereo()) continue;
 
       ++n_total_clus;
 
-      int r_id = tTopo->tecRing(iclus->geographicalId())-3;
-      int p_id = tTopo->tecPetalNumber(iclus->geographicalId())-1;
-      int w_id = tTopo->tecWheel(iclus->geographicalId())-1;
+      r_id = id.ringNumber()-3;
+      p_id = id.petalNumber()-1;
+      w_id = id.wheelNumber()-1;
     
       // Then we do accumulations and cuts 'on the fly'
 
-      if (tTopo->tecSide(iclus->geographicalId())==1) // Minus side (BEAM2)
+      if (id.side()==1) // Minus side (BEAM2)
       {
 	++n_total_clusm;
 

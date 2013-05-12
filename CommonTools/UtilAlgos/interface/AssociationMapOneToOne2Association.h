@@ -4,7 +4,7 @@
  *
  * \author Luca Lista, INFN
  *
- * \version $Id: AssociationMapOneToOne2Association.h,v 1.3 2013/02/28 00:34:12 wmtan Exp $
+ * \version $Id: AssociationMapOneToOne2Association.h,v 1.2 2010/02/20 20:55:14 wmtan Exp $
  */
 
 #include "DataFormats/Common/interface/AssociationMap.h"
@@ -20,7 +20,7 @@ class AssociationMapOneToOne2Association : public edm::EDProducer {
  private:
   typedef edm::AssociationMap<edm::OneToOne<CKey, CVal> > am_t;
   typedef edm::Association<CVal> as_t;
-  void produce(edm::Event&, const edm::EventSetup&) override;
+  void produce(edm::Event&, const edm::EventSetup&);
   edm::InputTag am_;
 };
 

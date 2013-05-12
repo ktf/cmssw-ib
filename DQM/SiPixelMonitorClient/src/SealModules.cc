@@ -1,3 +1,4 @@
+#include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ModuleFactory.h"
 #include "DQM/SiPixelMonitorClient/interface/SiPixelEDAClient.h"

@@ -6,9 +6,9 @@
  * 
  * \author Giovanni Petrucciani 
  *
- * \version $Revision: 1.7 $
+ * \version $Revision: 1.6 $
  *
- * $Id: TrackMultiSelector.h,v 1.7 2013/02/27 13:28:30 muzaffar Exp $
+ * $Id: TrackMultiSelector.h,v 1.6 2010/02/20 21:01:20 wmtan Exp $
  *
  */
 
@@ -55,7 +55,7 @@ namespace reco { namespace modules {
         private:
             typedef math::XYZPoint Point;
             /// process one event
-            void produce( edm::Event& evt, const edm::EventSetup& es ) override;
+            void produce( edm::Event& evt, const edm::EventSetup& es ) ;
             /// return class, or -1 if rejected
             short select ( const reco::Track &tk, const reco::BeamSpot &beamSpot, const std::vector<Point> &points);
             void selectVertices ( const reco::VertexCollection &vtxs, std::vector<Point> &points);

@@ -39,16 +39,15 @@
 #include "Riostream.h"
 #include "TRandom2.h"
 
-class TrackerTopology;
 
 class HitEff : public edm::EDAnalyzer {
  public:  
   explicit HitEff(const edm::ParameterSet& conf);
   double checkConsistency(StripClusterParameterEstimator::LocalValues parameters, double xx, double xerr);
-  bool isDoubleSided(unsigned int iidd, const TrackerTopology* tTopo) const;
+  bool isDoubleSided(unsigned int iidd) const;
   bool check2DPartner(unsigned int iidd, std::vector<TrajectoryMeasurement> traj);
   virtual ~HitEff();
-  unsigned int checkLayer(unsigned int iidd, const TrackerTopology* tTopo);
+  unsigned int checkLayer(unsigned int iidd);
 
  private:
   virtual void beginJob();

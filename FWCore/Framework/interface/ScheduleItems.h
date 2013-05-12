@@ -5,6 +5,7 @@
 #include "FWCore/ServiceRegistry/interface/ServiceToken.h"
 
 #include "boost/shared_ptr.hpp"
+#include "boost/utility.hpp"
 
 #include <memory>
 #include <vector>
@@ -14,20 +15,16 @@ namespace edm {
   class ActivityRegistry;
   class BranchIDListHelper;
   class CommonParams;
-  class OutputModule;
   class ParameterSet;
   class ProcessConfiguration;
   class ProductRegistry;
   class Schedule;
   class SignallingProductRegistry;
 
-  struct ScheduleItems {
+  struct ScheduleItems : private boost::noncopyable {
     ScheduleItems();
 
-    ScheduleItems(ProductRegistry const& preg, BranchIDListHelper const& branchIDListHelper, OutputModule const& om);
-
-    ScheduleItems(ScheduleItems const&) = delete; // Disallow copying and moving
-    ScheduleItems& operator=(ScheduleItems const&) = delete; // Disallow copying and moving
+    ScheduleItems(ProductRegistry const& preg, BranchIDListHelper const& branchIDListHelper);
 
     ServiceToken
     initServices(std::vector<ParameterSet>& servicePSets,
@@ -50,9 +47,9 @@ namespace edm {
     clear();
 
     boost::shared_ptr<ActivityRegistry>           actReg_;
-    std::unique_ptr<SignallingProductRegistry>    preg_;
+    boost::shared_ptr<SignallingProductRegistry>  preg_;
     boost::shared_ptr<BranchIDListHelper>         branchIDListHelper_;
-    std::unique_ptr<ActionTable const>            act_table_;
+    boost::shared_ptr<ActionTable const>          act_table_;
     boost::shared_ptr<ProcessConfiguration>       processConfiguration_;
   };
 }

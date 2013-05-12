@@ -8,7 +8,7 @@
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
-class EcalBarrelTopology GCC11_FINAL : public CaloSubdetectorTopology
+class EcalBarrelTopology : public CaloSubdetectorTopology
 {
 
  public:
@@ -23,13 +23,10 @@ class EcalBarrelTopology GCC11_FINAL : public CaloSubdetectorTopology
     {
     }
   
- /// move the Topology north (increment iphi)
-  virtual DetId  goNorth(const DetId& id) const {
-    return incrementIphi(EBDetId(id));
-  }
+  /// move the Topology north (increment iphi)
   virtual std::vector<DetId> north(const DetId& id) const
     { 
-      EBDetId nextId=goNorth(id);
+      EBDetId nextId(incrementIphi(EBDetId(id)));
       std::vector<DetId> vNeighborsDetId;
       if (! (nextId==EBDetId(0)))
 	vNeighborsDetId.push_back(DetId(nextId.rawId()));
@@ -37,12 +34,9 @@ class EcalBarrelTopology GCC11_FINAL : public CaloSubdetectorTopology
     }
 
   /// move the Topology south (decrement iphi)
-  virtual DetId goSouth(const DetId& id) const {
-    return decrementIphi(EBDetId(id));
-  }
   virtual std::vector<DetId> south(const DetId& id) const
     { 
-      EBDetId nextId=goSouth(id);
+      EBDetId nextId(decrementIphi(EBDetId(id)));
       std::vector<DetId> vNeighborsDetId;
       if (! (nextId==EBDetId(0)))
 	vNeighborsDetId.push_back(DetId(nextId.rawId()));
@@ -50,12 +44,9 @@ class EcalBarrelTopology GCC11_FINAL : public CaloSubdetectorTopology
     }
 
   /// move the Topology east (negative ieta)
-  virtual DetId  goEast(const DetId& id) const {
-    return decrementIeta(EBDetId(id));
-  }
   virtual std::vector<DetId> east(const DetId& id) const
     { 
-      EBDetId nextId=goEast(id);
+      EBDetId nextId(decrementIeta(EBDetId(id)));
       std::vector<DetId> vNeighborsDetId;
       if (! (nextId==EBDetId(0)))
 	vNeighborsDetId.push_back(DetId(nextId.rawId()));
@@ -63,18 +54,14 @@ class EcalBarrelTopology GCC11_FINAL : public CaloSubdetectorTopology
     }
 
   /// move the Topology west (positive ieta)
-  virtual DetId  goWest(const DetId& id) const {
-    return incrementIeta(EBDetId(id));
-  }
   virtual std::vector<DetId> west(const DetId& id) const
     { 
-      EBDetId nextId=goWest(id);
+      EBDetId nextId(incrementIeta(EBDetId(id)));
       std::vector<DetId> vNeighborsDetId;
       if (! (nextId==EBDetId(0)))
 	vNeighborsDetId.push_back(DetId(nextId.rawId()));
       return vNeighborsDetId;
     }
-  
   
   virtual std::vector<DetId> up(const DetId& /*id*/) const
     {

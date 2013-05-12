@@ -30,18 +30,18 @@ void EnergyLossUpdator::compute (const TrajectoryStateOnSurface& TSoS,
   //
   // Now get information on medium
   //
-  if (surface.mediumProperties().isValid()) {
+  if (surface.mediumProperties()) {
     //
     // Bethe-Bloch
     //
     if ( mass()>0.001 )
-      computeBetheBloch(TSoS.localMomentum(),surface.mediumProperties(),effect);
+      computeBetheBloch(TSoS.localMomentum(),*surface.mediumProperties(),effect);
     //
     // Special treatment for electrons (currently rather crude
     // distinction using mass)
     //
     else
-      computeElectrons(TSoS.localMomentum(),surface.mediumProperties(),
+      computeElectrons(TSoS.localMomentum(),*surface.mediumProperties(),
 		       propDir,effect);
     if (propDir != alongMomentum) effect.deltaP *= -1.;
   }
@@ -67,8 +67,8 @@ EnergyLossUpdator::computeBetheBloch (const LocalVector& localP,
 
   constexpr Float emass = 0.511e-3;
   constexpr Float poti = 16.e-9 * 10.75; // = 16 eV * Z**0.9, for Si Z=14
-  const Float eplasma = 28.816e-9 * sqrt(2.33*0.498); // 28.816 eV * sqrt(rho*(Z/A)) for Si
-  const Float delta0 = 2*log(eplasma/poti) - 1.;
+  constexpr Float eplasma = 28.816e-9 * sqrt(2.33*0.498); // 28.816 eV * sqrt(rho*(Z/A)) for Si
+  constexpr Float delta0 = 2*log(eplasma/poti) - 1.;
 
   // calculate general physics things
   Float im2 = Float(1.)/m2;
@@ -113,7 +113,7 @@ EnergyLossUpdator::computeElectrons (const LocalVector& localP,
   // Energy loss and variance according to Bethe and Heitler, see also
   // Comp. Phys. Comm. 79 (1994) 157. 
   //
-  const float l3ol2 = std::log(3.)/std::log(2.);
+  constexpr float l3ol2 = std::log(3.)/std::log(2.);
   float z = unsafe_expf<3>(-normalisedPath);
   float varz = unsafe_expf<3>(-normalisedPath*l3ol2)- 
                 z*z;

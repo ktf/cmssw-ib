@@ -33,7 +33,7 @@ ExpressionVar::delStorage(edm::ObjectWithDict &obj) {
             void **p = static_cast<void **>(obj.address());
             delete p;
         } else {
-            //std::cout << "Calling Destruct on a " << obj.typeOf().qualifiedName() << std::endl;
+            //std::cout << "Calling Destruct on a " << obj.typeOf().name(edm::TypeNameHandling::Qualified) << std::endl;
             obj.typeOf().deallocate(obj.address());
         }
     }
@@ -44,8 +44,10 @@ void ExpressionVar::initObjects_() {
     std::vector<MethodInvoker>::const_iterator it = methods_.begin(), ed = methods_.end();
     std::vector<edm::ObjectWithDict>::iterator itobj = objects_.begin();
     for (; it != ed; ++it, ++itobj) {
+       //remove any typedefs if any. If we do not do this it appears that we get a memory leak
+       // because typedefs do not have 'destructors'
        if(it->isFunction()) {
-          edm::TypeWithDict retType = it->method().finalReturnType();
+          edm::TypeWithDict retType = it->method().returnType().finalType();
           needsDestructor_.push_back(makeStorage(*itobj, retType));
        } else {
           *itobj = edm::ObjectWithDict();
@@ -59,14 +61,14 @@ ExpressionVar::makeStorage(edm::ObjectWithDict &obj, const edm::TypeWithDict &re
     bool ret = false;
     static edm::TypeWithDict tVoid(edm::TypeWithDict::byName("void"));
     if (retType == tVoid) {
-        obj = edm::ObjectWithDict::byType(tVoid);
+        obj = edm::ObjectWithDict(tVoid);
     } else if (retType.isPointer() || retType.isReference()) {
         // in this case, I have to allocate a void *, not an object!
         obj = edm::ObjectWithDict(retType, new void *);
     } else {
         obj = edm::ObjectWithDict(retType, retType.allocate());
         ret = retType.isClass();
-        //std::cout << "ExpressionVar: reserved memory at "  << obj.address() << " for a " << retType.qualifiedName() << " returned by " << member.name() << std::endl;
+        //std::cout << "ExpressionVar: reserved memory at "  << obj.address() << " for a " << retType.name(edm::TypeNameHandling::Qualified) << " returned by " << member.name() << std::endl;
     }
     return ret;
 }

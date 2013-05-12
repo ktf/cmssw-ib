@@ -5,8 +5,10 @@
 #include "CalibFormats/SiStripObjects/interface/SiStripDetCabling.h"
 
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 
 #include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
 #include "DQM/SiStripMonitorClient/interface/SiStripUtility.h"
@@ -102,17 +104,15 @@ void SiStripActionExecutor::createSummaryOffline(DQMStore* dqm_store) {
 // -- create tracker map
 //
 void SiStripActionExecutor::createTkMap(const edm::ParameterSet & tkmapPset, 
-					DQMStore* dqm_store, std::string& map_type,
-                                        const edm::EventSetup& eSetup) {
-  if (tkMapCreator_) tkMapCreator_->create(tkmapPset, dqm_store, map_type, eSetup);
+					DQMStore* dqm_store, std::string& map_type) {
+  if (tkMapCreator_) tkMapCreator_->create(tkmapPset, dqm_store, map_type);
 }
 //
 // -- create tracker map for offline
 //
 void SiStripActionExecutor::createOfflineTkMap(const edm::ParameterSet & tkmapPset,
-					DQMStore* dqm_store, std::string& map_type,
-                                        const edm::EventSetup& eSetup) {
-  if (tkMapCreator_) tkMapCreator_->createForOffline(tkmapPset, dqm_store, map_type, eSetup);
+					       DQMStore* dqm_store, std::string& map_type) {
+  if (tkMapCreator_) tkMapCreator_->createForOffline(tkmapPset, dqm_store, map_type);
 }
 
 //
@@ -131,8 +131,8 @@ void SiStripActionExecutor::fillDummyStatus(){
 //
 // -- Fill Status
 //
-void SiStripActionExecutor::fillStatus(DQMStore* dqm_store, const edm::ESHandle<SiStripDetCabling>& detcabling, const edm::EventSetup& eSetup) {
-  qualityChecker_->fillStatus(dqm_store, detcabling, eSetup);
+void SiStripActionExecutor::fillStatus(DQMStore* dqm_store, const edm::ESHandle<SiStripDetCabling>& detcabling) {
+  qualityChecker_->fillStatus(dqm_store, detcabling);
 }
 //
 // -- Fill Lumi Status

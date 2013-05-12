@@ -17,7 +17,7 @@ public:
     src_( cfg.getParameter<InputTag>( "src" ) ) {
   }
 private:
-  void analyze( const Event & evt, const EventSetup&) override {
+  void analyze( const Event & evt, const EventSetup & ) {
     Handle<CandidateCollection> gen;
     evt.getByLabel( src_, gen );
     size_t n = gen->size();
@@ -53,6 +53,5 @@ private:
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE( TestGenParticleCandidates );
-
 
 

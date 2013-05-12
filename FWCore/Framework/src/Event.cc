@@ -12,8 +12,6 @@
 
 namespace edm {
 
-  std::string const Event::emptyString_;
-
   Event::Event(EventPrincipal& ep, ModuleDescription const& md) :
       provRecorder_(ep, md),
       aux_(ep.aux()),
@@ -26,12 +24,6 @@ namespace edm {
    // anything left here must be the result of a failure
    // let's record them as failed attempts in the event principal
     for_all(putProducts_, principal_get_adapter_detail::deleter());
-  }
-
-  void
-  Event::setConsumer(EDConsumerBase const* iConsumer) {
-    provRecorder_.setConsumer(iConsumer);
-    const_cast<LuminosityBlock*>(luminosityBlock_.get())->setConsumer(iConsumer);
   }
 
   EventPrincipal&

@@ -19,10 +19,8 @@
 
 #include <iostream>
 
-#include "DataFormats/Common/interface/IntValues.h"
+#include "DataFormats/Common/test/IntValues.h"
 #include <typeinfo>
-
-#include "Cintex/Cintex.h"
 
 using namespace edm;
 using namespace test_with_dictionaries;
@@ -36,7 +34,7 @@ class testPtr: public CppUnit::TestFixture {
 
    CPPUNIT_TEST_SUITE_END();
 public:
-   void setUp(){ROOT::Cintex::Cintex::Enable();}
+      void setUp(){}
    void tearDown(){}
 
    void constructTest();

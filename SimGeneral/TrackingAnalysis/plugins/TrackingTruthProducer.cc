@@ -1,9 +1,13 @@
 
 #include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -13,8 +17,6 @@
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingVertex.h"
 
 #include "SimGeneral/TrackingAnalysis/interface/TrackingTruthProducer.h"
-
-#include "FWCore/Framework/interface/ESHandle.h"
 
 typedef edm::Ref<edm::HepMCProduct, HepMC::GenParticle > GenParticleRef;
 typedef edm::Ref<edm::HepMCProduct, HepMC::GenVertex >   GenVertexRef;
@@ -33,7 +35,6 @@ TrackingTruthProducer::TrackingTruthProducer(const edm::ParameterSet & config) :
     volumeZ_                = config.getParameter<double>("volumeZ");
     mergedBremsstrahlung_   = config.getParameter<bool>("mergedBremsstrahlung");
     removeDeadModules_      = config.getParameter<bool>("removeDeadModules");
-    mixLabel_               = config.getParameter<std::string>("mixLabel");
     simHitLabel_            = config.getParameter<std::string>("simHitLabel");
 
     // Initialize selection for building TrackingParticles
@@ -95,10 +96,6 @@ TrackingTruthProducer::TrackingTruthProducer(const edm::ParameterSet & config) :
 
 void TrackingTruthProducer::produce(edm::Event &event, const edm::EventSetup & setup)
 {
-  edm::ESHandle<TrackerTopology> tTopoHand;
-  setup.get<IdealGeometryRecord>().get(tTopoHand);
-  const TrackerTopology *tTopo=tTopoHand.product();
-
     // Clean the list of hepmc products
     hepMCProducts_.clear();
 
@@ -130,14 +127,14 @@ void TrackingTruthProducer::produce(edm::Event &event, const edm::EventSetup & s
 
     // Collect all the simtracks from the crossing frame
     edm::Handle<CrossingFrame<SimTrack> > cfSimTracks;
-    event.getByLabel(mixLabel_, simHitLabel_, cfSimTracks);
+    event.getByLabel("mix", simHitLabel_, cfSimTracks);
 
     // Create a mix collection from one simtrack collection
     simTracks_ = std::auto_ptr<MixCollection<SimTrack> >( new MixCollection<SimTrack>(cfSimTracks.product()) );
 
     // Collect all the simvertex from the crossing frame
     edm::Handle<CrossingFrame<SimVertex> > cfSimVertexes;
-    event.getByLabel(mixLabel_, simHitLabel_, cfSimVertexes);
+    event.getByLabel("mix", simHitLabel_, cfSimVertexes);
 
     // Create a mix collection from one simvertex collection
     simVertexes_ = std::auto_ptr<MixCollection<SimVertex> >( new MixCollection<SimVertex>(cfSimVertexes.product()) );
@@ -173,7 +170,7 @@ void TrackingTruthProducer::produce(edm::Event &event, const edm::EventSetup & s
     // Create a map between vertexId and vertex index
     associator(simVertexes_, vertexIdToIndex_);
 
-    createTrackingTruth(tTopo);
+    createTrackingTruth();
 
     if (mergedBremsstrahlung_)
     {
@@ -481,7 +478,7 @@ bool TrackingTruthProducer::isBremsstrahlungVertex(
 }
 
 
-void TrackingTruthProducer::createTrackingTruth(const TrackerTopology *tTopo)
+void TrackingTruthProducer::createTrackingTruth()
 {
     // Reset the event counter (use for define vertexId)
     eventIdCounter_.clear();
@@ -514,7 +511,7 @@ void TrackingTruthProducer::createTrackingTruth(const TrackerTopology *tTopo)
 
         // Set a bare tp (only with the psimhit) with a given simtrack
         // the function return true if it is tracable
-        if ( setTrackingParticle(simTrack, trackingParticle, tTopo) )
+        if ( setTrackingParticle(simTrack, trackingParticle) )
         {
             // Follows the path upward recovering the history of the particle
             SimTrack const * currentSimTrack = & simTrack;
@@ -529,7 +526,7 @@ void TrackingTruthProducer::createTrackingTruth(const TrackerTopology *tTopo)
                 // and add it to the list of parent tracks of previous vertex
                 if (trackingParticleIndex >= 0)
                 {
-		  setTrackingParticle(*currentSimTrack, trackingParticle,tTopo);
+                    setTrackingParticle(*currentSimTrack, trackingParticle);
 
                     // Set the tp index to its new value
                     trackingParticleIndex = trackingParticles_->size();
@@ -674,8 +671,7 @@ void TrackingTruthProducer::createTrackingTruth(const TrackerTopology *tTopo)
 
 bool TrackingTruthProducer::setTrackingParticle(
     SimTrack const & simTrack,
-    TrackingParticle & trackingParticle,
-    const TrackerTopology *tTopo
+    TrackingParticle & trackingParticle
 )
 {
     // Get the eventid associated to the track
@@ -768,9 +764,7 @@ bool TrackingTruthProducer::setTrackingParticle(
             DetId detectorId = DetId(detectorIdIndex);
             oldLayer = newLayer;
             oldDetector = newDetector;
-            newLayer = 0;
-	    if ( detectorId.det() == DetId::Tracker ) newLayer=tTopo->layer(detectorId);
-
+            newLayer = LayerFromDetid(detectorIdIndex);
             newDetector = detectorId.subdetId();
 
             // Count hits using layers for glued detectors
@@ -937,5 +931,49 @@ void TrackingTruthProducer::addCloseGenVertexes(TrackingVertex & trackingVertex)
 }
 
 
+int TrackingTruthProducer::LayerFromDetid(const unsigned int & detid)
+{
+    DetId detId = DetId(detid);
+
+    if ( detId.det() != DetId::Tracker ) return 0;
+
+    int layerNumber=0;
+    unsigned int subdetId = static_cast<unsigned int>(detId.subdetId());
+
+    if ( subdetId == StripSubdetector::TIB)
+    {
+        TIBDetId tibid(detId.rawId());
+        layerNumber = tibid.layer();
+    }
+    else if ( subdetId ==  StripSubdetector::TOB )
+    {
+        TOBDetId tobid(detId.rawId());
+        layerNumber = tobid.layer();
+    }
+    else if ( subdetId ==  StripSubdetector::TID)
+    {
+        TIDDetId tidid(detId.rawId());
+        layerNumber = tidid.wheel();
+    }
+    else if ( subdetId ==  StripSubdetector::TEC )
+    {
+        TECDetId tecid(detId.rawId());
+        layerNumber = tecid.wheel();
+    }
+    else if ( subdetId ==  PixelSubdetector::PixelBarrel )
+    {
+        PXBDetId pxbid(detId.rawId());
+        layerNumber = pxbid.layer();
+    }
+    else if ( subdetId ==  PixelSubdetector::PixelEndcap )
+    {
+        PXFDetId pxfid(detId.rawId());
+        layerNumber = pxfid.disk();
+    }
+    else
+        edm::LogVerbatim("TrackingTruthProducer") << "Unknown subdetid: " <<  subdetId;
+
+    return layerNumber;
+}
 
 DEFINE_FWK_MODULE(TrackingTruthProducer);

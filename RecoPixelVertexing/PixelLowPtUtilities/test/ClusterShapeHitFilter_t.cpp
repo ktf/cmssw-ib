@@ -6,10 +6,8 @@
 #include <iostream>
 #include <cassert>
 int main() {
-  const std::string use_PixelShapeFile("RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape.par");
 
   ClusterShapeHitFilter filter;
-  filter.PixelShapeFile = &use_PixelShapeFile;
   filter.loadPixelLimits();
   filter.loadStripLimits();
 

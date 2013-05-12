@@ -6,7 +6,11 @@ using namespace reco::method;
 
 namespace reco {
   edm::TypeWithDict returnType(const edm::FunctionWithDict & mem) {
-    return mem.finalReturnType();
+    edm::TypeWithDict t = mem.returnType();
+    if(t) {
+       while(t.isTypedef()) t = t.toType();
+    }
+    return t;
   }
 
   TypeCode returnTypeCode(const edm::FunctionWithDict & mem) {

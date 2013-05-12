@@ -64,8 +64,9 @@ class SiPixelQualityHistory : public edm::EDAnalyzer {
 
    private:
       virtual void beginJob() ;
-      virtual void beginRun(const edm::Run&, const edm::EventSetup&) override;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void beginRun(const edm::Run&, const edm::EventSetup&) ;
+      virtual void endRun(const edm::Run&, const edm::EventSetup&) ;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
 
       // ----------member data ---------------------------
@@ -243,6 +244,11 @@ SiPixelQualityHistory::beginRun(const edm::Run& iRun, const edm::EventSetup& iSe
   }
   
 }
+
+void 
+SiPixelQualityHistory::endRun(const edm::Run& iRun, const edm::EventSetup&)
+{}
+
 
 // ------------ method called once each job just before starting event loop  ------------
 void 

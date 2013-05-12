@@ -23,7 +23,6 @@ private:
 
   std::string geometryType;
   //Name of Collection used for create the XF 
-  std::string mix_;
   std::string collection_for_XF;
 };
 

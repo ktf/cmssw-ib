@@ -2,15 +2,13 @@
  *  
  *  See header file for description of class
  *
- *  $Date: 2013/01/03 23:50:06 $
- *  $Revision: 1.22 $
+ *  $Date: 2012/11/02 14:17:28 $
+ *  $Revision: 1.20 $
  *  \author M. Strang SUNY-Buffalo
  */
 
 #include "Validation/GlobalDigis/interface/GlobalDigisAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 GlobalDigisAnalyzer::GlobalDigisAnalyzer(const edm::ParameterSet& iPSet) :
   fName(""), verbosity(0), frequency(0), label(""), getAllProvenances(false),
@@ -1166,12 +1164,6 @@ void GlobalDigisAnalyzer::fillHCal(const edm::Event& iEvent,
 void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent, 
 				  const edm::EventSetup& iSetup)
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
-
-
   std::string MsgLoggerCat = "GlobalDigisAnalyzer_fillTrk";
   
   TString eventout;
@@ -1201,22 +1193,22 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get TIB
       if (detId.subdetId() == sdSiTIB) {
-	
+	TIBDetId tibid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nStripBrl;
-	  if (tTopo->tibLayer(id) == 1) {
+	  if (tibid.layer() == 1) {
 	    mehSiStripADC[0]->Fill((*iter).adc());
 	    mehSiStripStrip[0]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tibLayer(id) == 2) {
+	  if (tibid.layer() == 2) {
 	    mehSiStripADC[1]->Fill((*iter).adc());
 	    mehSiStripStrip[1]->Fill((*iter).strip());
 	  }	
-	  if (tTopo->tibLayer(id) == 3) {
+	  if (tibid.layer() == 3) {
 	    mehSiStripADC[2]->Fill((*iter).adc());
 	    mehSiStripStrip[2]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tibLayer(id) == 4) {
+	  if (tibid.layer() == 4) {
 	    mehSiStripADC[3]->Fill((*iter).adc());
 	    mehSiStripStrip[3]->Fill((*iter).strip());
 	  }
@@ -1225,22 +1217,22 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get TOB
       if (detId.subdetId() == sdSiTOB) {
-	
+	TOBDetId tobid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nStripBrl;
-	  if (tTopo->tobLayer(id) == 1) {
+	  if (tobid.layer() == 1) {
 	    mehSiStripADC[4]->Fill((*iter).adc());
 	    mehSiStripStrip[4]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tobLayer(id) == 2) {
+	  if (tobid.layer() == 2) {
 	    mehSiStripADC[5]->Fill((*iter).adc());
 	    mehSiStripStrip[5]->Fill((*iter).strip());
 	  }	
-	  if (tTopo->tobLayer(id) == 3) {
+	  if (tobid.layer() == 3) {
 	    mehSiStripADC[6]->Fill((*iter).adc());
 	    mehSiStripStrip[6]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tobLayer(id) == 4) {
+	  if (tobid.layer() == 4) {
 	    mehSiStripADC[7]->Fill((*iter).adc());
 	    mehSiStripStrip[7]->Fill((*iter).strip());
 	  }
@@ -1249,18 +1241,18 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get TID
       if (detId.subdetId() == sdSiTID) {
-	
+	TIDDetId tidid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nStripFwd;
-	  if (tTopo->tidWheel(id) == 1) {
+	  if (tidid.wheel() == 1) {
 	    mehSiStripADC[8]->Fill((*iter).adc());
 	    mehSiStripStrip[8]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tidWheel(id) == 2) {
+	  if (tidid.wheel() == 2) {
 	    mehSiStripADC[9]->Fill((*iter).adc());
 	    mehSiStripStrip[9]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tidWheel(id) == 3) {
+	  if (tidid.wheel() == 3) {
 	    mehSiStripADC[10]->Fill((*iter).adc());
 	    mehSiStripStrip[10]->Fill((*iter).strip());
 	  }
@@ -1269,38 +1261,38 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get TEC
       if (detId.subdetId() == sdSiTEC) {
-	
+	TECDetId tecid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nStripFwd;
-	  if (tTopo->tecWheel(id) == 1) {
+	  if (tecid.wheel() == 1) {
 	    mehSiStripADC[11]->Fill((*iter).adc());
 	    mehSiStripStrip[11]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 2) {
+	  if (tecid.wheel() == 2) {
 	    mehSiStripADC[12]->Fill((*iter).adc());
 	    mehSiStripStrip[12]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 3) {
+	  if (tecid.wheel() == 3) {
 	    mehSiStripADC[13]->Fill((*iter).adc());
 	    mehSiStripStrip[13]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 4) {
+	  if (tecid.wheel() == 4) {
 	    mehSiStripADC[14]->Fill((*iter).adc());
 	    mehSiStripStrip[14]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 5) {
+	  if (tecid.wheel() == 5) {
 	    mehSiStripADC[15]->Fill((*iter).adc());
 	    mehSiStripStrip[15]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 6) {
+	  if (tecid.wheel() == 6) {
 	    mehSiStripADC[16]->Fill((*iter).adc());
 	    mehSiStripStrip[16]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 7) {
+	  if (tecid.wheel() == 7) {
 	    mehSiStripADC[17]->Fill((*iter).adc());
 	    mehSiStripStrip[17]->Fill((*iter).strip());
 	  }
-	  if (tTopo->tecWheel(id) == 8) {
+	  if (tecid.wheel() == 8) {
 	    mehSiStripADC[18]->Fill((*iter).adc());
 	    mehSiStripStrip[18]->Fill((*iter).strip());
 	  }
@@ -1347,20 +1339,20 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get Barrel pixels
       if (detId.subdetId() == sdPxlBrl) {
-	
+	PXBDetId bdetid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nPxlBrl;
-	  if (tTopo->pxbLayer(id) == 1) {
+	  if (bdetid.layer() == 1) {
 	    mehSiPixelADC[0]->Fill((*iter).adc());
 	    mehSiPixelRow[0]->Fill((*iter).row());
 	    mehSiPixelCol[0]->Fill((*iter).column());
 	  }
-	  if (tTopo->pxbLayer(id) == 2) {
+	  if (bdetid.layer() == 2) {
 	    mehSiPixelADC[1]->Fill((*iter).adc());
 	    mehSiPixelRow[1]->Fill((*iter).row());
 	    mehSiPixelCol[1]->Fill((*iter).column());
 	  }
-	  if (tTopo->pxbLayer(id) == 3) {
+	  if (bdetid.layer() == 3) {
 	    mehSiPixelADC[2]->Fill((*iter).adc());
 	    mehSiPixelRow[2]->Fill((*iter).row());
 	    mehSiPixelCol[2]->Fill((*iter).column());
@@ -1370,29 +1362,29 @@ void GlobalDigisAnalyzer::fillTrk(const edm::Event& iEvent,
       
       // get Forward pixels
       if (detId.subdetId() == sdPxlFwd) {
-	
+	PXFDetId fdetid(id);
 	for (iter = begin; iter != end; ++iter) {
 	  ++nPxlFwd;
-	  if (tTopo->pxfDisk(id) == 1) {
-	    if (tTopo->pxfSide(id) == 1) {
+	  if (fdetid.disk() == 1) {
+	    if (fdetid.side() == 1) {
 	      mehSiPixelADC[4]->Fill((*iter).adc());
 	      mehSiPixelRow[4]->Fill((*iter).row());
 	      mehSiPixelCol[4]->Fill((*iter).column());
 	    }
-	    if (tTopo->pxfSide(id) == 2) {
+	    if (fdetid.side() == 2) {
 	      mehSiPixelADC[3]->Fill((*iter).adc());
 	      mehSiPixelRow[3]->Fill((*iter).row());
 	      mehSiPixelCol[3]->Fill((*iter).column());
 	    }
 	  }
-	  if (tTopo->pxfDisk(id) == 2) {
-	    if (tTopo->pxfSide(id) == 1) {
+	  if (fdetid.disk() == 2) {
+	    if (fdetid.side() == 1) {
 	      
 	      mehSiPixelADC[6]->Fill((*iter).adc());
 	      mehSiPixelRow[6]->Fill((*iter).row());
 	      mehSiPixelCol[6]->Fill((*iter).column());
 	    }
-	    if (tTopo->pxfSide(id) == 2) {
+	    if (fdetid.side() == 2) {
 	      mehSiPixelADC[5]->Fill((*iter).adc());
 	      mehSiPixelRow[5]->Fill((*iter).row());
 	      mehSiPixelCol[5]->Fill((*iter).column());

@@ -13,7 +13,7 @@
 //
 // Original Author:  Jim Pivarski,,,
 //         Created:  Sat Jan 24 16:20:28 CST 2009
-// $Id: MuonAlignmentFromReference.cc,v 1.41 2013/01/07 19:58:00 wmtan Exp $
+// $Id: MuonAlignmentFromReference.cc,v 1.39 2011/10/13 00:03:12 khotilov Exp $
 
 #include "Alignment/CommonAlignmentAlgorithm/interface/AlignmentAlgorithmBase.h"
 
@@ -85,7 +85,7 @@ public:
 
   void processMuonResidualsFromTrack(MuonResidualsFromTrack &mrft);
 
-  void terminate(const edm::EventSetup& iSetup);
+  void terminate();
 
 private:
   bool numeric(std::string s);
@@ -842,7 +842,7 @@ void MuonAlignmentFromReference::processMuonResidualsFromTrack(MuonResidualsFrom
 }
 
 
-void MuonAlignmentFromReference::terminate(const edm::EventSetup& iSetup)
+void MuonAlignmentFromReference::terminate()
 {
   // one-time print-out
   std::cout << "Counters:" << std::endl

@@ -5,8 +5,8 @@
  *
  *  A class to hold a surface with width and length for alignment purposes.
  *
- *  $Date: 2012/12/30 12:18:35 $
- *  $Revision: 1.9 $
+ *  $Date: 2007/04/25 18:37:59 $
+ *  $Revision: 1.8 $
  *  \author Chung Khim Lae
  */
 
@@ -15,7 +15,7 @@
 #include "Alignment/CommonAlignment/interface/Utilities.h"
 #include "DataFormats/GeometrySurface/interface/GloballyPositioned.h"
 
-class Plane;
+class BoundPlane;
 
 class AlignableSurface:
   public GloballyPositioned<align::Scalar>
@@ -24,7 +24,7 @@ class AlignableSurface:
 
   /// Constructor to set surface from geometry.
   AlignableSurface(
-		   const Plane& surface
+		   const BoundPlane& surface
 		   );
 
   /// Constructor to set position and rotation; width and length default to 0.

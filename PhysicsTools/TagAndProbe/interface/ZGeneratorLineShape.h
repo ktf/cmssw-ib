@@ -14,7 +14,7 @@ public:
   ZGeneratorLineShape(const char *name, const char *title,
 		      RooAbsReal& _m,
                       //char* genfile = "/uscmst1b_scratch/lpc1/old_scratch/lpctrig/jwerner/ZeePASResConvFitter/ZeeGenLevel.root"
-                      const char* genfile = "ZeeGenLevel.root", const char* histoName= "Mass"
+                      char* genfile = "ZeeGenLevel.root", char* histoName= "Mass"
 		      );
 
   ZGeneratorLineShape(const ZGeneratorLineShape& other, const char* name);

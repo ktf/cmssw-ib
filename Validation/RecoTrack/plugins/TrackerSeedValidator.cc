@@ -176,11 +176,11 @@ void TrackerSeedValidator::analyze(const edm::Event& event, const edm::EventSetu
       LogTrace("TrackValidator") << "Calling associateRecoToSim method" << "\n";
       reco::RecoToSimCollectionSeed recSimColl=associator[ww]->associateRecoToSim(seedCollection,
 										  TPCollectionHfake,
-										  &event,&setup);
+										  &event);
       LogTrace("TrackValidator") << "Calling associateSimToReco method" << "\n";
       reco::SimToRecoCollectionSeed simRecColl=associator[ww]->associateSimToReco(seedCollection,
 										  TPCollectionHeff, 
-										  &event,&setup);
+										  &event);
       
       //
       //fill simulation histograms

@@ -32,7 +32,6 @@
 #include "TROOT.h"
 #include "Riostream.h"
 
-class TrackerTopology;
 
 class SiStripCalibLorentzAngle : public ConditionDBWriter<SiStripLorentzAngle>
 {
@@ -52,7 +51,6 @@ class SiStripCalibLorentzAngle : public ConditionDBWriter<SiStripLorentzAngle>
    edm::ESHandle<MagneticField> magfield_;
    
    const TrackerGeometry *tracker;
-   const TrackerTopology *tTopo;
   
   typedef std::map <std::string , TProfile*> ProfileMap;
   ProfileMap Profiles;

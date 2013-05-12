@@ -10,6 +10,7 @@
 #include "FWCore/ServiceRegistry/interface/ServiceToken.h"
 #include "FWCore/Utilities/interface/BranchType.h"
 
+#include "boost/scoped_ptr.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include <map>
@@ -213,15 +214,15 @@ namespace edm {
 
     ServiceToken                                  serviceToken_;
     boost::shared_ptr<ProductRegistry const>      parentPreg_;
-    boost::shared_ptr<ProductRegistry const>	  preg_;
+    boost::shared_ptr<SignallingProductRegistry>  preg_;
     boost::shared_ptr<BranchIDListHelper>         branchIDListHelper_;
-    std::unique_ptr<ActionTable const>            act_table_;
-    boost::shared_ptr<ProcessConfiguration const> processConfiguration_;
+    boost::shared_ptr<ActionTable const>          act_table_;
+    boost::shared_ptr<ProcessConfiguration>       processConfiguration_;
     PrincipalCache                                principalCache_;
     boost::shared_ptr<eventsetup::EventSetupProvider> esp_;
     std::auto_ptr<Schedule>                       schedule_;
     std::map<ProcessHistoryID, ProcessHistoryID>  parentToChildPhID_;
-    std::unique_ptr<HistoryAppender>              historyAppender_;
+    boost::scoped_ptr<HistoryAppender>            historyAppender_;
     std::auto_ptr<ESInfo>                         esInfo_;
     std::auto_ptr<SubProcess>                     subProcess_;
     bool                                          cleaningUpAfterException_;

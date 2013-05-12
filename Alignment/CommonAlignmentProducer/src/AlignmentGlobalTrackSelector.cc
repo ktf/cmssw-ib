@@ -81,7 +81,7 @@ bool AlignmentGlobalTrackSelector::useThisFilter()
 
 // do selection ---------------------------------------------------------------
 AlignmentGlobalTrackSelector::Tracks 
-AlignmentGlobalTrackSelector::select(const Tracks& tracks, const edm::Event& iEvent, const edm::EventSetup& iSetup) 
+AlignmentGlobalTrackSelector::select(const Tracks& tracks, const edm::Event& iEvent) 
 {
   Tracks result = tracks;
 

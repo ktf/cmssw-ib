@@ -4,13 +4,10 @@
 #include <fstream>
 #include <vector>
 
-#include "FWCore/Framework/interface/ESHandle.h"
-
 namespace edm { class Event; class EventSetup; }
 class TrackingRecHit;
 class TrackerGeometry;
 class TrackerHitAssociator;
-class TrackerTopology;
 class FreeTrajectoryState;
 class MagneticField;
 class Propagator;
@@ -25,15 +22,13 @@ class PlotRecTracks
     explicit PlotRecTracks(const edm::EventSetup& es_,
                            std::string trackProducer_, std::ofstream& file_);
     ~PlotRecTracks();
-    void printRecTracks(const edm::Event& ev, const edm::EventSetup& es);
+    void printRecTracks(const edm::Event& ev);
 
   private:
     std::string getPixelInfo(const TrackingRecHit* recHit,
-                             const TrackerTopology* tTopo,
                              const std::ostringstream& o,
                              const std::ostringstream& d);
     std::string getStripInfo(const TrackingRecHit* recHit,
-                             const TrackerTopology* tTopo,
                              const std::ostringstream& o,
                              const std::ostringstream& d);
     FreeTrajectoryState getTrajectoryAtOuterPoint(const reco::Track& track);

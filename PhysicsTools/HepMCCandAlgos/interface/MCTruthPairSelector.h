@@ -65,4 +65,3 @@ namespace reco {
 }
 
 #endif
-

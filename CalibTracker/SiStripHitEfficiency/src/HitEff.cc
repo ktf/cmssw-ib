@@ -36,8 +36,10 @@
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h" 
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "CalibTracker/SiStripHitEfficiency/interface/TrajectoryAtInvalidHit.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
 #include "TrackingTools/GeomPropagators/interface/AnalyticalPropagator.h"
 #include "DataFormats/TrackReco/interface/DeDxData.h"
@@ -130,10 +132,6 @@ void HitEff::beginJob(){
 
 
 void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
 
   //  bool DEBUG = false;
 
@@ -224,7 +222,7 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
       surface = &(tracker->idToDet(ClusterDetId)->surface());
       LocalPoint lp = parameters.first;
       GlobalPoint gp = surface->toGlobal(lp);
-      unsigned int layer = checkLayer(ClusterId, tTopo);
+      unsigned int layer = checkLayer(ClusterId);
             if(DEBUG) cout << "Found hit in cluster collection layer = " << layer << " with id = " << ClusterId << "   local X position = " << lp.x() << " +- " << sqrt(parameters.second.xx()) << "   matched/stereo/rphi = " << ((ClusterId & 0x3)==0) << "/" << ((ClusterId & 0x3)==1) << "/" << ((ClusterId & 0x3)==2) << endl;
     }
   }
@@ -309,7 +307,7 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	
 	unsigned int iidd = theInHit->geographicalId().rawId();
 	
-	unsigned int TKlayers = checkLayer(iidd, tTopo);
+	unsigned int TKlayers = checkLayer(iidd);
 	if (DEBUG)	cout << "TKlayer from trajectory: " << TKlayers << "  from module = " << iidd <<  "   matched/stereo/rphi = " << ((iidd & 0x3)==0) << "/" << ((iidd & 0x3)==1) << "/" << ((iidd & 0x3)==2) << endl;
 
 	// If Trajectory measurement from TOB 6 or TEC 9, skip it because it's always valid they are filled later
@@ -327,20 +325,20 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	// for double sided layers check both sensors--if no hit was found on either sensor surface,
 	// the trajectory measurements only have one invalid hit entry on the matched surface
 	// so get the TrajectoryAtInvalidHit for both surfaces and include them in the study
-	if (isDoubleSided(iidd, tTopo) &&  ((iidd & 0x3)==0) ) {
+	if (isDoubleSided(iidd) &&  ((iidd & 0x3)==0) ) {
 	  // do hit eff check twice--once for each sensor
 	  //add a TM for each surface
-	  TMs.push_back(TrajectoryAtInvalidHit(*itm, tTopo, tkgeom, propagator, 1));
-	  TMs.push_back(TrajectoryAtInvalidHit(*itm, tTopo, tkgeom, propagator, 2));
-	} else if ( isDoubleSided(iidd, tTopo) && (!check2DPartner(iidd, TMeas)) ) {
+	  TMs.push_back(TrajectoryAtInvalidHit(*itm,tkgeom, propagator, 1));
+	  TMs.push_back(TrajectoryAtInvalidHit(*itm,tkgeom, propagator, 2));
+	} else if ( isDoubleSided(iidd) && (!check2DPartner(iidd, TMeas)) ) {
 	  // if only one hit was found the trajectory measurement is on that sensor surface, and the other surface from
 	  // the matched layer should be added to the study as well
-	  TMs.push_back(TrajectoryAtInvalidHit(*itm, tTopo, tkgeom, propagator, 1));
-	  TMs.push_back(TrajectoryAtInvalidHit(*itm, tTopo, tkgeom, propagator, 2));
+	  TMs.push_back(TrajectoryAtInvalidHit(*itm,tkgeom, propagator, 1));
+	  TMs.push_back(TrajectoryAtInvalidHit(*itm,tkgeom, propagator, 2));
 	  if (DEBUG) cout << " found a hit with a missing partner" << endl;
 	} else {
 	  //only add one TM for the single surface and the other will be added in the next iteration
-	  TMs.push_back(TrajectoryAtInvalidHit(*itm, tTopo, tkgeom, propagator));
+	  TMs.push_back(TrajectoryAtInvalidHit(*itm,tkgeom, propagator));
 	}
 
 	//////////////////////////////////////////////
@@ -353,7 +351,7 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	bool isLast = (itm==(TMeas.end()-1));
 	bool isLastTOB5 = true;
 	if (!isLast) {
-	  if ( checkLayer((++itm)->recHit()->geographicalId().rawId(), tTopo) == 9 ) isLastTOB5 = false;
+	  if ( checkLayer((++itm)->recHit()->geographicalId().rawId()) == 9 ) isLastTOB5 = false;
 	  else isLastTOB5 = true;
 	  --itm;
 	}
@@ -380,14 +378,14 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	    
 	    if (tob6Hit->geographicalId().rawId()!=0) {
 	      if (DEBUG) cout << "tob6 hit actually being added to TM vector" << endl;
-	      TMs.push_back(TrajectoryAtInvalidHit(tob6TM, tTopo, tkgeom, propagator));
+	      TMs.push_back(TrajectoryAtInvalidHit(tob6TM,tkgeom, propagator));
 	    }
 	  }
 	}
 
 	bool isLastTEC8 = true;
 	if (!isLast) {
-	  if ( checkLayer((++itm)->recHit()->geographicalId().rawId(), tTopo) == 21 ) isLastTEC8 = false;
+	  if ( checkLayer((++itm)->recHit()->geographicalId().rawId()) == 21 ) isLastTEC8 = false;
 	  else isLastTEC8 = true;
 	  --itm;
 	}
@@ -405,14 +403,14 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	  
 	  // check if track on positive or negative z
 	  if (!iidd ==  StripSubdetector::TEC) cout << "there is a problem with TEC 9 extrapolation" << endl;
-	  
-	  //cout << " tec9 id = " << iidd << " and side = " << tTopo->tecSide(iidd) << endl;
+	  TECDetId tecdetid(iidd);
+	  //cout << " tec9 id = " << iidd << " and side = " << tecdetid.side() << endl;
 	  vector<TrajectoryMeasurement> tmp;
-	  if ( tTopo->tecSide(iidd) == 1 ) {
+	  if ( tecdetid.side() == 1 ) {
 	    tmp = theLayerMeasurements->measurements(*tec9neg, tsosTEC9, *thePropagator, *estimator);
 	    //cout << "on negative side" << endl;
 	  }
-	  if ( tTopo->tecSide(iidd) == 2 ) {
+	  if ( tecdetid.side() == 2 ) {
 	    tmp = theLayerMeasurements->measurements(*tec9pos, tsosTEC9, *thePropagator, *estimator);
 	    //cout << "on positive side" << endl;
 	  }
@@ -426,17 +424,17 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	    tec9Hit = tec9TM.recHit();
 	    
 	    unsigned int tec9id = tec9Hit->geographicalId().rawId();
-	    if (DEBUG) cout << "tec9id = " << tec9id << " is Double sided = " <<  isDoubleSided(tec9id, tTopo) << "  and 0x3 = " << (tec9id & 0x3) << endl;
+	    if (DEBUG) cout << "tec9id = " << tec9id << " is Double sided = " <<  isDoubleSided(tec9id) << "  and 0x3 = " << (tec9id & 0x3) << endl;
 	    
 	    if (tec9Hit->geographicalId().rawId()!=0) {
 	      if (DEBUG) cout << "tec9 hit actually being added to TM vector" << endl;
 	      // in tec the hit can be single or doubled sided. whenever the invalid hit at the end of vector of TMs is
 	      // double sided it is always on the matched surface, so we need to split it into the true sensor surfaces
-	      if (isDoubleSided(tec9id, tTopo)) {
-		TMs.push_back(TrajectoryAtInvalidHit(tec9TM, tTopo, tkgeom, propagator, 1));
-		TMs.push_back(TrajectoryAtInvalidHit(tec9TM, tTopo, tkgeom, propagator, 2));
+	      if (isDoubleSided(tec9id)) {
+		TMs.push_back(TrajectoryAtInvalidHit(tec9TM,tkgeom, propagator, 1));
+		TMs.push_back(TrajectoryAtInvalidHit(tec9TM,tkgeom, propagator, 2));
 	      } else 
-		TMs.push_back(TrajectoryAtInvalidHit(tec9TM, tTopo, tkgeom, propagator));
+		TMs.push_back(TrajectoryAtInvalidHit(tec9TM,tkgeom, propagator));
 	    }
 	  } //else cout << "tec9 tmp empty" << endl;
 	}
@@ -468,7 +466,7 @@ void HitEff::analyze(const edm::Event& e, const edm::EventSetup& es){
 	  trajHitValid = TM->validHit();
 
 	  // reget layer from iidd here, to account for TOB 6 and TEC 9 TKlayers being off
-	  TKlayers = checkLayer(iidd, tTopo);
+	  TKlayers = checkLayer(iidd);
 
 	  if ( (layers == TKlayers) || (layers == 0) ) {   // Look at the layer not used to reconstruct the track
 	    whatlayer = TKlayers;
@@ -681,31 +679,31 @@ double HitEff::checkConsistency(StripClusterParameterEstimator::LocalValues para
   return consistency;
 }
 
-bool HitEff::isDoubleSided(unsigned int iidd, const TrackerTopology* tTopo) const {
+bool HitEff::isDoubleSided(unsigned int iidd) const {
   StripSubdetector strip=StripSubdetector(iidd);
   unsigned int subid=strip.subdetId();
   unsigned int layer = 0;
   if (subid ==  StripSubdetector::TIB) { 
-    
-    layer = tTopo->tibLayer(iidd);
+    TIBDetId tibid(iidd);
+    layer = tibid.layer();
     if (layer == 1 || layer == 2) return true;
     else return false;
   }
   else if (subid ==  StripSubdetector::TOB) { 
-    
-    layer = tTopo->tobLayer(iidd) + 4 ; 
+    TOBDetId tobid(iidd);
+    layer = tobid.layer() + 4 ; 
     if (layer == 5 || layer == 6) return true;
     else return false;
   }
   else if (subid ==  StripSubdetector::TID) { 
-    
-    layer = tTopo->tidRing(iidd) + 10;
+    TIDDetId tidid(iidd);
+    layer = tidid.ring() + 10;
     if (layer == 11 || layer == 12) return true;
     else return false;
   }
   else if (subid ==  StripSubdetector::TEC) { 
-    
-    layer = tTopo->tecRing(iidd) + 13 ; 
+    TECDetId tecid(iidd);
+    layer = tecid.ring() + 13 ; 
     if (layer == 14 || layer == 15 || layer == 18) return true;
     else return false;
   }
@@ -729,24 +727,24 @@ bool HitEff::check2DPartner(unsigned int iidd, std::vector<TrajectoryMeasurement
   return found2DPartner;
 }
 
-unsigned int HitEff::checkLayer( unsigned int iidd, const TrackerTopology* tTopo) {
+unsigned int HitEff::checkLayer( unsigned int iidd) {
   StripSubdetector strip=StripSubdetector(iidd);
   unsigned int subid=strip.subdetId();
   if (subid ==  StripSubdetector::TIB) { 
-    
-    return tTopo->tibLayer(iidd);
+    TIBDetId tibid(iidd);
+    return tibid.layer();
   }
   if (subid ==  StripSubdetector::TOB) { 
-    
-    return tTopo->tobLayer(iidd) + 4 ; 
+    TOBDetId tobid(iidd);
+    return tobid.layer() + 4 ; 
   }
   if (subid ==  StripSubdetector::TID) { 
-    
-    return tTopo->tidWheel(iidd) + 10;
+    TIDDetId tidid(iidd);
+    return tidid.wheel() + 10;
   }
   if (subid ==  StripSubdetector::TEC) { 
-    
-    return tTopo->tecWheel(iidd) + 13 ; 
+    TECDetId tecid(iidd);
+    return tecid.wheel() + 13 ; 
   }
   return 0;
 }

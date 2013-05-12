@@ -28,8 +28,8 @@
 #include "DataFormats/GeometrySurface/interface/ReferenceCounted.h"
 #include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
 
-class Cylinder;
-class Plane;
+class BoundCylinder;
+class BoundPlane;
 
 
 /* Class SmartPropagator Interface */
@@ -129,7 +129,7 @@ class SmartPropagator GCC11_FINAL : public Propagator {
     ///true if a surface is inside tracker volume
     bool insideTkVol(const Surface& surface) const ;
     ///true if a cylinder is inside tracker volume
-    bool insideTkVol(const Cylinder& cylin)  const ;
+    bool insideTkVol(const BoundCylinder& cylin)  const ;
     ///true if a plane is inside tracker volume
     bool insideTkVol(const Plane& plane)  const ;
 
@@ -147,7 +147,7 @@ class SmartPropagator GCC11_FINAL : public Propagator {
     mutable Propagator* theTkProp;
     mutable Propagator* theGenProp;
     const MagneticField* theField;
-    static ReferenceCountingPointer<Cylinder> & theTkVolume();
+    static ReferenceCountingPointer<BoundCylinder> & theTkVolume();
 
   protected:
 

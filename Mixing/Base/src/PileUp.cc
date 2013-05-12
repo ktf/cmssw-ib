@@ -1,16 +1,10 @@
 #include "Mixing/Base/interface/PileUp.h"
-#include "DataFormats/Provenance/interface/BranchIDListHelper.h"
-#include "DataFormats/Provenance/interface/ModuleDescription.h"
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/InputSourceDescription.h"
-#include "FWCore/Framework/src/SignallingProductRegistry.h"
-#include "FWCore/ServiceRegistry/interface/ActivityRegistry.h"
 #include "FWCore/Sources/interface/VectorInputSourceFactory.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Utilities/interface/Exception.h"
-#include "FWCore/Utilities/interface/GetPassID.h"
-#include "FWCore/Version/interface/GetReleaseVersion.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
@@ -19,8 +13,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "CondFormats/DataRecord/interface/MixingRcd.h"
 #include "CondFormats/RunInfo/interface/MixingModuleConfig.h"
-
-#include "boost/shared_ptr.hpp"
 
 #include <algorithm>
 
@@ -35,39 +27,16 @@ namespace edm {
     poisson_(type_ == "poisson"),
     fixed_(type_ == "fixed"),
     none_(type_ == "none"),
-    productRegistry_(new SignallingProductRegistry),
-    input_(VectorInputSourceFactory::get()->makeVectorInputSource(pset, InputSourceDescription(
-                                                                   ModuleDescription(),
-                                                                   *productRegistry_,
-                                                                   boost::shared_ptr<BranchIDListHelper>(new BranchIDListHelper),
-                                                                   boost::shared_ptr<ActivityRegistry>(new ActivityRegistry),
-                                                                   -1, -1
-                                                                   )).release()),
-    processConfiguration_(new ProcessConfiguration(std::string("@MIXING"), getReleaseVersion(), getPassID())),
-    eventPrincipal_(),
-    poissonDistribution_(),
-    poissonDistr_OOT_(),
+    input_(VectorInputSourceFactory::get()->makeVectorInputSource(pset, InputSourceDescription()).release()),
+    poissonDistribution_(0),
+    poissonDistr_OOT_(0),
     playback_(playback),
     sequential_(pset.getUntrackedParameter<bool>("sequential", false)),
     samelumi_(pset.getUntrackedParameter<bool>("sameLumiBlock", false)),
-    seed_(0) {
-
-    // Use the empty parameter set for the parameter set ID of our "@MIXING" process.
-    ParameterSet emptyPSet;
-    emptyPSet.registerIt();
-    processConfiguration_->setParameterSetID(emptyPSet.id());
-
-    input_->productRegistry()->setFrozen();
-
-    // A modified HistoryAppender must be used for unscheduled processing.
-    eventPrincipal_.reset(new EventPrincipal(input_->productRegistry(),
-                                       input_->branchIDListHelper(),
-                                       *processConfiguration_,
-                                       nullptr));
-
-    if (pset.exists("nbPileupEvents")) {
+    seed_(0)
+   {
+     if (pset.exists("nbPileupEvents"))
        seed_=pset.getParameter<edm::ParameterSet>("nbPileupEvents").getUntrackedParameter<int>("seed",0);
-    }
 
     bool DB=type_=="readDB";
 
@@ -80,7 +49,7 @@ namespace edm {
     }
     
     CLHEP::HepRandomEngine& engine = rng->getEngine();
-    poissonDistribution_.reset(new CLHEP::RandPoissonQ(engine, averageNumber_));
+    poissonDistribution_ = new CLHEP::RandPoissonQ(engine, averageNumber_);
     
     // Get seed for the case when using user histogram or probability function
     if (histoDistribution_ || probFunctionDistribution_ || DB){ 
@@ -126,7 +95,7 @@ namespace edm {
 
       if(OOT_type == "Poisson" || OOT_type == "poisson") {
 	poisson_OOT_ = true;
-	poissonDistr_OOT_.reset(new CLHEP::RandPoisson(engine));
+	poissonDistr_OOT_ = new CLHEP::RandPoisson(engine);
       }
       else if(OOT_type == "Fixed" || OOT_type == "fixed") {
 	fixed_OOT_ = true;
@@ -174,7 +143,8 @@ namespace edm {
 	averageNumber_=config.averageNumber();
 	edm::Service<edm::RandomNumberGenerator> rng; 
 	CLHEP::HepRandomEngine& engine = rng->getEngine();            
-	poissonDistribution_.reset(new CLHEP::RandPoissonQ(engine, averageNumber_));
+	delete poissonDistribution_;
+	poissonDistribution_ = new CLHEP::RandPoissonQ(engine, averageNumber_);  
       }
     else if (probFunctionDistribution_)
       {
@@ -229,7 +199,7 @@ namespace edm {
       {
 	manage_OOT_=true;
 	poisson_OOT_ = false;
-	if (poissonDistr_OOT_){poissonDistr_OOT_.reset(); }
+	if (poissonDistr_OOT_){delete poissonDistr_OOT_; poissonDistr_OOT_=0; }
 	fixed_OOT_ = true;
 	intFixed_OOT_=config.fixedOutOfTime();
       }
@@ -242,13 +212,15 @@ namespace edm {
 	  //no need to trash the previous one if already there
 	  edm::Service<edm::RandomNumberGenerator> rng; 
 	  CLHEP::HepRandomEngine& engine = rng->getEngine();            	  
-	  poissonDistr_OOT_.reset(new CLHEP::RandPoisson(engine));
+	  poissonDistr_OOT_ = new CLHEP::RandPoisson(engine);
 	}
       }
 
     
   }
   PileUp::~PileUp() {
+    delete poissonDistribution_;
+    delete poissonDistr_OOT_ ;
   }
 
   void PileUp::CalculatePileup(int MinBunch, int MaxBunch, std::vector<int>& PileupSelection, std::vector<float>& TrueNumInteractions) {

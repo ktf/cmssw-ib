@@ -13,7 +13,7 @@
 //
 // Original Author:  Andrea Venturi
 //         Created:  Mon Oct 27 17:37:53 CET 2008
-// $Id: MultiplicityTimeCorrelations.cc,v 1.2 2013/02/27 19:49:47 wmtan Exp $
+// $Id: MultiplicityTimeCorrelations.cc,v 1.1 2011/03/10 16:15:13 venturia Exp $
 //
 //
 
@@ -66,8 +66,9 @@ class MultiplicityTimeCorrelations : public edm::EDAnalyzer {
 
 private:
   virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-  virtual void beginRun(const edm::Run&, const edm::EventSetup&) override;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+  virtual void endRun(const edm::Run&, const edm::EventSetup&);
   virtual void endJob() ;
 
       // ----------member data ---------------------------
@@ -366,6 +367,10 @@ MultiplicityTimeCorrelations::beginRun(const edm::Run& iRun, const edm::EventSet
 
   _digibxcorrhmevent.beginRun(iRun.run());
 
+}
+
+void
+MultiplicityTimeCorrelations::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
 }
 // ------------ method called once each job just after ending the event loop  ------------
 void 

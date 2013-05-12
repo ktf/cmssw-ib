@@ -1,6 +1,5 @@
 
 // Framework
-#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
@@ -11,8 +10,6 @@
 
 #include "Alignment/SurveyAnalysis/plugins/SurveyDataConverter.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 //__________________________________________________________________________________________________
 SurveyDataConverter::SurveyDataConverter(const edm::ParameterSet& iConfig) :
@@ -23,10 +20,6 @@ SurveyDataConverter::SurveyDataConverter(const edm::ParameterSet& iConfig) :
 //__________________________________________________________________________________________________
 void SurveyDataConverter::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoHandle;
-  iSetup.get<IdealGeometryRecord>().get(tTopoHandle);
-  const TrackerTopology* const tTopo = tTopoHandle.product();
   
   edm::LogInfo("SurveyDataConverter") << "Analyzer called";
   applyfineinfo = theParameterSet.getParameter<bool>("applyFineInfo");
@@ -47,7 +40,7 @@ void SurveyDataConverter::analyze( const edm::Event& iEvent, const edm::EventSet
   for (int ii=0 ; ii<NFILES ;ii++) {
     if ( textFileNames[ii] == "NONE" )
       throw cms::Exception("BadConfig") << fileType[ii] << " input file not found in configuration";
-    dataReader.readFile( textFileNames[ii], fileType[ii], tTopo );
+    dataReader.readFile( textFileNames[ii], fileType[ii] );
   }
 
   // Get info and map

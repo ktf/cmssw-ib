@@ -202,16 +202,10 @@ void FastTimerService::postBeginJob() {
 
   // check if the process is bound to a single CPU.
   // otherwise, the results of the CLOCK_THREAD_CPUTIME_ID timer might be inaccurate
-#ifdef __linux
-  // cpu affinity is currently only supported on LINUX
   m_is_cpu_bound = CPUAffinity::isCpuBound();
-  if ((m_timer_id != CLOCK_REALTIME) and not m_is_cpu_bound) {
-    clockid_t clock;
-    if (clock_getcpuclockid(0, & clock) == ENOENT)
-      // the process is NOT bound to a single CPU, and the system does not support a consistent time source across multiple CPUs
-      edm::LogError("FastTimerService") << "this process is NOT bound to a single CPU, the results of the FastTimerService may be undefined";
-  }
-#endif
+  if ((m_timer_id != CLOCK_REALTIME) and not m_is_cpu_bound)
+    // the process is NOT bound to a single CPU
+    edm::LogError("FastTimerService") << "this process is NOT bound to a single CPU, the results of the FastTimerService may be undefined";
 
   edm::service::TriggerNamesService & tns = * edm::Service<edm::service::TriggerNamesService>();
   uint32_t size_p = tns.getTrigPaths().size();
@@ -617,7 +611,7 @@ void FastTimerService::postEndJob() {
             << std::right << std::setw(10) << m_paths[name].summary_active  / (double) m_summary_events << "  "
             << name << '\n';
     } else if (m_enable_timing_paths and m_enable_timing_modules) {
-      out << "FastReport " << (m_timer_id == CLOCK_REALTIME ? "(real time) " : "(CPU time)  ")    << "     Active       Pre-     Inter-  Post-mods   Overhead      Total  Path" << '\n';
+      out << "FastReport " << (m_timer_id == CLOCK_REALTIME ? "(real time) " : "(CPU time)  ")    << "     Active      Pre-    Inter- Post-mods  Overhead     Total  Path" << '\n';
       for (auto const & name: tns.getTrigPaths()) {
         out << "FastReport              "
             << std::right << std::setw(10) << m_paths[name].summary_active        / (double) m_summary_events << " "
@@ -629,7 +623,7 @@ void FastTimerService::postEndJob() {
             << name << '\n';
       }
       out << '\n';
-      out << "FastReport " << (m_timer_id == CLOCK_REALTIME ? "(real time) " : "(CPU time)  ")    << "     Active       Pre-     Inter-  Post-mods   Overhead      Total  EndPath" << '\n';
+      out << "FastReport " << (m_timer_id == CLOCK_REALTIME ? "(real time) " : "(CPU time)  ")    << "     Active      Pre-    Inter- Post-mods  Overhead     Total  EndPath" << '\n';
       for (auto const & name: tns.getEndPaths()) {
         out << "FastReport              "
             << std::right << std::setw(10) << m_paths[name].summary_active        / (double) m_summary_events << " "
@@ -840,7 +834,7 @@ void FastTimerService::postProcessEvent(edm::Event const & event, edm::EventSetu
       float luminosity = 0.;
       edm::Handle<LumiScalersCollection> h_luminosity;
       if (event.getByLabel(m_luminosity_label, h_luminosity) and not h_luminosity->empty())
-        luminosity = h_luminosity->front().instantLumi();   // in units of 1e30 cm-2s-1
+        luminosity = h_luminosity->front().instantLumi();
 
       m_dqm_byluminosity_event        ->Fill(luminosity, m_event        * 1000.);
       m_dqm_byluminosity_source       ->Fill(luminosity, m_source       * 1000.);

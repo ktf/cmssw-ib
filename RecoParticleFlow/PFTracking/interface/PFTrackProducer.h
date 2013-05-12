@@ -27,11 +27,11 @@ public:
   ~PFTrackProducer();
   
 private:
-  virtual void beginRun(const edm::Run&,const edm::EventSetup&) override;
-  virtual void endRun(const edm::Run&,const edm::EventSetup&) override;
+  virtual void beginRun(edm::Run&,const edm::EventSetup&) ;
+  virtual void endRun() ;
   
   ///Produce the PFRecTrack collection
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&);
   
   ///PFTrackTransformer
   PFTrackTransformer *pfTransformer_; 
