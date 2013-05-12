@@ -1,5 +1,5 @@
 //
-// $Id: LogErrorEventFilter.cc,v 1.2 2012/09/30 13:11:35 venturia Exp $
+// $Id: LogErrorEventFilter.cc,v 1.4 2013/04/09 10:06:10 davidlt Exp $
 //
 
 /**
@@ -7,7 +7,7 @@
   \brief    Use StandAlone track to define the 4-momentum of a PAT Muon (normally the global one is used)
             
   \author   Giovanni Petrucciani
-  \version  $Id: LogErrorEventFilter.cc,v 1.2 2012/09/30 13:11:35 venturia Exp $
+  \version  $Id: LogErrorEventFilter.cc,v 1.4 2013/04/09 10:06:10 davidlt Exp $
 */
 
 
@@ -35,11 +35,11 @@ class LogErrorEventFilter : public edm::EDFilter {
         explicit LogErrorEventFilter(const edm::ParameterSet & iConfig);
         virtual ~LogErrorEventFilter() { }
 
-        virtual bool filter(edm::Event & iEvent, const edm::EventSetup & iSetup);
-        virtual bool beginLuminosityBlock(edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup);
-        virtual bool endLuminosityBlock(edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup);
-        virtual bool beginRun(edm::Run &run, const edm::EventSetup &iSetup);
-        virtual bool endRun(edm::Run &run, const edm::EventSetup &iSetup);
+        virtual bool filter(edm::Event & iEvent, const edm::EventSetup& iSetup) override;
+        virtual void beginLuminosityBlock(const edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup) override;
+        virtual bool endLuminosityBlock(edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup) override;
+        virtual void beginRun(const edm::Run &run, const edm::EventSetup &iSetup) override;
+        virtual void endRun(const edm::Run &run, const edm::EventSetup &iSetup) override;
         virtual void endJob();
 
     private:
@@ -131,8 +131,8 @@ LogErrorEventFilter::LogErrorEventFilter(const edm::ParameterSet & iConfig) :
 
 }
 
-bool
-LogErrorEventFilter::beginLuminosityBlock(edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup) {
+void
+LogErrorEventFilter::beginLuminosityBlock(const edm::LuminosityBlock &lumi, const edm::EventSetup &iSetup) {
     npassLumi_ = 0; nfailLumi_ = 0;
     errorCollectionThisLumi_.clear();
     if (readSummaryMode_) {
@@ -147,7 +147,6 @@ LogErrorEventFilter::beginLuminosityBlock(edm::LuminosityBlock &lumi, const edm:
         npassRun_ += npassLumi_;
         nfailRun_ += nfailLumi_;
     }
-    return true;
 }
 
 bool
@@ -169,15 +168,14 @@ LogErrorEventFilter::endLuminosityBlock(edm::LuminosityBlock &lumi, const edm::E
 }
 
 
-bool
-LogErrorEventFilter::beginRun(edm::Run &run, const edm::EventSetup &iSetup) {
+void
+LogErrorEventFilter::beginRun(const edm::Run &run, const edm::EventSetup &iSetup) {
     npassRun_ = 0; nfailRun_ = 0;
     errorCollectionThisRun_.clear();
-    return true;
 }
 
-bool
-LogErrorEventFilter::endRun(edm::Run &run, const edm::EventSetup &iSetup) {
+void
+LogErrorEventFilter::endRun(const edm::Run &run, const edm::EventSetup &iSetup) {
     statsPerRun_[run.run()] = std::pair<size_t,size_t>(npassRun_, nfailRun_);
     if (nfailRun_ < thresholdPerRun_*(npassRun_+nfailRun_)) {
         increment(errorCollectionAll_, errorCollectionThisRun_);
@@ -189,7 +187,6 @@ LogErrorEventFilter::endRun(edm::Run &run, const edm::EventSetup &iSetup) {
         }
     }
     //run.put(serialize(errorCollectionThisRun_));
-    return true;
 }
 
 void
@@ -204,14 +201,14 @@ LogErrorEventFilter::endJob() {
         typedef std::pair<uint32_t, counter> hitRun;
         foreach(const hitRun &hit, statsPerRun_) {
             double fract = hit.second.second/double(hit.second.first + hit.second.second);
-            printf("run %6d: fail %7lu, pass %7lu, fraction %7.3f%%%s\n", hit.first, hit.second.second, hit.second.first, fract*100., (fract >= thresholdPerRun_ ? " (run excluded from summary list)" : ""));
+            printf("run %6d: fail %7zu, pass %7zu, fraction %7.3f%%%s\n", hit.first, hit.second.second, hit.second.first, fract*100., (fract >= thresholdPerRun_ ? " (run excluded from summary list)" : ""));
         }
  
         std::cout << "\n === SCOREBOARD PER LUMI === " << std::endl;
         typedef std::pair<std::pair<uint32_t,uint32_t>, counter> hitLumi;
         foreach(const hitLumi &hit, statsPerLumi_) {
             double fract = hit.second.second/double(hit.second.first + hit.second.second);
-            printf("run %6d, lumi %4d: fail %7lu, pass %7lu, fraction %7.3f%%%s\n", hit.first.first, hit.first.second, hit.second.second, hit.second.first, fract*100., (fract >= thresholdPerLumi_ ? " (lumi excluded from run list)" : ""));
+            printf("run %6d, lumi %4d: fail %zu, pass %zu, fraction %7.3f%%%s\n", hit.first.first, hit.first.second, hit.second.second, hit.second.first, fract*100., (fract >= thresholdPerLumi_ ? " (lumi excluded from run list)" : ""));
         }
     }
 }

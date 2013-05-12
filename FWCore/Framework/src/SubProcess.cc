@@ -12,7 +12,7 @@
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/FileBlock.h"
-#include "FWCore/Framework/interface/Group.h"
+#include "FWCore/Framework/interface/ProductHolder.h"
 #include "FWCore/Framework/interface/HistoryAppender.h"
 #include "FWCore/Framework/interface/LuminosityBlockPrincipal.h"
 #include "FWCore/Framework/interface/OccurrenceTraits.h"
@@ -25,7 +25,6 @@
 #include "FWCore/Utilities/interface/ExceptionCollector.h"
 
 #include <cassert>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -51,10 +50,12 @@ namespace edm {
       schedule_(),
       parentToChildPhID_(),
       historyAppender_(new HistoryAppender),
-      esInfo_(0),
+      esInfo_(nullptr),
       subProcess_(),
       cleaningUpAfterException_(false),
       processParameterSet_() {
+
+    selectProducts(*parentProductRegistry);
 
     std::string const maxEvents("maxEvents");
     std::string const maxLumis("maxLuminosityBlocks");
@@ -81,7 +82,7 @@ namespace edm {
 
     boost::shared_ptr<ParameterSet> subProcessParameterSet(popSubProcessParameterSet(*processParameterSet_).release());
   
-    ScheduleItems items(*parentProductRegistry, *parentBranchIDListHelper);
+    ScheduleItems items(*parentProductRegistry, *parentBranchIDListHelper, *this);
 
     ParameterSet const& optionsPset(processParameterSet_->getUntrackedParameterSet("options", ParameterSet()));
     IllegalParameters::setThrowAnException(optionsPset.getUntrackedParameter<bool>("throwIfIllegalParameter", true));
@@ -110,8 +111,8 @@ namespace edm {
     schedule_ = items.initSchedule(*processParameterSet_,subProcessParameterSet.get());
 
     // set the items
-    act_table_ = items.act_table_;
-    preg_ = items.preg_;
+    act_table_ = std::move(items.act_table_);
+    preg_.reset(items.preg_.release());
     branchIDListHelper_ = items.branchIDListHelper_;
     processConfiguration_ = items.processConfiguration_;
 
@@ -136,29 +137,8 @@ namespace edm {
     if(!droppedBranchIDToKeptBranchID().empty()) {
       fixBranchIDListsForEDAliases(droppedBranchIDToKeptBranchID());
     }
-    // Mark dropped branches as dropped in the product registry.
-    {
-      std::set<BranchID> keptBranches;
-      Selections const& keptVectorR = keptProducts()[InRun];
-      for(Selections::const_iterator it = keptVectorR.begin(), itEnd = keptVectorR.end(); it != itEnd; ++it) {
-        keptBranches.insert((*it)->branchID());
-      }
-      Selections const& keptVectorL = keptProducts()[InLumi];
-      for(Selections::const_iterator it = keptVectorL.begin(), itEnd = keptVectorL.end(); it != itEnd; ++it) {
-        keptBranches.insert((*it)->branchID());
-      }
-      Selections const& keptVectorE = keptProducts()[InEvent];
-      for(Selections::const_iterator it = keptVectorE.begin(), itEnd = keptVectorE.end(); it != itEnd; ++it) {
-        keptBranches.insert((*it)->branchID());
-      }
-      for(ProductRegistry::ProductList::const_iterator it = preg_->productList().begin(), itEnd = preg_->productList().end(); it != itEnd; ++it) {
-        if(keptBranches.find(it->second.branchID()) == keptBranches.end()) {
-          it->second.setDropped();
-        } 
-      }
-    }
     ServiceRegistry::Operate operate(serviceToken_);
-    schedule_->beginJob();
+    schedule_->beginJob(*preg_);
     if(subProcess_.get()) subProcess_->doBeginJob();
   }
 
@@ -357,12 +337,12 @@ namespace edm {
   SubProcess::propagateProducts(BranchType type, Principal const& parentPrincipal, Principal& principal) const {
     Selections const& keptVector = keptProducts()[type];
     for(Selections::const_iterator it = keptVector.begin(), itEnd = keptVector.end(); it != itEnd; ++it) {
-      Group const* parentGroup = parentPrincipal.getGroup((*it)->branchID(), false, false);
-      if(parentGroup != 0) {
-        ProductData const& parentData = parentGroup->productData();
-        Group const* group = principal.getGroup((*it)->branchID(), false, false);
-        if(group != 0) {
-          ProductData& thisData = const_cast<ProductData&>(group->productData());
+      ProductHolderBase const* parentProductHolder = parentPrincipal.getProductHolder((*it)->branchID(), false, false);
+      if(parentProductHolder != 0) {
+        ProductData const& parentData = parentProductHolder->productData();
+        ProductHolderBase const* productHolder = principal.getProductHolder((*it)->branchID(), false, false);
+        if(productHolder != 0) {
+          ProductData& thisData = const_cast<ProductData&>(productHolder->productData());
           //Propagate the per event(run)(lumi) data for this product to the subprocess.
           //First, the product itself.
           thisData.wrapper_ = parentData.wrapper_;
@@ -378,7 +358,7 @@ namespace edm {
             thisData.prov_.resetProductProvenance();
           }
           // Sets unavailable flag, if known that product is not available
-          (void)group->productUnavailable();
+          (void)productHolder->productUnavailable();
         }
       }
     }
@@ -402,7 +382,7 @@ namespace edm {
       assert(subProcesses[0] == "@sub_process");
       return parameterSet.popParameterSet(subProcesses[0]);
     }
-    return std::auto_ptr<ParameterSet>(0);
+    return std::auto_ptr<ParameterSet>(nullptr);
   }
 }
 
