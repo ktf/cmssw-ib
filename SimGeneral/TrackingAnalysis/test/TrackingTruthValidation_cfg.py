@@ -60,7 +60,7 @@ process.add_(
 )
 
 process.trackCategorySelector = TrackingParticleCategorySelector(
-    src = cms.InputTag('mix', 'MergedTrackTruth'),
+    src = cms.InputTag('mergedtruth', 'MergedTrackTruth'),
     cut = cms.string("is('SignalEvent')")
 )
 

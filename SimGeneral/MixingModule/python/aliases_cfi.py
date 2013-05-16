@@ -28,15 +28,11 @@ simSiPixelDigis = cms.EDAlias(
     )
 )
 simSiStripDigis = cms.EDAlias(
+    simSiStripDigiSimLink = cms.VPSet(
+      cms.PSet(type = cms.string('StripDigiSimLinkedmDetSetVector'))
+    ),
     mix = cms.VPSet(
       cms.PSet(type = cms.string('SiStripDigiedmDetSetVector')),
-      cms.PSet(type = cms.string('SiStripRawDigiedmDetSetVector')),
-      cms.PSet(type = cms.string('StripDigiSimLinkedmDetSetVector'))
+      cms.PSet(type = cms.string('SiStripRawDigiedmDetSetVector'))
     )
 )
-#mergedtruth = cms.EDAlias(
-#    mix = cms.VPSet(
-#      cms.PSet(type = cms.string('TrackingParticles')),
-#      cms.PSet(type = cms.string('TrackingVertexs'))
-#    )
-#)

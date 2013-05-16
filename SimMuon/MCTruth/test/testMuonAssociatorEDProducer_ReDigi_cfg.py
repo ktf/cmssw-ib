@@ -128,7 +128,7 @@ process.muonAssociatorByHits.UseMuon = cms.bool(True)
 # test analysis
 process.testanalyzer = cms.EDAnalyzer("testReader",
     tracksTag = cms.InputTag("globalMuons"),
-    tpTag = cms.InputTag("mix","MergedTrackTruth"),
+    tpTag = cms.InputTag("mergedtruth","MergedTrackTruth"),
     assoMapsTag = cms.InputTag("muonAssociatorByHits")
 )
 

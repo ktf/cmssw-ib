@@ -129,11 +129,11 @@ void testVertexAssociator::analyze(const edm::Event& event, const edm::EventSetu
   const  edm::View<reco::Track>   tC = *(trackCollection.product());
 
   edm::Handle<TrackingParticleCollection>  TPCollection ;
-  event.getByLabel("mix","MergedTrackTruth",TPCollection);
+  event.getByLabel("mergedtruth","MergedTrackTruth",TPCollection);
   const TrackingParticleCollection tPC   = *(TPCollection.product());
 
   edm::Handle<TrackingVertexCollection>  TVCollection;
-  event.getByLabel("mix","MergedTrackTruth",TVCollection);
+  event.getByLabel("mergedtruth","MergedTrackTruth",TVCollection);
   const TrackingVertexCollection tVC   = *(TVCollection.product());
 
   //Vertex Collection

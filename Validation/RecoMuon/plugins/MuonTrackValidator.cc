@@ -325,8 +325,8 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
 
 	TrackingParticleRef tpr(TPCollectionHeff, i);
 	TrackingParticle* tp=const_cast<TrackingParticle*>(tpr.get());
-	TrackingParticle::Vector momentumTP; 
-	TrackingParticle::Point vertexTP;
+	ParticleBase::Vector momentumTP; 
+	ParticleBase::Point vertexTP;
 	double dxySim = 0;
 	double dzSim = 0; 
 
@@ -337,8 +337,8 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
 	    momentumTP = tp->momentum();
 	    vertexTP = tp->vertex();
 	    //Calcualte the impact parameters w.r.t. PCA
-	    TrackingParticle::Vector momentum = parametersDefinerTP->momentum(event,setup,*tp);
-	    TrackingParticle::Point vertex = parametersDefinerTP->vertex(event,setup,*tp);
+	    ParticleBase::Vector momentum = parametersDefinerTP->momentum(event,setup,*tp);
+	    ParticleBase::Point vertex = parametersDefinerTP->vertex(event,setup,*tp);
 	    dxySim = (-vertex.x()*sin(momentum.phi())+vertex.y()*cos(momentum.phi()));
 	    dzSim = vertex.z() - (vertex.x()*momentum.x()+vertex.y()*momentum.y())/sqrt(momentum.perp2()) * momentum.z()/sqrt(momentum.perp2());
 	  }
@@ -491,21 +491,20 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
  	  }
  	} // END for (unsigned int f=0; f<zposintervals[w].size()-1; f++){
 	
-#warning "This file has been modified just to get it to compile without any regard as to whether it still functions as intended"
-	int nHits = 0;
+	std::vector<PSimHit> simhits;
+	
 	if (usetracker && usemuon) {
-	  nHits= tpr.get()->numberOfHits();
+	  simhits=tp->trackPSimHit();
 	} 
 	else if (!usetracker && usemuon) {
-	  nHits= tpr.get()->numberOfHits() - tpr.get()->numberOfTrackerHits();
+	  simhits=tp->trackPSimHit(DetId::Muon);
 	}
 	else if (usetracker && !usemuon) {
-	  nHits=tpr.get()->numberOfTrackerHits();
+	  simhits=tp->trackPSimHit(DetId::Tracker);
 	}
-
 	
-        int tmp = std::min(nHits,int(maxHit-1));
-	edm::LogVerbatim("MuonTrackValidator") << "\t N simhits = "<< nHits<<"\n";
+        int tmp = std::min((int)(simhits.end()-simhits.begin()),int(maxHit-1));
+	edm::LogVerbatim("MuonTrackValidator") << "\t N simhits = "<< (int)(simhits.end()-simhits.begin())<<"\n";
 
 	totSIM_hit[w][tmp]++;
 	if (TP_is_matched) totASS_hit[w][tmp]++;
@@ -513,7 +512,7 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
 	if (TP_is_matched)	 
 	  {
 	    RefToBase<Track> assoctrack = rt.begin()->first; 
-	    nrecHit_vs_nsimHit_sim2rec[w]->Fill( assoctrack->numberOfValidHits(),nHits);
+	    nrecHit_vs_nsimHit_sim2rec[w]->Fill( assoctrack->numberOfValidHits(),(int)(simhits.end()-simhits.begin() ));
 	  }
       } // End  for (TrackingParticleCollection::size_type i=0; i<tPCeff.size(); i++){
       if (st!=0) h_tracksSIM[w]->Fill(st);
@@ -668,8 +667,8 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
 	  h_charge[w]->Fill( track->charge() );
 	  
 	  //Get tracking particle parameters at point of closest approach to the beamline
-	  TrackingParticle::Vector momentumTP = parametersDefinerTP->momentum(event,setup,*(tpr.get()));
-	  TrackingParticle::Point vertexTP = parametersDefinerTP->vertex(event,setup,*(tpr.get()));
+	  ParticleBase::Vector momentumTP = parametersDefinerTP->momentum(event,setup,*(tpr.get()));
+	  ParticleBase::Point vertexTP = parametersDefinerTP->vertex(event,setup,*(tpr.get()));
 	  double ptSim = sqrt(momentumTP.perp2());
 	  double qoverpSim = tpr->charge()/sqrt(momentumTP.x()*momentumTP.x()+momentumTP.y()*momentumTP.y()+momentumTP.z()*momentumTP.z());
 	  double thetaSim = momentumTP.theta();
@@ -821,21 +820,19 @@ void MuonTrackValidator::analyze(const edm::Event& event, const edm::EventSetup&
 	  phipull_vs_phi[w]->Fill(phiRec,phiPull); 
 	  thetapull_vs_phi[w]->Fill(phiRec,thetaPull); 
 	  
-// 	  std::vector<PSimHit> simhits;
+	  std::vector<PSimHit> simhits;
 	  
-#warning "This file has been modified just to get it to compile without any regard as to whether it still functions as intended"
-	  int nHits = 0;
 	  if (usetracker && usemuon) {
-	    nHits= tpr.get()->numberOfHits();
+	    simhits=tpr.get()->trackPSimHit();
 	  } 
 	  else if (!usetracker && usemuon) {
-	    nHits= tpr.get()->numberOfHits() - tpr.get()->numberOfTrackerHits();
+	    simhits=tpr.get()->trackPSimHit(DetId::Muon);
 	  }
 	  else if (usetracker && !usemuon) {
-	    nHits=tpr.get()->numberOfTrackerHits();
+	    simhits=tpr.get()->trackPSimHit(DetId::Tracker);
 	  }
 	  
-	  nrecHit_vs_nsimHit_rec2sim[w]->Fill(track->numberOfValidHits(), nHits);
+	  nrecHit_vs_nsimHit_rec2sim[w]->Fill(track->numberOfValidHits(), (int)(simhits.end()-simhits.begin() ));
 	  
 	} // End of try{
 	catch (cms::Exception e){
