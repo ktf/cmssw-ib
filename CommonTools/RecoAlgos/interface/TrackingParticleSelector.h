@@ -4,11 +4,12 @@
  *
  * \author Giuseppe Cerati, INFN
  *
- *  $Date: 2013/02/28 00:14:22 $
- *  $Revision: 1.5 $
+ *  $Date: 2013/05/14 15:46:46 $
+ *  $Revision: 1.5.4.2 $
  *
  */
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 class TrackingParticleSelector {
 
@@ -38,8 +39,7 @@ public:
 	stable = false; // we are not interested into PU particles among the stable ones
       } else {
 	for( TrackingParticle::genp_iterator j = tp.genParticle_begin(); j != tp.genParticle_end(); ++ j ) {
-          const HepMC::GenParticle * p = j->get();
-	  if (!p || p->status() != 1) {
+	  if (j->get()==0 || j->get()->status() != 1) {
 	    stable = 0; break;
 	  }
 	}
@@ -51,7 +51,7 @@ public:
       }
     }
     return (
-	    tp.matchedHit() >= minHit_ &&
+	    tp.numberOfTrackerLayers() >= minHit_ &&
 	    sqrt(tp.momentum().perp2()) >= ptMin_ && 
 	    tp.momentum().eta() >= minRapidity_ && tp.momentum().eta() <= maxRapidity_ && 
 	    sqrt(tp.vertex().perp2()) <= tip_ &&
